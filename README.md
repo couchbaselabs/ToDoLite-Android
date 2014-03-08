@@ -7,6 +7,13 @@ A shared todo app that shows how to use the uses the [Couchbase Lite Android](ht
 * [Android Studio](http://developer.android.com/sdk/installing/studio.html)
 * (optional) [Sync Gateway](https://github.com/couchbaselabs/sync_gateway) to use the sync feature.
 
+## Get the code
+
+```
+$ git clone <this repo>
+$ git submodule init && git submodule update
+```
+
 ## Build and run the app
 
 * Import the project into your Android Studio by selecting `build.gradle` or `settings.gradle` from the root of the project.
