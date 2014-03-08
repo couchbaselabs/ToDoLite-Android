@@ -298,23 +298,6 @@ public class MainActivity extends Activity
                     R.layout.fragment_main, container, false);
 
             final String listId = getArguments().getString(ARG_LIST_DOC_ID);
-            LiveQuery query = Task.getQuery(getDatabase(), listId).toLiveQuery();
-            final TaskAdapter adapter = new TaskAdapter(getActivity(), query);
-            listView.setAdapter(adapter);
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
-                    Document task = (Document) adapter.getItemAtPosition(position);
-                    boolean checked = ((Boolean) task.getProperty("checked")).booleanValue();
-                    try {
-                        Task.updateCheckedStatus(task, checked);
-                    } catch (CouchbaseLiteException e) {
-                        Log.e(Application.TAG, "Cannot update checked status", e);
-                        e.printStackTrace();
-                    }
-                }
-            });
 
             ViewGroup header = (ViewGroup) inflater.inflate(
                     R.layout.view_task_create, listView, false);
@@ -341,6 +324,24 @@ public class MainActivity extends Activity
             });
 
             listView.addHeaderView(header);
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
+                    Document task = (Document) adapter.getItemAtPosition(position);
+                    boolean checked = ((Boolean) task.getProperty("checked")).booleanValue();
+                    try {
+                        Task.updateCheckedStatus(task, checked);
+                    } catch (CouchbaseLiteException e) {
+                        Log.e(Application.TAG, "Cannot update checked status", e);
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            LiveQuery query = Task.getQuery(getDatabase(), listId).toLiveQuery();
+            final TaskAdapter adapter = new TaskAdapter(getActivity(), query);
+            listView.setAdapter(adapter);
 
             return listView;
         }
