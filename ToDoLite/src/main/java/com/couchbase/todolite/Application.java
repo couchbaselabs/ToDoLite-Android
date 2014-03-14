@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.auth.FacebookAuthorizer;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
@@ -31,7 +32,7 @@ public class Application extends android.app.Application {
 
     private void initDatabase() {
         try {
-            manager = new Manager(getApplicationContext().getFilesDir(), Manager.DEFAULT_OPTIONS);
+            manager = new Manager(new AndroidContext(getApplicationContext()), Manager.DEFAULT_OPTIONS);
         } catch (IOException e) {
             Log.e(TAG, "Cannot create Manager object", e);
             return;
