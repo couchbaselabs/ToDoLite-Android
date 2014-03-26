@@ -22,7 +22,7 @@ import java.net.URL;
 public class Application extends android.app.Application {
     public static final String TAG = "ToDoLite";
     private static final String DATABASE_NAME = "todos";
-    private static final String SYNC_URL = "http://10.17.26.89:4984/todos/";
+    private static final String SYNC_URL = "http://sync.couchbasecloud.com:4984/todos4/";
 
     private static final String PREF_CURRENT_LIST_ID = "CurrentListId";
     private static final String PREF_CURRENT_USER_ID = "CurrentUserId";
