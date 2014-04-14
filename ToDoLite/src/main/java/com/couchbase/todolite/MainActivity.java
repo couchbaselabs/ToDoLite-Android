@@ -8,7 +8,13 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -16,12 +22,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import com.couchbase.lite.Attachment;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
@@ -31,13 +41,21 @@ import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
 import com.couchbase.todolite.document.Task;
+import com.couchbase.todolite.helper.LiveQueryAdapter;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Observable;
+import java.util.Observer;
 
 public class MainActivity extends Activity
         implements ListDrawerFragment.ListSelectionCallback {
@@ -69,6 +87,7 @@ public class MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
         mDrawerFragment = (ListDrawerFragment)
@@ -85,6 +104,23 @@ public class MainActivity extends Activity
 
         // Log the current user in and start replication sync
         Application application = (Application) getApplication();
+        application.getOnSyncProgressChangeObservable().addObserver(new Observer() {
+            @Override
+            public void update(final Observable observable, final Object data) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Application.SyncProgress progress = (Application.SyncProgress) data;
+                        if (progress.totalCount > 0 && progress.completedCount < progress.totalCount) {
+                            setProgressBarIndeterminateVisibility(true);
+                        } else {
+                            setProgressBarIndeterminateVisibility(false);
+                        }
+                    }
+                });
+            }
+        });
+
         if (application.getCurrentUserId() != null) {
             loginWithFacebookAndStartSync();
         }
@@ -274,6 +310,16 @@ public class MainActivity extends Activity
     public static class TasksFragment extends Fragment {
         private static final String ARG_LIST_DOC_ID = "id";
 
+        private static final int REQUEST_TAKE_PHOTO = 1;
+        private static final int REQUEST_CHOOSE_PHOTO = 2;
+
+        private static final int THUMBNAIL_SIZE_PX = 150;
+
+        private TaskAdapter mAdapter;
+        private String mImagePathToBeAttached;
+        private Bitmap mImageToBeAttached;
+        private Document mCurrentTaskToAttachImage;
+
         public static TasksFragment newInstance(String id) {
             TasksFragment fragment = new TasksFragment();
 
@@ -291,6 +337,99 @@ public class MainActivity extends Activity
             return application.getDatabase();
         }
 
+        private File createImageFile() throws IOException {
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String fileName = "TODO_LITE_" + timeStamp + "_";
+            File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            File image = File.createTempFile(fileName, ".jpg", storageDir);
+            mImagePathToBeAttached = image.getAbsolutePath();
+            return image;
+        }
+
+        private void dispatchTakePhotoIntent() {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                File photoFile = null;
+                try {
+                    photoFile = createImageFile();
+                } catch (IOException e) {
+                    Log.e(Application.TAG, "Cannot create a temp image file", e);
+                }
+
+                if (photoFile != null) {
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                }
+            }
+        }
+
+        private void dispatchChoosePhotoIntent() {
+            Intent intent = new Intent(Intent.ACTION_PICK,
+                    android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            intent.setType("image/*");
+            startActivityForResult(Intent.createChooser(intent, "Select File"),
+                    REQUEST_CHOOSE_PHOTO);
+        }
+
+        private void deleteCurrentPhoto() {
+            if (mImageToBeAttached != null) {
+                mImageToBeAttached.recycle();
+                mImageToBeAttached = null;
+
+                ViewGroup createTaskPanel = (ViewGroup) getActivity().findViewById(
+                        R.id.create_task);
+                ImageView imageView = (ImageView) createTaskPanel.findViewById(R.id.image);
+                imageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
+            }
+        }
+
+        private void attachImage(final Document task) {
+            CharSequence[] items;
+            if (mImageToBeAttached != null)
+                items = new CharSequence[] { "Take photo", "Choose photo", "Delete photo" };
+            else
+                items = new CharSequence[] { "Take photo", "Choose photo" };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle("Add picture");
+            builder.setItems(items, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int item) {
+                    if (item == 0) {
+                        mCurrentTaskToAttachImage = task;
+                        dispatchTakePhotoIntent();
+                    } else if (item == 1) {
+                        mCurrentTaskToAttachImage = task;
+                        dispatchChoosePhotoIntent();
+                    } else {
+                        deleteCurrentPhoto();
+                    }
+                }
+            });
+            builder.show();
+        }
+
+        private void dispatchImageViewIntent(Bitmap image) {
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.JPEG, 50, stream);
+            byte[] byteArray = stream.toByteArray();
+
+            long l = byteArray.length;
+
+            Intent intent = new Intent(getActivity(), ImageViewActivity.class);
+            intent.putExtra(ImageViewActivity.INTENT_IMAGE, byteArray);
+            startActivity(intent);
+        }
+
+        private void deleteTask(int position) {
+            Document task = (Document) mAdapter.getItem(position);
+            try {
+                Task.deleteTask(task);
+            } catch (CouchbaseLiteException e) {
+                Log.e(Application.TAG, "Cannot delete a task", e);
+            }
+        }
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
@@ -301,6 +440,15 @@ public class MainActivity extends Activity
 
             ViewGroup header = (ViewGroup) inflater.inflate(
                     R.layout.view_task_create, listView, false);
+
+            final ImageView imageView = (ImageView) header.findViewById(R.id.image);
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    attachImage(null);
+                }
+            });
+
             final EditText text = (EditText) header.findViewById(R.id.text);
             text.setOnKeyListener(new View.OnKeyListener() {
                 @Override
@@ -310,15 +458,18 @@ public class MainActivity extends Activity
                         String inputText = text.getText().toString();
                         if (inputText.length() > 0) {
                             try {
-                                Task.createTask(getDatabase(), inputText, listId);
+                                Task.createTask(getDatabase(), inputText, mImageToBeAttached, listId);
                             } catch (CouchbaseLiteException e) {
                                 Log.e(Application.TAG, "Cannot create new task", e);
                             }
                         }
+
+                        // Reset text and current selected photo if available.
                         text.setText("");
+                        deleteCurrentPhoto();
+
                         return true;
                     }
-
                     return false;
                 }
             });
@@ -339,11 +490,79 @@ public class MainActivity extends Activity
                 }
             });
 
+            listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, final int position,
+                                               long id) {
+                    PopupMenu popup = new PopupMenu(getActivity(), view);
+                    popup.getMenu().add(getResources().getString(R.string.action_delete));
+                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            deleteTask(position - 1);
+                            return true;
+                        }
+                    });
+                    popup.show();
+                    return true;
+                }
+            });
+
             LiveQuery query = Task.getQuery(getDatabase(), listId).toLiveQuery();
-            final TaskAdapter adapter = new TaskAdapter(getActivity(), query);
-            listView.setAdapter(adapter);
+            mAdapter = new TaskAdapter(getActivity(), query);
+            listView.setAdapter(mAdapter);
 
             return listView;
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            super.onActivityResult(requestCode, resultCode, data);
+
+            if (resultCode != RESULT_OK) {
+                if (mCurrentTaskToAttachImage != null) {
+                    mCurrentTaskToAttachImage = null;
+                }
+                return;
+            }
+
+            if (requestCode == REQUEST_TAKE_PHOTO) {
+                mImageToBeAttached = BitmapFactory.decodeFile(mImagePathToBeAttached);
+
+                // Delete the temporary image file
+                File file = new File(mImagePathToBeAttached);
+                file.delete();
+                mImagePathToBeAttached = null;
+            } else if (requestCode == REQUEST_CHOOSE_PHOTO) {
+                try {
+                    Uri uri = data.getData();
+                    mImageToBeAttached = MediaStore.Images.Media.getBitmap(
+                            getActivity().getContentResolver(), uri);
+                } catch (IOException e) {
+                    Log.e(Application.TAG, "Cannot get a selected photo from the gallery.", e);
+                }
+            }
+
+            if (mImageToBeAttached != null) {
+                if (mCurrentTaskToAttachImage != null) {
+                    try {
+                        Task.attachImage(mCurrentTaskToAttachImage, mImageToBeAttached);
+                    } catch (CouchbaseLiteException e) {
+                        Log.e(Application.TAG, "Cannot attach an image to a task.", e);
+                    }
+                } else { // Attach an image for a new task
+                    Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
+                            mImageToBeAttached, THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX);
+
+                    ImageView imageView = (ImageView) getActivity().findViewById(R.id.image);
+                    imageView.setImageBitmap(thumbnail);
+                }
+            }
+
+            // Ensure resetting the task to attach an image
+            if (mCurrentTaskToAttachImage != null) {
+                mCurrentTaskToAttachImage = null;
+            }
         }
 
         private class TaskAdapter extends LiveQueryAdapter {
@@ -361,12 +580,44 @@ public class MainActivity extends Activity
 
                 final Document task = (Document) getItem(position);
 
+                Bitmap image = null;
+                Bitmap thumbnail = null;
+                java.util.List<Attachment> attachments = task.getCurrentRevision().getAttachments();
+                if (attachments != null && attachments.size() > 0) {
+                    Attachment attachment = attachments.get(0);
+                    try {
+                        image = BitmapFactory.decodeStream(attachment.getContent());
+                        thumbnail = ThumbnailUtils.extractThumbnail(
+                                image, THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX);
+                    } catch (Exception e) {
+                        Log.e(Application.TAG, "Cannot decode the attached image", e);
+                    }
+                }
+
+                final Bitmap displayImage = image;
+                ImageView imageView = (ImageView) convertView.findViewById(R.id.image);
+                if (thumbnail != null) {
+                    imageView.setImageBitmap(thumbnail);
+                } else {
+                    imageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera_light));
+                }
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (displayImage != null) {
+                            dispatchImageViewIntent(displayImage);
+                        } else {
+                            attachImage(task);
+                        }
+                    }
+                });
+
                 TextView text = (TextView) convertView.findViewById(R.id.text);
                 text.setText((String) task.getProperty("title"));
 
                 final CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checked);
-                Boolean checkedPropertry = (Boolean) task.getProperty("checked");
-                boolean checked = checkedPropertry != null ? checkedPropertry.booleanValue() : false;
+                Boolean checkedProperty = (Boolean) task.getProperty("checked");
+                boolean checked = checkedProperty != null ? checkedProperty.booleanValue() : false;
                 checkBox.setChecked(checked);
                 checkBox.setOnClickListener(new View.OnClickListener() {
                     @Override

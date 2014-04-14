@@ -21,6 +21,7 @@ import com.couchbase.lite.Query;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
+import com.couchbase.todolite.helper.LiveQueryAdapter;
 
 public class ShareActivity extends Activity {
     public static final String SHARE_ACTIVITY_CURRENT_LIST_ID_EXTRA = "current_list_id";

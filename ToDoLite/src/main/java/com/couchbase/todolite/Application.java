@@ -18,6 +18,7 @@ import com.couchbase.lite.util.Log;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Observable;
 
 public class Application extends android.app.Application {
     public static final String TAG = "ToDoLite";
@@ -29,6 +30,10 @@ public class Application extends android.app.Application {
 
     private Manager manager;
     private Database database;
+
+    private int syncCompletedChangedCount;
+    private int syncTotalChangedCount;
+    private OnSyncProgressChangeObservable onSyncProgressChangeObservable;
 
     private void initDatabase() {
         try {
@@ -46,6 +51,14 @@ public class Application extends android.app.Application {
         }
     }
 
+    private void initObservable() {
+        onSyncProgressChangeObservable = new OnSyncProgressChangeObservable();
+    }
+
+    private synchronized void updateSyncProgress(int completedCount, int totalCount) {
+        onSyncProgressChangeObservable.notifyChanges(completedCount, totalCount);
+    }
+
     public void startReplicationSyncWithFacebookLogin(String accessToken, String email) {
         URL syncUrl;
         try {
@@ -61,10 +74,26 @@ public class Application extends android.app.Application {
         Replication pullRep = database.createPullReplication(syncUrl);
         pullRep.setContinuous(true);
         pullRep.setAuthorizer(auth);
+        pullRep.addChangeListener(new Replication.ChangeListener() {
+            @Override
+            public void changed(Replication.ChangeEvent event) {
+                Replication replication = event.getSource();
+                updateSyncProgress(replication.getCompletedChangesCount(),
+                        replication.getChangesCount());
+            }
+        });
 
         Replication pushRep = database.createPushReplication(syncUrl);
         pushRep.setContinuous(true);
         pushRep.setAuthorizer(auth);
+        pushRep.addChangeListener(new Replication.ChangeListener() {
+            @Override
+            public void changed(Replication.ChangeEvent event) {
+                Replication replication = event.getSource();
+                updateSyncProgress(replication.getCompletedChangesCount(),
+                        replication.getChangesCount());
+            }
+        });
 
         pullRep.start();
         pushRep.start();
@@ -75,7 +104,9 @@ public class Application extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
         initDatabase();
+        initObservable();
     }
 
     public Database getDatabase() {
@@ -94,8 +125,9 @@ public class Application extends android.app.Application {
 
         if (id != null) {
             sp.edit().putString(PREF_CURRENT_LIST_ID, id).apply();
-        } else
+        } else {
             sp.edit().remove(PREF_CURRENT_LIST_ID);
+        }
     }
 
     public String getCurrentUserId() {
@@ -112,7 +144,27 @@ public class Application extends android.app.Application {
 
         if (id != null) {
             sp.edit().putString(PREF_CURRENT_USER_ID, id).apply();
-        } else
+        } else {
             sp.edit().remove(PREF_CURRENT_USER_ID);
+        }
+    }
+
+    public OnSyncProgressChangeObservable getOnSyncProgressChangeObservable() {
+        return onSyncProgressChangeObservable;
+    }
+
+    static class OnSyncProgressChangeObservable extends Observable {
+        private void notifyChanges(int completedCount, int totalCount) {
+            SyncProgress progress = new SyncProgress();
+            progress.completedCount = completedCount;
+            progress.totalCount = totalCount;
+            setChanged();
+            notifyObservers(progress);
+        }
+    }
+
+    static class SyncProgress {
+        public int completedCount;
+        public int totalCount;
     }
 }

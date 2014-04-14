@@ -2,7 +2,7 @@
  * Created by Pasin Suriyentrakorn <pasin@couchbase.com> on 2/27/14.
  */
 
-package com.couchbase.todolite;
+package com.couchbase.todolite.helper;
 
 import android.app.Activity;
 import android.content.Context;

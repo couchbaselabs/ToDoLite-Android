@@ -15,10 +15,17 @@
         android:minHeight="48dp"
         android:orientation="horizontal"
         android:background="@drawable/bg_card">
+        <com.couchbase.todolite.helper.RoundedImageView
+            android:id="@+id/image"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@android:color/white"
+            android:src="@drawable/ic_camera_light"/>
         <TextView
             android:id="@+id/text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
             android:singleLine="false"

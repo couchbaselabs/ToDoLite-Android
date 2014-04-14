@@ -40,7 +40,7 @@ public class ListDrawerFragment extends Fragment {
     private ListView mDrawerListView;
     private View mFragmentContainerView;
 
-    private int mCurrentSelectedPosition = 0;
+    private int mCurrentSelectedPosition = -1;
 
     private ListsAdapter mListsAdapter;
     private LiveQuery mListsLiveQuery;
@@ -83,8 +83,10 @@ public class ListDrawerFragment extends Fragment {
                     public void run() {
                         QueryEnumerator changedEnumerator = event.getRows();
                         mListsAdapter.update(changedEnumerator);
-                        mCurrentSelectedPosition = getCurrentSelectedPosition(changedEnumerator);
-                        if (mDrawerListView != null) mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+                        int position = getCurrentSelectedPosition(changedEnumerator);
+                        if (position != -1 && position != mCurrentSelectedPosition) {
+                            selectListItem(position, false);
+                        }
                     }
                 });
             }
@@ -128,16 +130,14 @@ public class ListDrawerFragment extends Fragment {
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
-                Document document = (Document) mListsAdapter.getItem(position);
-                Application application = (Application) getActivity().getApplication();
-                application.setCurrentListId(document.getId());
-                mCurrentSelectedPosition = position;
-                selectItem(position, true);
+                selectListItem(position, true);
             }
         });
 
         mDrawerListView.setAdapter(mListsAdapter);
-        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+        if (mCurrentSelectedPosition > mListsAdapter.getCount()) {
+            mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
+        }
 
         return mDrawerListView;
     }
@@ -197,9 +197,8 @@ public class ListDrawerFragment extends Fragment {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
-    private void selectItem(int position, boolean closeDrawer) {
-        if (position < 0)
-            return;
+    private void selectListItem(int position, boolean closeDrawer) {
+        mCurrentSelectedPosition = position;
 
         if (mDrawerListView != null)
             mDrawerListView.setItemChecked(position, true);
@@ -207,9 +206,14 @@ public class ListDrawerFragment extends Fragment {
         if (mDrawerLayout != null && closeDrawer)
             mDrawerLayout.closeDrawer(mFragmentContainerView);
 
-        if (mCallbacks != null && mListsAdapter.getCount() > position) {
+        if (mListsAdapter.getCount() > position) {
             Document document = (Document)mListsAdapter.getItem(position);
-            mCallbacks.onListSelected(document.getId());
+            Application application = (Application) getActivity().getApplication();
+            application.setCurrentListId(document.getId());
+
+            if (mCallbacks != null) {
+                mCallbacks.onListSelected(document.getId());
+            }
         }
     }
 

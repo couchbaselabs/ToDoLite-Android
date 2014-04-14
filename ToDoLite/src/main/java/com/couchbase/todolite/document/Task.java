@@ -4,13 +4,18 @@
 
 package com.couchbase.todolite.document;
 
+import android.graphics.Bitmap;
+
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
+import com.couchbase.lite.UnsavedRevision;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -51,8 +56,10 @@ public class Task {
         return query;
     }
 
-    public static Document createTask(Database database, String title, String listId)
-            throws CouchbaseLiteException {
+    public static Document createTask(Database database,
+                                      String title,
+                                      Bitmap image,
+                                      String listId) throws CouchbaseLiteException {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Calendar calendar = GregorianCalendar.getInstance();
         String currentTimeString = dateFormatter.format(calendar.getTime());
@@ -65,9 +72,33 @@ public class Task {
         properties.put("list_id", listId);
 
         Document document = database.createDocument();
-        document.putProperties(properties);
+
+        UnsavedRevision revision = document.createRevision();
+        revision.setUserProperties(properties);
+
+        if (image != null) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.JPEG, 50, out);
+            ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+            revision.setAttachment("image", "image/jpg", in);
+        }
+
+        revision.save();
 
         return document;
+    }
+
+    public static void attachImage(Document task, Bitmap image) throws CouchbaseLiteException {
+        if (task == null || image == null) return;
+
+        UnsavedRevision revision = task.createRevision();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        image.compress(Bitmap.CompressFormat.JPEG, 50, out);
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        revision.setAttachment("image", "image/jpg", in);
+
+        revision.save();
     }
 
     public static void updateCheckedStatus(Document task, boolean checked)
@@ -76,5 +107,9 @@ public class Task {
         properties.putAll(task.getProperties());
         properties.put("checked", checked);
         task.putProperties(properties);
+    }
+
+    public static void deleteTask(Document task) throws CouchbaseLiteException {
+        task.delete();
     }
 }

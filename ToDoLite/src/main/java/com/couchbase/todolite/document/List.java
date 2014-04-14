@@ -4,8 +4,6 @@
 
 package com.couchbase.todolite.document;
 
-import android.util.Log;
-
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
