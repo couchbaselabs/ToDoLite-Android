@@ -11,6 +11,8 @@ import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Manager;
 import com.couchbase.lite.android.AndroidContext;
+import com.couchbase.lite.auth.Authenticator;
+import com.couchbase.lite.auth.AuthenticatorFactory;
 import com.couchbase.lite.auth.FacebookAuthorizer;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
@@ -68,12 +70,10 @@ public class Application extends android.app.Application {
             throw new RuntimeException(e);
         }
 
-        FacebookAuthorizer auth = new FacebookAuthorizer(email);
-        auth.registerAccessToken(accessToken, email, syncUrl.toString());
-
         Replication pullRep = database.createPullReplication(syncUrl);
         pullRep.setContinuous(true);
-        pullRep.setAuthorizer(auth);
+        Authenticator facebookAuthenticator = AuthenticatorFactory.createFacebookAuthenticator(accessToken);
+        pullRep.setAuthenticator(facebookAuthenticator);
         pullRep.addChangeListener(new Replication.ChangeListener() {
             @Override
             public void changed(Replication.ChangeEvent event) {
@@ -85,7 +85,7 @@ public class Application extends android.app.Application {
 
         Replication pushRep = database.createPushReplication(syncUrl);
         pushRep.setContinuous(true);
-        pushRep.setAuthorizer(auth);
+        pullRep.setAuthenticator(facebookAuthenticator);
         pushRep.addChangeListener(new Replication.ChangeListener() {
             @Override
             public void changed(Replication.ChangeEvent event) {
