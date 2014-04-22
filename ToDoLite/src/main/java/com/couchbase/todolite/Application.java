@@ -198,7 +198,7 @@ public class Application extends android.app.Application {
         if (id != null) {
             sp.edit().putString(PREF_CURRENT_USER_ID, id).apply();
         } else {
-            sp.edit().remove(PREF_CURRENT_USER_ID);
+            sp.edit().remove(PREF_CURRENT_USER_ID).apply();
         }
     }
 
