@@ -17,12 +17,16 @@ import com.couchbase.lite.auth.FacebookAuthorizer;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 
+import org.apache.http.client.HttpResponseException;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.Observable;
 
 public class Application extends android.app.Application {
+
     public static final String TAG = "ToDoLite";
     private static final String DATABASE_NAME = "todos";
     private static final String SYNC_URL = "http://sync.couchbasecloud.com:4984/todos4/";
@@ -36,6 +40,10 @@ public class Application extends android.app.Application {
     private int syncCompletedChangedCount;
     private int syncTotalChangedCount;
     private OnSyncProgressChangeObservable onSyncProgressChangeObservable;
+    private OnSyncUnauthorizedObservable onSyncUnauthorizedObservable;
+
+    public enum AuthenticationType { FACEBOOK, CUSTOM_COOKIE }
+    private AuthenticationType authenticationType = AuthenticationType.FACEBOOK;
 
     private void initDatabase() {
         try {
@@ -55,13 +63,48 @@ public class Application extends android.app.Application {
 
     private void initObservable() {
         onSyncProgressChangeObservable = new OnSyncProgressChangeObservable();
+        onSyncUnauthorizedObservable = new OnSyncUnauthorizedObservable();
     }
 
     private synchronized void updateSyncProgress(int completedCount, int totalCount) {
         onSyncProgressChangeObservable.notifyChanges(completedCount, totalCount);
     }
 
+    public void startReplicationSyncWithCustomCookie(String name, String value, String path, Date expirationDate, boolean secure, boolean httpOnly) {
+
+        Replication[] replications = createReplications();
+        Replication pullRep = replications[0];
+        Replication pushRep = replications[1];
+
+        pullRep.setCookie(name, value, path, expirationDate, secure, httpOnly);
+        pushRep.setCookie(name, value, path, expirationDate, secure, httpOnly);
+
+        pullRep.start();
+        pushRep.start();
+
+        Log.v(TAG, "Start Replication Sync ...");
+
+    }
+
     public void startReplicationSyncWithFacebookLogin(String accessToken, String email) {
+
+        Authenticator facebookAuthenticator = AuthenticatorFactory.createFacebookAuthenticator(accessToken);
+
+        Replication[] replications = createReplications();
+        Replication pullRep = replications[0];
+        Replication pushRep = replications[1];
+
+        pullRep.setAuthenticator(facebookAuthenticator);
+        pushRep.setAuthenticator(facebookAuthenticator);
+
+        pullRep.start();
+        pushRep.start();
+
+        Log.v(TAG, "Start Replication Sync ...");
+    }
+
+    public Replication[] createReplications() {
+
         URL syncUrl;
         try {
             syncUrl = new URL(SYNC_URL);
@@ -72,33 +115,34 @@ public class Application extends android.app.Application {
 
         Replication pullRep = database.createPullReplication(syncUrl);
         pullRep.setContinuous(true);
-        Authenticator facebookAuthenticator = AuthenticatorFactory.createFacebookAuthenticator(accessToken);
-        pullRep.setAuthenticator(facebookAuthenticator);
-        pullRep.addChangeListener(new Replication.ChangeListener() {
-            @Override
-            public void changed(Replication.ChangeEvent event) {
-                Replication replication = event.getSource();
-                updateSyncProgress(replication.getCompletedChangesCount(),
-                        replication.getChangesCount());
-            }
-        });
+        pullRep.addChangeListener(getReplicationChangeListener());
 
         Replication pushRep = database.createPushReplication(syncUrl);
         pushRep.setContinuous(true);
-        pullRep.setAuthenticator(facebookAuthenticator);
-        pushRep.addChangeListener(new Replication.ChangeListener() {
+        pushRep.addChangeListener(getReplicationChangeListener());
+
+        return new Replication[]{pullRep, pushRep};
+
+    }
+
+    private Replication.ChangeListener getReplicationChangeListener() {
+        return new Replication.ChangeListener() {
             @Override
             public void changed(Replication.ChangeEvent event) {
                 Replication replication = event.getSource();
+                if (replication.getLastError() != null) {
+                    Throwable lastError = replication.getLastError();
+                    if (lastError instanceof HttpResponseException) {
+                        HttpResponseException responseException = (HttpResponseException) lastError;
+                        if (responseException.getStatusCode() == 401) {
+                            onSyncUnauthorizedObservable.notifyChanges();
+                        }
+                    }
+                }
                 updateSyncProgress(replication.getCompletedChangesCount(),
                         replication.getChangesCount());
             }
-        });
-
-        pullRep.start();
-        pushRep.start();
-
-        Log.v(TAG, "Start Replication Sync ...");
+        };
     }
 
     @Override
@@ -131,11 +175,20 @@ public class Application extends android.app.Application {
     }
 
     public String getCurrentUserId() {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
+        switch (getAuthenticationType()) {
+            case CUSTOM_COOKIE:
+                // for custom cookies, the user id is not persisted
+                return null;
+            case FACEBOOK:
+                SharedPreferences sp = PreferenceManager
+                        .getDefaultSharedPreferences(getApplicationContext());
 
-        String userId = sp.getString(PREF_CURRENT_USER_ID, null);
-        return userId;
+                String userId = sp.getString(PREF_CURRENT_USER_ID, null);
+                return userId;
+            default:
+                return null;
+        }
+
     }
 
     public void setCurrentUserId(String id) {
@@ -153,6 +206,14 @@ public class Application extends android.app.Application {
         return onSyncProgressChangeObservable;
     }
 
+    public OnSyncUnauthorizedObservable getOnSyncUnauthorizedObservable() {
+        return onSyncUnauthorizedObservable;
+    }
+
+    public AuthenticationType getAuthenticationType() {
+        return authenticationType;
+    }
+
     static class OnSyncProgressChangeObservable extends Observable {
         private void notifyChanges(int completedCount, int totalCount) {
             SyncProgress progress = new SyncProgress();
@@ -163,8 +224,18 @@ public class Application extends android.app.Application {
         }
     }
 
+    static class OnSyncUnauthorizedObservable extends Observable {
+        private void notifyChanges() {
+            setChanged();
+            notifyObservers();
+        }
+    }
+
     static class SyncProgress {
         public int completedCount;
         public int totalCount;
     }
+
+
+
 }

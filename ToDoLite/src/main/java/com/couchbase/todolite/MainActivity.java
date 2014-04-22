@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.couchbase.lite.Attachment;
 import com.couchbase.lite.CouchbaseLiteException;
@@ -53,6 +54,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
@@ -120,9 +122,28 @@ public class MainActivity extends Activity
                 });
             }
         });
+        application.getOnSyncUnauthorizedObservable().addObserver(new Observer() {
+            @Override
+            public void update(Observable observable, Object data) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d(Application.TAG, "OnSyncUnauthorizedObservable called, show toast");
+                        String msg = "Sync unable to continue due to invalid session/login";
+                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+
+                    }
+                });
+
+            }
+        });
 
         if (application.getCurrentUserId() != null) {
-            loginWithFacebookAndStartSync();
+            switch (application.getAuthenticationType()) {
+                case FACEBOOK:
+                    loginWithFacebookAndStartSync();
+                    break;
+            }
         }
     }
 
@@ -164,7 +185,15 @@ public class MainActivity extends Activity
                 shareMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
-                        loginWithFacebookAndStartSync();
+                        Application application = (Application) getApplication();
+                        switch (application.getAuthenticationType()) {
+                            case CUSTOM_COOKIE:
+                                loginWithCustomCookieAndStartSync();
+                                break;
+                            case FACEBOOK:
+                                loginWithFacebookAndStartSync();
+                                break;
+                        }
                         invalidateOptionsMenu();
                         return true;
                     }
@@ -264,6 +293,71 @@ public class MainActivity extends Activity
         } else {
             Session.openActiveSession(this, true, statusCallback);
         }
+    }
+
+    /**
+     * This is allows the user to enter a "fake" cookie, that would have to been
+     * obtained manually.  In a real app, this would look like:
+     *
+     * - Your app prompts user for credentials
+     * - Your app directly contacts your app server with these credentials
+     * - Your app server creates a session on the Sync Gateway, which returns a cookie
+     * - Your app server returns this cookie to your app
+     *
+     * Having obtained the cookie in the manner above, you would then call
+     * startSyncWithCustomCookie() with this cookie.
+     *
+     */
+    private void loginWithCustomCookieAndStartSync() {
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        // if it's too much typing in the emulator, just replace hardcoded fake cookie here.
+        String hardcodedFakeCookie = "c6adaa29f77b2b0de079474961c93fa8730afc74";
+
+        alert.setTitle("Enter fake cookie");
+        alert.setMessage("See loginWithCustomCookieAndStartSync() for explanation.");
+
+        // Set an EditText view to get user input
+        final EditText input = new EditText(this);
+        input.setText(hardcodedFakeCookie);
+        alert.setView(input);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String value = input.getText().toString();
+                startSyncWithCustomCookie(value);
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Canceled.
+            }
+        });
+
+        alert.show();
+    }
+
+    private void startSyncWithCustomCookie(String cookieVal) {
+
+        // TODO: some application specific code to get a cookie.
+        String cookieName = "SyncGatewaySession";
+        // String cookieVal = "369f3de299e32a8d249f0a0dff2f4c0f3f171350";  // works
+        // String cookieVal = "369f3de299e32a8d249f0a0dff2f4c0f3f171350BROKEN";
+        boolean isSecure = false;
+        boolean httpOnly = false;
+
+        // expiration date - 1 day from now
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        int numDaysToAdd = 1;
+        cal.add(Calendar.DATE, numDaysToAdd);
+        Date expirationDate = cal.getTime();
+
+        Application application = (Application) MainActivity.this.getApplication();
+        application.startReplicationSyncWithCustomCookie(cookieName, cookieVal, "/", expirationDate, isSecure, httpOnly);
+
     }
 
     private class FacebookSessionStatusCallback implements Session.StatusCallback {
