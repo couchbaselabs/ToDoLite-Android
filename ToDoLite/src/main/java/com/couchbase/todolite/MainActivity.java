@@ -129,6 +129,13 @@ public class MainActivity extends Activity
                     @Override
                     public void run() {
                         Log.d(Application.TAG, "OnSyncUnauthorizedObservable called, show toast");
+
+                        // clear the saved user id, since our session is no longer valid
+                        // and we want to show the login button
+                        Application application = (Application) getApplication();
+                        application.setCurrentUserId(null);
+                        invalidateOptionsMenu();
+
                         String msg = "Sync unable to continue due to invalid session/login";
                         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
 
@@ -140,6 +147,12 @@ public class MainActivity extends Activity
 
         if (application.getCurrentUserId() != null) {
             switch (application.getAuthenticationType()) {
+                case CUSTOM_COOKIE:
+                    // since the user has already logged in before, assume that we
+                    // can start sync using the persisted cookie.  if it's expired,
+                    // a message will be shown and the user can login.
+                    startSyncWithStoredCustomCookie();
+                    break;
                 case FACEBOOK:
                     loginWithFacebookAndStartSync();
                     break;
@@ -313,7 +326,7 @@ public class MainActivity extends Activity
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
         // if it's too much typing in the emulator, just replace hardcoded fake cookie here.
-        String hardcodedFakeCookie = "c6adaa29f77b2b0de079474961c93fa8730afc74";
+        String hardcodedFakeCookie = "376b9c707158a381a143060f1937935ede7cf75d";
 
         alert.setTitle("Enter fake cookie");
         alert.setMessage("See loginWithCustomCookieAndStartSync() for explanation.");
@@ -326,6 +339,10 @@ public class MainActivity extends Activity
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String value = input.getText().toString();
+
+                Application application = (Application) MainActivity.this.getApplication();
+                application.setCurrentUserId(value);
+
                 startSyncWithCustomCookie(value);
             }
         });
@@ -341,10 +358,7 @@ public class MainActivity extends Activity
 
     private void startSyncWithCustomCookie(String cookieVal) {
 
-        // TODO: some application specific code to get a cookie.
         String cookieName = "SyncGatewaySession";
-        // String cookieVal = "369f3de299e32a8d249f0a0dff2f4c0f3f171350";  // works
-        // String cookieVal = "369f3de299e32a8d249f0a0dff2f4c0f3f171350BROKEN";
         boolean isSecure = false;
         boolean httpOnly = false;
 
@@ -357,6 +371,13 @@ public class MainActivity extends Activity
 
         Application application = (Application) MainActivity.this.getApplication();
         application.startReplicationSyncWithCustomCookie(cookieName, cookieVal, "/", expirationDate, isSecure, httpOnly);
+
+    }
+
+    private void startSyncWithStoredCustomCookie() {
+
+        Application application = (Application) MainActivity.this.getApplication();
+        application.startReplicationSyncWithStoredCustomCookie();
 
     }
 

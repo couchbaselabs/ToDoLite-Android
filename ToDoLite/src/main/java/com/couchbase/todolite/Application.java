@@ -43,6 +43,9 @@ public class Application extends android.app.Application {
     private OnSyncUnauthorizedObservable onSyncUnauthorizedObservable;
 
     public enum AuthenticationType { FACEBOOK, CUSTOM_COOKIE }
+
+    // By default, this should be set to FACEBOOK.  To test "custom cookie" auth,
+    // set this to CUSTOM_COOKIE.
     private AuthenticationType authenticationType = AuthenticationType.FACEBOOK;
 
     private void initDatabase() {
@@ -78,6 +81,19 @@ public class Application extends android.app.Application {
 
         pullRep.setCookie(name, value, path, expirationDate, secure, httpOnly);
         pushRep.setCookie(name, value, path, expirationDate, secure, httpOnly);
+
+        pullRep.start();
+        pushRep.start();
+
+        Log.v(TAG, "Start Replication Sync ...");
+
+    }
+
+    public void startReplicationSyncWithStoredCustomCookie() {
+
+        Replication[] replications = createReplications();
+        Replication pullRep = replications[0];
+        Replication pushRep = replications[1];
 
         pullRep.start();
         pushRep.start();
@@ -175,20 +191,11 @@ public class Application extends android.app.Application {
     }
 
     public String getCurrentUserId() {
-        switch (getAuthenticationType()) {
-            case CUSTOM_COOKIE:
-                // for custom cookies, the user id is not persisted
-                return null;
-            case FACEBOOK:
-                SharedPreferences sp = PreferenceManager
-                        .getDefaultSharedPreferences(getApplicationContext());
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
 
-                String userId = sp.getString(PREF_CURRENT_USER_ID, null);
-                return userId;
-            default:
-                return null;
-        }
-
+        String userId = sp.getString(PREF_CURRENT_USER_ID, null);
+        return userId;
     }
 
     public void setCurrentUserId(String id) {
