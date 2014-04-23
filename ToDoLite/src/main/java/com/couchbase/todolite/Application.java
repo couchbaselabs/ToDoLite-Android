@@ -50,6 +50,12 @@ public class Application extends android.app.Application {
 
     private void initDatabase() {
         try {
+            Manager.enableLogging(Log.TAG, Log.VERBOSE);
+            Manager.enableLogging(Log.TAG_SYNC, Log.DEBUG);
+            Manager.enableLogging(Log.TAG_QUERY, Log.DEBUG);
+            Manager.enableLogging(Log.TAG_VIEW, Log.DEBUG);
+            Manager.enableLogging(Log.TAG_DATABASE, Log.DEBUG);
+
             manager = new Manager(new AndroidContext(getApplicationContext()), Manager.DEFAULT_OPTIONS);
         } catch (IOException e) {
             Log.e(TAG, "Cannot create Manager object", e);
