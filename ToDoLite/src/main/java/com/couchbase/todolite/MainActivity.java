@@ -49,6 +49,8 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -56,6 +58,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -611,13 +614,30 @@ public class MainActivity extends Activity
                                                long id) {
                     PopupMenu popup = new PopupMenu(getActivity(), view);
                     popup.getMenu().add(getResources().getString(R.string.action_delete));
+                    popup.getMenu().add(getResources().getString(R.string.action_show_document));
                     popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
-                            deleteTask(position - 1);
+                            if (item.getTitle().equals(getResources().getString(R.string.action_delete))) {
+                                deleteTask(position - 1);
+                            } else if (item.getTitle().equals(getResources().getString(R.string.action_show_document))) {
+                                Document task = (Document) mAdapter.getItem(position - 1);
+                                Map<String, Object> documentMap = task.getProperties();
+                                ObjectMapper objectMapper = new ObjectMapper();
+                                try {
+                                    String documentString = objectMapper.writeValueAsString(documentMap);
+                                    Toast.makeText(getActivity(), documentString, Toast.LENGTH_LONG).show();
+                                } catch (IOException e) {
+                                    Toast.makeText(getActivity(), "Error showing document", Toast.LENGTH_LONG).show();
+                                    Log.d(Application.TAG, "Error showing document", e);
+                                }
+
+                            }
                             return true;
                         }
                     });
+
+
                     popup.show();
                     return true;
                 }

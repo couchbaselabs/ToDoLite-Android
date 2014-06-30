@@ -6,6 +6,7 @@
     <string name="action_login">Log in</string>
     <string name="action_share">Share</string>
     <string name="action_delete">Delete</string>
+    <string name="action_show_document">Show Document</string>
     <string name="hint_new_list">List title</string>
     <string name="hint_create_task">Add new task</string>
     <string name="navigation_drawer_open">Open drawer</string>
