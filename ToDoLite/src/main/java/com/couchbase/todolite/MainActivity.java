@@ -598,12 +598,17 @@ public class MainActivity extends Activity
                 @Override
                 public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
                     Document task = (Document) adapter.getItemAtPosition(position);
-                    boolean checked = ((Boolean) task.getProperty("checked")).booleanValue();
-                    try {
-                        Task.updateCheckedStatus(task, checked);
-                    } catch (CouchbaseLiteException e) {
-                        Log.e(Application.TAG, "Cannot update checked status", e);
-                        e.printStackTrace();
+                    if (task != null) {
+                        boolean checked = ((Boolean) task.getProperty("checked")).booleanValue();
+                        try {
+                            Task.updateCheckedStatus(task, checked);
+                        } catch (CouchbaseLiteException e) {
+                            Log.e(Application.TAG, "Cannot update checked status", e);
+                            e.printStackTrace();
+                        }
+                    } else {
+                        String msg = String.format("Task was null for item: %d", position);
+                        Toast.makeText(getActivity(), msg, Toast.LENGTH_LONG).show();
                     }
                 }
             });
