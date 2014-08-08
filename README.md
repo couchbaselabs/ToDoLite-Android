@@ -4,7 +4,7 @@ A shared todo app that shows how to use the uses the [Couchbase Lite Android](ht
 
 ## Prequisites
 
-* [Android Studio](http://developer.android.com/sdk/installing/studio.html)
+* [Android Studio](http://developer.android.com/sdk/installing/studio.html) ([compatible version list](https://github.com/couchbase/couchbase-lite-android#building-couchbase-lite-master-branch-from-source))
 * (optional) [Sync Gateway](https://github.com/couchbaselabs/sync_gateway) to use the sync feature.
 
 ## Get the code
