@@ -297,18 +297,34 @@ public class MainActivity extends Activity
     }
 
     private void loginWithFacebookAndStartSync() {
-        Session session = Session.getActiveSession();
 
-        if (session == null) {
-            session = new Session(this);
-            Session.setActiveSession(session);
-        }
+        // do we have a stored facebook auth token?
 
-        if (!session.isOpened() && !session.isClosed()) {
-            session.openForRead(getFacebookOpenRequest());
+        Application application = (Application) MainActivity.this.getApplication();
+        String lastReceivedFbAccessToken = application.getLastReceivedFbAccessToken();
+        if (lastReceivedFbAccessToken != null) {
+            // yes, use it
+            application.startReplicationSyncWithFacebookLogin(lastReceivedFbAccessToken);
+
         } else {
-            Session.openActiveSession(this, true, statusCallback);
+            // no, get or create new FB session -- will start replication after session created
+            Session session = Session.getActiveSession();
+
+            if (session == null) {
+                session = new Session(this);
+                Session.setActiveSession(session);
+            }
+
+            if (!session.isOpened() && !session.isClosed()) {
+                session.openForRead(getFacebookOpenRequest());
+            } else {
+                Session.openActiveSession(this, true, statusCallback);
+            }
+
         }
+
+
+
     }
 
     /**
@@ -415,8 +431,10 @@ public class MainActivity extends Activity
                         } catch (CouchbaseLiteException e) { }
 
                         application.setCurrentUserId(userId);
+                        application.setLastReceivedFbAccessToken(session.getAccessToken());
+
                         application.startReplicationSyncWithFacebookLogin(
-                                session.getAccessToken(), userId);
+                                session.getAccessToken());
 
                         invalidateOptionsMenu();
                     }

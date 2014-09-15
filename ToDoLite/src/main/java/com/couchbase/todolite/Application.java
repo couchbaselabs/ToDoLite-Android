@@ -33,6 +33,7 @@ public class Application extends android.app.Application {
 
     private static final String PREF_CURRENT_LIST_ID = "CurrentListId";
     private static final String PREF_CURRENT_USER_ID = "CurrentUserId";
+    private static final String PREF_LAST_RCVD_FB_ACCESS_TOKEN = "LastReceivedFbAccessToken";
 
     private Manager manager;
     private Database database;
@@ -213,6 +214,23 @@ public class Application extends android.app.Application {
         } else {
             sp.edit().remove(PREF_CURRENT_USER_ID).apply();
         }
+    }
+
+    public void setLastReceivedFbAccessToken(String fbAccessToken) {
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        if (fbAccessToken != null) {
+            sp.edit().putString(PREF_LAST_RCVD_FB_ACCESS_TOKEN, fbAccessToken).apply();
+        } else {
+            sp.edit().remove(PREF_LAST_RCVD_FB_ACCESS_TOKEN).apply();
+        }
+    }
+
+    public String getLastReceivedFbAccessToken() {
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+
+        return sp.getString(PREF_LAST_RCVD_FB_ACCESS_TOKEN, null);
     }
 
     public OnSyncProgressChangeObservable getOnSyncProgressChangeObservable() {
