@@ -88,65 +88,69 @@ public class Application extends android.app.Application {
         onSyncProgressChangeObservable.notifyChanges(completedCount, totalCount);
     }
 
-    private void verifyNoReplicationsRunning() {
-        if (pullReplication != null || pushReplication != null) {
-            Log.w(TAG, "pullReplication: %s", pullReplication);
-            Log.w(TAG, "pushReplication: %s", pushReplication);
-            pushLocalNotification("Sync err", "Cannot start replicators, already running.");
-            throw new IllegalStateException("Non-null pullReplication or pushReplication, refuse to start new ones");
-        }
-    }
-
     public void startReplicationSyncWithCustomCookie(String name, String value, String path, Date expirationDate, boolean secure, boolean httpOnly) {
 
-        verifyNoReplicationsRunning();
+        if (pullReplication == null && pushReplication == null) {
+            Replication[] replications = createReplications();
+            pullReplication = replications[0];
+            pushReplication = replications[1];
 
-        Replication[] replications = createReplications();
-        pullReplication = replications[0];
-        pushReplication = replications[1];
+            pullReplication.setCookie(name, value, path, expirationDate, secure, httpOnly);
+            pushReplication.setCookie(name, value, path, expirationDate, secure, httpOnly);
 
-        pullReplication.setCookie(name, value, path, expirationDate, secure, httpOnly);
-        pushReplication.setCookie(name, value, path, expirationDate, secure, httpOnly);
+            pullReplication.start();
+            pushReplication.start();
 
-        pullReplication.start();
-        pushReplication.start();
+            Log.v(TAG, "startReplicationSyncWithCustomCookie(): Start Replication Sync ...");
+        } else {
+            Log.v(TAG, "startReplicationSyncWithCustomCookie(): doing nothing, already have existing replications");
 
-        Log.v(TAG, "startReplicationSyncWithCustomCookie(): Start Replication Sync ...");
+        }
 
     }
 
     public void startReplicationSyncWithStoredCustomCookie() {
 
-        verifyNoReplicationsRunning();
+        if (pullReplication == null && pushReplication == null) {
 
-        Replication[] replications = createReplications();
-        pullReplication = replications[0];
-        pushReplication = replications[1];
+            Replication[] replications = createReplications();
+            pullReplication = replications[0];
+            pushReplication = replications[1];
 
-        pullReplication.start();
-        pushReplication.start();
+            pullReplication.start();
+            pushReplication.start();
 
-        Log.v(TAG, "startReplicationSyncWithStoredCustomCookie(): Start Replication Sync ...");
+            Log.v(TAG, "startReplicationSyncWithStoredCustomCookie(): Start Replication Sync ...");
+
+        } else {
+            Log.v(TAG, "startReplicationSyncWithStoredCustomCookie(): doing nothing, already have existing replications");
+
+        }
 
     }
 
     public void startReplicationSyncWithFacebookLogin(String accessToken) {
 
-        verifyNoReplicationsRunning();
+        if (pullReplication == null && pushReplication == null) {
 
-        Authenticator facebookAuthenticator = AuthenticatorFactory.createFacebookAuthenticator(accessToken);
+            Authenticator facebookAuthenticator = AuthenticatorFactory.createFacebookAuthenticator(accessToken);
 
-        Replication[] replications = createReplications();
-        pullReplication = replications[0];
-        pushReplication = replications[1];
+            Replication[] replications = createReplications();
+            pullReplication = replications[0];
+            pushReplication = replications[1];
 
-        pullReplication.setAuthenticator(facebookAuthenticator);
-        pushReplication.setAuthenticator(facebookAuthenticator);
+            pullReplication.setAuthenticator(facebookAuthenticator);
+            pushReplication.setAuthenticator(facebookAuthenticator);
 
-        pullReplication.start();
-        pushReplication.start();
+            pullReplication.start();
+            pushReplication.start();
 
-        Log.v(TAG, "startReplicationSyncWithFacebookLogin(): Start Replication Sync ...");
+            Log.v(TAG, "startReplicationSyncWithFacebookLogin(): Start Replication Sync ...");
+
+        } else {
+            Log.v(TAG, "startReplicationSyncWithFacebookLogin(): doing nothing, already have existing replications");
+
+        }
     }
 
     public Replication[] createReplications() {
@@ -224,14 +228,7 @@ public class Application extends android.app.Application {
         initDatabase();
         initObservable();
 
-
-
-
-
     }
-
-
-
 
 
     public Database getDatabase() {
