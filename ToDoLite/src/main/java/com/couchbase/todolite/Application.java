@@ -4,6 +4,11 @@
 
 package com.couchbase.todolite;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
@@ -13,7 +18,6 @@ import com.couchbase.lite.Manager;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.auth.Authenticator;
 import com.couchbase.lite.auth.AuthenticatorFactory;
-import com.couchbase.lite.auth.FacebookAuthorizer;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 
@@ -43,6 +47,9 @@ public class Application extends android.app.Application {
     private OnSyncProgressChangeObservable onSyncProgressChangeObservable;
     private OnSyncUnauthorizedObservable onSyncUnauthorizedObservable;
 
+    private Replication pullReplication;
+    private Replication pushReplication;
+
     public enum AuthenticationType { FACEBOOK, CUSTOM_COOKIE }
 
     // By default, this should be set to FACEBOOK.  To test "custom cookie" auth,
@@ -52,10 +59,11 @@ public class Application extends android.app.Application {
     private void initDatabase() {
         try {
             Manager.enableLogging(Log.TAG, Log.VERBOSE);
-            Manager.enableLogging(Log.TAG_SYNC, Log.DEBUG);
-            Manager.enableLogging(Log.TAG_QUERY, Log.DEBUG);
-            Manager.enableLogging(Log.TAG_VIEW, Log.DEBUG);
-            Manager.enableLogging(Log.TAG_DATABASE, Log.DEBUG);
+            Manager.enableLogging(Log.TAG_SYNC_ASYNC_TASK, Log.VERBOSE);
+            Manager.enableLogging(Log.TAG_SYNC, Log.VERBOSE);
+            Manager.enableLogging(Log.TAG_QUERY, Log.VERBOSE);
+            Manager.enableLogging(Log.TAG_VIEW, Log.VERBOSE);
+            Manager.enableLogging(Log.TAG_DATABASE, Log.VERBOSE);
 
             manager = new Manager(new AndroidContext(getApplicationContext()), Manager.DEFAULT_OPTIONS);
         } catch (IOException e) {
@@ -80,50 +88,65 @@ public class Application extends android.app.Application {
         onSyncProgressChangeObservable.notifyChanges(completedCount, totalCount);
     }
 
+    private void verifyNoReplicationsRunning() {
+        if (pullReplication != null || pushReplication != null) {
+            Log.w(TAG, "pullReplication: %s", pullReplication);
+            Log.w(TAG, "pushReplication: %s", pushReplication);
+            pushLocalNotification("Sync err", "Cannot start replicators, already running.");
+            throw new IllegalStateException("Non-null pullReplication or pushReplication, refuse to start new ones");
+        }
+    }
+
     public void startReplicationSyncWithCustomCookie(String name, String value, String path, Date expirationDate, boolean secure, boolean httpOnly) {
 
+        verifyNoReplicationsRunning();
+
         Replication[] replications = createReplications();
-        Replication pullRep = replications[0];
-        Replication pushRep = replications[1];
+        pullReplication = replications[0];
+        pushReplication = replications[1];
 
-        pullRep.setCookie(name, value, path, expirationDate, secure, httpOnly);
-        pushRep.setCookie(name, value, path, expirationDate, secure, httpOnly);
+        pullReplication.setCookie(name, value, path, expirationDate, secure, httpOnly);
+        pushReplication.setCookie(name, value, path, expirationDate, secure, httpOnly);
 
-        pullRep.start();
-        pushRep.start();
+        pullReplication.start();
+        pushReplication.start();
 
-        Log.v(TAG, "Start Replication Sync ...");
+        Log.v(TAG, "startReplicationSyncWithCustomCookie(): Start Replication Sync ...");
 
     }
 
     public void startReplicationSyncWithStoredCustomCookie() {
 
+        verifyNoReplicationsRunning();
+
         Replication[] replications = createReplications();
-        Replication pullRep = replications[0];
-        Replication pushRep = replications[1];
+        pullReplication = replications[0];
+        pushReplication = replications[1];
 
-        pullRep.start();
-        pushRep.start();
+        pullReplication.start();
+        pushReplication.start();
 
-        Log.v(TAG, "Start Replication Sync ...");
+        Log.v(TAG, "startReplicationSyncWithStoredCustomCookie(): Start Replication Sync ...");
 
     }
 
-    public void startReplicationSyncWithFacebookLogin(String accessToken, String email) {
+    public void startReplicationSyncWithFacebookLogin(String accessToken) {
+
+        verifyNoReplicationsRunning();
 
         Authenticator facebookAuthenticator = AuthenticatorFactory.createFacebookAuthenticator(accessToken);
 
         Replication[] replications = createReplications();
-        Replication pullRep = replications[0];
-        Replication pushRep = replications[1];
+        pullReplication = replications[0];
+        pushReplication = replications[1];
 
-        pullRep.setAuthenticator(facebookAuthenticator);
-        pushRep.setAuthenticator(facebookAuthenticator);
+        pullReplication.setAuthenticator(facebookAuthenticator);
+        pushReplication.setAuthenticator(facebookAuthenticator);
 
-        pullRep.start();
-        pushRep.start();
+        pullReplication.start();
+        pushReplication.start();
 
-        Log.v(TAG, "Start Replication Sync ...");
+        Log.v(TAG, "startReplicationSyncWithFacebookLogin(): Start Replication Sync ...");
     }
 
     public Replication[] createReplications() {
@@ -148,13 +171,37 @@ public class Application extends android.app.Application {
 
     }
 
+    public void pushLocalNotification(String title, String notificationText){
+
+        NotificationManager notificationManager = (NotificationManager)this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        //use the flag FLAG_UPDATE_CURRENT to override any notification already there
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new Notification(R.drawable.ic_launcher, notificationText, System.currentTimeMillis());
+        notification.flags = Notification.FLAG_AUTO_CANCEL | Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND;
+
+        notification.setLatestEventInfo(this, title, notificationText, contentIntent);
+
+        //10 is a random number I chose to act as the id for this notification
+        notificationManager.notify(10, notification);
+
+    }
+
     private Replication.ChangeListener getReplicationChangeListener() {
         return new Replication.ChangeListener() {
+
             @Override
             public void changed(Replication.ChangeEvent event) {
                 Replication replication = event.getSource();
-                if (replication.getLastError() != null) {
-                    Throwable lastError = replication.getLastError();
+                if (event.getError() != null) {
+                    Throwable lastError = event.getError();
+                    if (lastError.getMessage().contains("existing change tracker")) {
+                        pushLocalNotification("Replication Event", String.format("Sync error: %s:", lastError.getMessage()));
+                    }
                     if (lastError instanceof HttpResponseException) {
                         HttpResponseException responseException = (HttpResponseException) lastError;
                         if (responseException.getStatusCode() == 401) {
@@ -172,9 +219,20 @@ public class Application extends android.app.Application {
     public void onCreate() {
         super.onCreate();
 
+        Log.d(Application.TAG, "Application State: onCreate()");
+
         initDatabase();
         initObservable();
+
+
+
+
+
     }
+
+
+
+
 
     public Database getDatabase() {
         return this.database;
