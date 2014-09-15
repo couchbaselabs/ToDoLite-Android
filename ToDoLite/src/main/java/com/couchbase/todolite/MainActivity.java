@@ -92,6 +92,9 @@ public class MainActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(Application.TAG, "MainActivity State: onCreate()");
+
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
@@ -162,6 +165,55 @@ public class MainActivity extends Activity
             }
         }
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(Application.TAG, "MainActivity State: onStart()");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(Application.TAG, "MainActivity State: onRestart()");
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(Application.TAG, "MainActivity State: onResume()");
+
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        Log.d(Application.TAG, "MainActivity State: onPostResume()");
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(Application.TAG, "MainActivity State: onPause()");
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(Application.TAG, "MainActivity State: onStop()");
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(Application.TAG, "MainActivity State: onDestroy()");
+
+    }
+
 
     private void displayListContent(String listDocId) {
         Document document = getDatabase().getDocument(listDocId);
@@ -645,6 +697,7 @@ public class MainActivity extends Activity
                                 deleteTask(position - 1);
                             } else if (item.getTitle().equals(getResources().getString(R.string.action_show_document))) {
                                 Document task = (Document) mAdapter.getItem(position - 1);
+                                System.out.println("Doc id: " + task.getId());
                                 Map<String, Object> documentMap = task.getProperties();
                                 ObjectMapper objectMapper = new ObjectMapper();
                                 try {
