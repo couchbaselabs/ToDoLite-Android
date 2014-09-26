@@ -70,6 +70,8 @@ public class MainActivity extends Activity
 
     private Session.StatusCallback statusCallback = new FacebookSessionStatusCallback();
 
+    private static final String TAG = Application.TAG;
+
     private Database getDatabase() {
         Application application = (Application) getApplication();
         return application.getDatabase();
@@ -119,9 +121,13 @@ public class MainActivity extends Activity
                     @Override
                     public void run() {
                         Application.SyncProgress progress = (Application.SyncProgress) data;
+                        Log.d(TAG, "Sync progress changed.  Completed: %d Total: %d", progress.completedCount, progress.totalCount);
+
                         if (progress.totalCount > 0 && progress.completedCount < progress.totalCount) {
+                            Log.d(TAG, "Turn on progress spinny");
                             setProgressBarIndeterminateVisibility(true);
                         } else {
+                            Log.d(TAG, "Turn off progress spinny");
                             setProgressBarIndeterminateVisibility(false);
                         }
                     }
@@ -669,8 +675,8 @@ public class MainActivity extends Activity
                 public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
                     Document task = (Document) adapter.getItemAtPosition(position);
                     if (task != null) {
-                        boolean checked = ((Boolean) task.getProperty("checked")).booleanValue();
                         try {
+                            boolean checked = ((Boolean) task.getProperty("checked")).booleanValue();
                             Task.updateCheckedStatus(task, checked);
                         } catch (CouchbaseLiteException e) {
                             Log.e(Application.TAG, "Cannot update checked status", e);
@@ -790,6 +796,10 @@ public class MainActivity extends Activity
                 }
 
                 final Document task = (Document) getItem(position);
+
+                if (task == null || task.getCurrentRevision() == null) {
+                    return convertView;
+                }
 
                 Bitmap image = null;
                 Bitmap thumbnail = null;

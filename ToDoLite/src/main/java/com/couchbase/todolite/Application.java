@@ -213,6 +213,7 @@ public class Application extends android.app.Application {
                         }
                     }
                 }
+                Log.d(TAG, event.toString());
                 updateSyncProgress(replication.getCompletedChangesCount(),
                         replication.getChangesCount());
             }
