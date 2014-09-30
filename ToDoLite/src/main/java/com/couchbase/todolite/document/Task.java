@@ -13,6 +13,8 @@ import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.UnsavedRevision;
+import com.couchbase.lite.util.Log;
+import com.couchbase.todolite.Application;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -85,6 +87,8 @@ public class Task {
 
         revision.save();
 
+        Log.d(Application.TAG, "Created doc: %s", document.getId());
+
         return document;
     }
 
@@ -111,5 +115,7 @@ public class Task {
 
     public static void deleteTask(Document task) throws CouchbaseLiteException {
         task.delete();
+        Log.d(Application.TAG, "Deleted doc: %s", task.getId());
+
     }
 }
