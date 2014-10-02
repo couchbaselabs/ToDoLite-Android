@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.StringTokenizer;
 
 public class MainActivity extends Activity
         implements ListDrawerFragment.ListSelectionCallback {
@@ -159,6 +160,11 @@ public class MainActivity extends Activity
 
         if (application.getCurrentUserId() != null) {
             switch (application.getAuthenticationType()) {
+                case BASIC:
+                    // if the user logged in before, we should have stored their username
+                    // and password.  start sync w/ those stored credentials.
+                    startSyncWithStoredBasicAuth();
+                    break;
                 case CUSTOM_COOKIE:
                     // since the user has already logged in before, assume that we
                     // can start sync using the persisted cookie.  if it's expired,
@@ -263,6 +269,9 @@ public class MainActivity extends Activity
                         switch (application.getAuthenticationType()) {
                             case CUSTOM_COOKIE:
                                 loginWithCustomCookieAndStartSync();
+                                break;
+                            case BASIC:
+                                promptUserForBasicAuthAndStartSync();
                                 break;
                             case FACEBOOK:
                                 loginWithFacebookAndStartSync();
@@ -386,6 +395,59 @@ public class MainActivity extends Activity
     }
 
     /**
+     * Allows user to enter basic auth username/password combo and start
+     * sync.
+     *
+     * Before this will work, you must create the user on sync gateway
+     *
+     * curl -X POST http://localhost:4985/${db}/_user/ -d '{"name":"foo", "password":"bar"}'
+     *
+     */
+    private void promptUserForBasicAuthAndStartSync() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        // if it's too much typing in the emulator, just replace hardcoded fake cookie here.
+        String hardcodedUsernamePassCombo = "foo:bar";
+
+        alert.setTitle("Enter username:pass combo for basic auth");
+        alert.setMessage("This user must have been already created on sync gateway.");
+
+        // Set an EditText view to get user input
+        final EditText input = new EditText(this);
+        input.setText(hardcodedUsernamePassCombo);
+        alert.setView(input);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                try {
+                    String value = input.getText().toString();
+
+                    StringTokenizer st = new StringTokenizer(value, ":");
+                    String username = st.nextToken();
+                    String password = st.nextToken();
+
+                    Application application = (Application) MainActivity.this.getApplication();
+                    application.setCurrentUserPassword(password);
+                    application.setCurrentUserId(username);
+
+                    startSyncWithBasicAuth(username, password);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error parsing username/pass or starting sync", e);
+                    Toast.makeText(MainActivity.this, "Invalid username/pass", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Canceled.
+            }
+        });
+
+        alert.show();
+    }
+
+    /**
      * This is allows the user to enter a "fake" cookie, that would have to been
      * obtained manually.  In a real app, this would look like:
      *
@@ -457,6 +519,19 @@ public class MainActivity extends Activity
         application.startReplicationSyncWithStoredCustomCookie();
 
     }
+
+    private void startSyncWithStoredBasicAuth() {
+        Application application = (Application) MainActivity.this.getApplication();
+        application.startReplicationSyncWithStoredBasicAuth();
+    }
+
+    private void startSyncWithBasicAuth(String username, String password) {
+
+        Application application = (Application) MainActivity.this.getApplication();
+        application.startReplicationSyncWithBasicAuth(username, password);
+
+    }
+
 
     private class FacebookSessionStatusCallback implements Session.StatusCallback {
         @Override

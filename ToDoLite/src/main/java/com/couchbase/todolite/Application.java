@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.Observable;
+import java.util.StringTokenizer;
 
 public class Application extends android.app.Application {
 
@@ -37,6 +38,8 @@ public class Application extends android.app.Application {
 
     private static final String PREF_CURRENT_LIST_ID = "CurrentListId";
     private static final String PREF_CURRENT_USER_ID = "CurrentUserId";
+    private static final String PREF_CURRENT_USER_PASSWORD = "CurrentUserPassword";
+
     private static final String PREF_LAST_RCVD_FB_ACCESS_TOKEN = "LastReceivedFbAccessToken";
 
     private Manager manager;
@@ -50,7 +53,7 @@ public class Application extends android.app.Application {
     private Replication pullReplication;
     private Replication pushReplication;
 
-    public enum AuthenticationType { FACEBOOK, CUSTOM_COOKIE }
+    public enum AuthenticationType { FACEBOOK, CUSTOM_COOKIE, BASIC }
 
     // By default, this should be set to FACEBOOK.  To test "custom cookie" auth,
     // set this to CUSTOM_COOKIE.
@@ -127,6 +130,63 @@ public class Application extends android.app.Application {
 
         }
 
+    }
+
+    public void startReplicationSyncWithStoredBasicAuth() {
+
+        if (pullReplication == null && pushReplication == null) {
+
+            Replication[] replications = createReplications();
+            pullReplication = replications[0];
+            pushReplication = replications[1];
+
+            String password = getCurrentUserPassword();
+            if (password == null || password.isEmpty()) {
+                Log.w(TAG, "Cannot start replication, no saved username / password");
+                return;
+            }
+            String username = getCurrentUserId();
+
+            Authenticator basicAuthenticator = AuthenticatorFactory.createBasicAuthenticator(username, password);
+
+            pullReplication.setAuthenticator(basicAuthenticator);
+            pushReplication.setAuthenticator(basicAuthenticator);
+
+            pullReplication.start();
+            pushReplication.start();
+
+            Log.v(TAG, "startReplicationSyncWithStoredCustomCookie(): Start Replication Sync ...");
+
+        } else {
+            Log.v(TAG, "startReplicationSyncWithStoredCustomCookie(): doing nothing, already have existing replications");
+
+        }
+
+    }
+
+
+    public void startReplicationSyncWithBasicAuth(String username, String password) {
+
+        if (pullReplication == null && pushReplication == null) {
+
+            Authenticator basicAuthenticator = AuthenticatorFactory.createBasicAuthenticator(username, password);
+
+            Replication[] replications = createReplications();
+            pullReplication = replications[0];
+            pushReplication = replications[1];
+
+            pullReplication.setAuthenticator(basicAuthenticator);
+            pushReplication.setAuthenticator(basicAuthenticator);
+
+            pullReplication.start();
+            pushReplication.start();
+
+            Log.v(TAG, "startReplicationSyncWithBasicAuth(): Start Replication Sync ...");
+
+        } else {
+            Log.v(TAG, "startReplicationSyncWithBasicAuth(): doing nothing, already have existing replications");
+
+        }
     }
 
     public void startReplicationSyncWithFacebookLogin(String accessToken) {
@@ -270,6 +330,25 @@ public class Application extends android.app.Application {
         } else {
             sp.edit().remove(PREF_CURRENT_USER_ID).apply();
         }
+    }
+
+    public void setCurrentUserPassword(String userNamePass) {
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+
+        if (userNamePass != null) {
+            sp.edit().putString(PREF_CURRENT_USER_PASSWORD, userNamePass).apply();
+        } else {
+            sp.edit().remove(PREF_CURRENT_USER_PASSWORD).apply();
+        }
+    }
+
+    public String getCurrentUserPassword() {
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+
+        String userId = sp.getString(PREF_CURRENT_USER_PASSWORD, null);
+        return userId;
     }
 
     public void setLastReceivedFbAccessToken(String fbAccessToken) {
