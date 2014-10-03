@@ -35,7 +35,7 @@ public class List {
                     }
                 }
             };
-            view.setMap(mapper, null);
+            view.setMap(mapper, "1");
         }
 
         Query query = view.createQuery();

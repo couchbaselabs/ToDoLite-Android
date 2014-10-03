@@ -39,7 +39,7 @@ public class Profile {
                     }
                 }
             };
-            view.setMap(map, null);
+            view.setMap(map, "1");
         }
 
         Query query = view.createQuery();
@@ -57,7 +57,7 @@ public class Profile {
                     }
                 }
             };
-            view.setMap(map, null);
+            view.setMap(map, "1");
         }
 
         Query query = view.createQuery();
