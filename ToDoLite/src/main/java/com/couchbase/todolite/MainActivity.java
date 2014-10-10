@@ -371,6 +371,7 @@ public class MainActivity extends Activity
         String lastReceivedFbAccessToken = application.getLastReceivedFbAccessToken();
         if (lastReceivedFbAccessToken != null) {
             // yes, use it
+            Toast.makeText(MainActivity.this, "Login successful!  Starting sync.", Toast.LENGTH_LONG).show();
             application.startReplicationSyncWithFacebookLogin(lastReceivedFbAccessToken);
 
         } else {
@@ -565,6 +566,8 @@ public class MainActivity extends Activity
 
                         application.setCurrentUserId(userId);
                         application.setLastReceivedFbAccessToken(session.getAccessToken());
+
+                        Toast.makeText(MainActivity.this, "Login successful!  Starting sync.", Toast.LENGTH_LONG).show();
 
                         application.startReplicationSyncWithFacebookLogin(
                                 session.getAccessToken());
