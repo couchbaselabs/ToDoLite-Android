@@ -371,7 +371,7 @@ public class MainActivity extends Activity
         String lastReceivedFbAccessToken = application.getLastReceivedFbAccessToken();
         if (lastReceivedFbAccessToken != null) {
             // yes, use it
-            Toast.makeText(MainActivity.this, "Login successful!  Starting sync.", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "Have saved FB session token!  Starting sync.", Toast.LENGTH_LONG).show();
             application.startReplicationSyncWithFacebookLogin(lastReceivedFbAccessToken);
 
         } else {
@@ -384,9 +384,19 @@ public class MainActivity extends Activity
             }
 
             if (!session.isOpened() && !session.isClosed()) {
+                Log.d(TAG, "FB session is not opened and not closed, calling openForRead()");
                 session.openForRead(getFacebookOpenRequest());
+
             } else {
-                Session.openActiveSession(this, true, statusCallback);
+
+                Log.d(TAG, "FB session, calling openActiveSession()");
+                session = Session.openActiveSession(this, true, statusCallback);
+                Log.d(TAG, "openActiveSession() returned: %s", session);
+
+                if (!session.isOpened()) {
+                    Log.d(TAG, "session from openActiveSession() is not open, is there an error?");
+                }
+
             }
 
         }
@@ -537,8 +547,25 @@ public class MainActivity extends Activity
     private class FacebookSessionStatusCallback implements Session.StatusCallback {
         @Override
         public void call(final Session session, SessionState state, Exception exception) {
-            if (session == null || !session.isOpened())
+
+            Log.d(TAG, "FacebookSessionStatusCallback called.  Session: %s State: %s Exception: %s", session, state, exception);
+
+            if (exception != null) {
+                String msg = String.format("Login failed!  Exception: %s", exception.getMessage());
+                Log.e(TAG, msg);
+                Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
                 return;
+            }
+
+            if (session == null || !session.isOpened()) {
+                Log.d(TAG, "FacebookSessionStatusCallback called, but session is null");
+                return;
+            }
+
+            if (!session.isOpened()) {
+                Log.d(TAG, "FacebookSessionStatusCallback called, but session is not opened");
+                return;
+            }
 
             Request.newMeRequest(session, new Request.GraphUserCallback() {
                 @Override
