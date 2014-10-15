@@ -2,7 +2,7 @@
 
 A shared todo app that shows how to use the uses the [Couchbase Lite Android](https://github.com/couchbase/couchbase-lite-android) framework to embed a nonrelational ("NoSQL") document-oriented database in an Android app and sync it with [Couchbase Server](http://www.couchbase.com/nosql-databases/couchbase-server) in "the cloud".
 
-The app is available for download in [Google Play](https://play.google.com/store/apps/details?id=com.couchbase.todolite&hl=en)
+The app is available for download in [Google Play](https://play.google.com/store/apps/details?id=com.couchbase.todolite&hl=en).
 
 ![screenshot](http://cl.ly/image/0C2N2F1X3J2a/todolite_screenshot.png)
 
