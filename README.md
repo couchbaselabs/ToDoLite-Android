@@ -24,9 +24,9 @@ $ git submodule init && git submodule update
 * Configure Sync Gateway URL by openning `app/src/main/java/com/couchbase/todolite/Application.java` and modifying SYNC_URL variable pointing to your Sync Gateway url. You can skip this step if you do not want to use the sync feature.
 * Run the app using the "play" or "debug" button.
 
-## Configure and run Sync Gateway (Optional)
+## Point to your own Sync Gateway (Optional)
 
-To use Sync feature, download and run [Sync Gateway](https://github.com/couchbaselabs/sync_gateway) on your desire server. A sample Sync Gateway Configuration to use with the ToDo Lite app is available at `./sync-gateway-config.json`.
+By default, the app is pointed to a Sync Gateway instance hosted by Couchbase on a demo server.  If you want to user your own Sync Gateway instance, you can change the URL in the `SYNC_URL` variable to point to your instance.  You'll want to use the following [Sync Gateway Config](https://github.com/couchbaselabs/ToDoLite-iOS/blob/master/sync-gateway-config.json)
 
 ## Community
 
