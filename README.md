@@ -22,6 +22,24 @@ $ git submodule init && git submodule update
 * Import the project into your Android Studio by selecting `build.gradle` or `settings.gradle` from the root of the project.
 * Run the app using the "play" or "debug" button.
 
+## Run the Unit Tests
+
+**One time configuration**
+
+* Go to Run / Edit Configurations .. menu
+* Click the + button
+* Choose Android Tests
+* **Module:** Select `couchbase-lite-android`
+* **Name:** enter All Tests
+* **Test:** All in module
+* **Target device:** Show chooser dialog
+
+
+**Run Tests**
+
+* Go to Run / Run 'All Tests' or Run / Debug 'All Tests'
+
+
 ## Point to your own Sync Gateway (Optional)
 
 By default, the app is pointed to a Sync Gateway instance hosted by Couchbase on a demo server.  If you want to user your own Sync Gateway instance, you can change the URL in the `SYNC_URL` variable to point to your instance.  You'll want to use the following [Sync Gateway Config](https://github.com/couchbaselabs/ToDoLite-iOS/blob/master/sync-gateway-config.json)
