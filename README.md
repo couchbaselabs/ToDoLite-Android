@@ -20,7 +20,6 @@ $ git submodule init && git submodule update
 ## Build and run the app
 
 * Import the project into your Android Studio by selecting `build.gradle` or `settings.gradle` from the root of the project.
-* Configure Sync Gateway URL by openning `app/src/main/java/com/couchbase/todolite/Application.java` and modifying SYNC_URL variable pointing to your Sync Gateway url. You can skip this step if you do not want to use the sync feature.
 * Run the app using the "play" or "debug" button.
 
 ## Point to your own Sync Gateway (Optional)
