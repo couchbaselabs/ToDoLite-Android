@@ -25,10 +25,20 @@ android {
     }
 }
 
+
 dependencies {
+
     compile 'com.android.support:support-v4:19.0.0'
     compile fileTree(dir: 'libs', include: ['*.jar'])
+
     compile project(':libraries:couchbase-lite-android')
     compile project(':libraries:couchbase-lite-java-core')
     compile project(':libraries:facebook')
+
+    // To depend on couchbase lite via the maven artifact, comment above lines:
+    // :libraries:couchbase-lite-android and :libraries:couchbase-lite-java-core
+    // And uncomment line below:
+    // compile 'com.couchbase.lite:couchbase-lite-android:1.0.3'
+
+
 }
