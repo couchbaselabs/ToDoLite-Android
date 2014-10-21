@@ -14,6 +14,7 @@ The app is available for download in [Google Play](https://play.google.com/store
 
 ```
 $ git clone https://github.com/couchbaselabs/ToDoLite-Android.git
+$ cd ToDoLite-Android
 $ git submodule init && git submodule update
 ```
 
