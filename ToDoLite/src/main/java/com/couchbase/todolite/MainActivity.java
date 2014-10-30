@@ -38,6 +38,7 @@ import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
@@ -122,9 +123,9 @@ public class MainActivity extends Activity
                     @Override
                     public void run() {
                         Application.SyncProgress progress = (Application.SyncProgress) data;
-                        Log.d(TAG, "Sync progress changed.  Completed: %d Total: %d", progress.completedCount, progress.totalCount);
+                        Log.d(TAG, "Sync progress changed.  Completed: %d Total: %d Status: %s", progress.completedCount, progress.totalCount, progress.status);
 
-                        if (progress.totalCount > 0 && progress.completedCount < progress.totalCount) {
+                        if (progress.status == Replication.ReplicationStatus.REPLICATION_ACTIVE) {
                             Log.d(TAG, "Turn on progress spinny");
                             setProgressBarIndeterminateVisibility(true);
                         } else {

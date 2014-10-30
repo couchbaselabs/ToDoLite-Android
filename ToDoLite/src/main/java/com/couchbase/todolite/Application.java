@@ -89,8 +89,8 @@ public class Application extends android.app.Application {
         onSyncUnauthorizedObservable = new OnSyncUnauthorizedObservable();
     }
 
-    private synchronized void updateSyncProgress(int completedCount, int totalCount) {
-        onSyncProgressChangeObservable.notifyChanges(completedCount, totalCount);
+    private synchronized void updateSyncProgress(int completedCount, int totalCount, Replication.ReplicationStatus status) {
+        onSyncProgressChangeObservable.notifyChanges(completedCount, totalCount, status);
     }
 
     public void startReplicationSyncWithCustomCookie(String name, String value, String path, Date expirationDate, boolean secure, boolean httpOnly) {
@@ -276,8 +276,11 @@ public class Application extends android.app.Application {
                     }
                 }
                 Log.d(TAG, event.toString());
-                updateSyncProgress(replication.getCompletedChangesCount(),
-                        replication.getChangesCount());
+                updateSyncProgress(
+                        replication.getCompletedChangesCount(),
+                        replication.getChangesCount(),
+                        replication.getStatus()
+                );
             }
         };
     }
@@ -383,10 +386,11 @@ public class Application extends android.app.Application {
     }
 
     static class OnSyncProgressChangeObservable extends Observable {
-        private void notifyChanges(int completedCount, int totalCount) {
+        private void notifyChanges(int completedCount, int totalCount, Replication.ReplicationStatus status) {
             SyncProgress progress = new SyncProgress();
             progress.completedCount = completedCount;
             progress.totalCount = totalCount;
+            progress.status = status;
             setChanged();
             notifyObservers(progress);
         }
@@ -402,6 +406,7 @@ public class Application extends android.app.Application {
     static class SyncProgress {
         public int completedCount;
         public int totalCount;
+        public Replication.ReplicationStatus status;
     }
 
 
