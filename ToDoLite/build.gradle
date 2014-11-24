@@ -40,5 +40,4 @@ dependencies {
     // And uncomment line below:
     // compile 'com.couchbase.lite:couchbase-lite-android:1.0.3'
 
-
 }
