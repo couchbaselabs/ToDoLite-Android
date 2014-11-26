@@ -52,8 +52,9 @@ public class List {
         properties.put("type", "list");
         properties.put("title", title);
         properties.put("created_at", currentTimeString);
-        properties.put("owner", "profile:" + userId);
         properties.put("members", new ArrayList<String>());
+        if (userId != null)
+            properties.put("owner", "profile:" + userId);
 
         Document document = database.createDocument();
         document.putProperties(properties);
