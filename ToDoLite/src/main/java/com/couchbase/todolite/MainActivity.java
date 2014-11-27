@@ -864,6 +864,7 @@ public class MainActivity extends Activity
                 if (mCurrentTaskToAttachImage != null) {
                     try {
                         Task.attachImage(mCurrentTaskToAttachImage, mImageToBeAttached);
+                        mImageToBeAttached = null;
                     } catch (CouchbaseLiteException e) {
                         Log.e(Application.TAG, "Cannot attach an image to a task.", e);
                     }
