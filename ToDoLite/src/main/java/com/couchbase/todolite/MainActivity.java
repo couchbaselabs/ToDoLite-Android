@@ -8,6 +8,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -43,6 +44,7 @@ import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
 import com.couchbase.todolite.document.Task;
+import com.couchbase.todolite.helper.ImageHelper;
 import com.couchbase.todolite.helper.LiveQueryAdapter;
 import com.facebook.Request;
 import com.facebook.Response;
@@ -830,8 +832,13 @@ public class MainActivity extends Activity
                 return;
             }
 
+            Bitmap thumbnail = null;
             if (requestCode == REQUEST_TAKE_PHOTO) {
                 mImageToBeAttached = BitmapFactory.decodeFile(mImagePathToBeAttached);
+                if (mCurrentTaskToAttachImage == null) {
+                    thumbnail = ImageHelper.thumbmailFromFile(mImagePathToBeAttached,
+                            THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX);
+                }
 
                 // Delete the temporary image file
                 File file = new File(mImagePathToBeAttached);
@@ -842,6 +849,12 @@ public class MainActivity extends Activity
                     Uri uri = data.getData();
                     mImageToBeAttached = MediaStore.Images.Media.getBitmap(
                             getActivity().getContentResolver(), uri);
+                    if (mCurrentTaskToAttachImage == null) {
+                        AssetFileDescriptor descriptor =
+                                getActivity().getContentResolver().openAssetFileDescriptor(uri, "r");
+                        thumbnail = ImageHelper.thumbmailFromDescriptor(descriptor.getFileDescriptor(),
+                                THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX);
+                    }
                 } catch (IOException e) {
                     Log.e(Application.TAG, "Cannot get a selected photo from the gallery.", e);
                 }
@@ -855,9 +868,6 @@ public class MainActivity extends Activity
                         Log.e(Application.TAG, "Cannot attach an image to a task.", e);
                     }
                 } else { // Attach an image for a new task
-                    Bitmap thumbnail = ThumbnailUtils.extractThumbnail(
-                            mImageToBeAttached, THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX);
-
                     ImageView imageView = (ImageView) getActivity().findViewById(R.id.image);
                     imageView.setImageBitmap(thumbnail);
                 }
@@ -888,32 +898,54 @@ public class MainActivity extends Activity
                     return convertView;
                 }
 
-                Bitmap image = null;
                 Bitmap thumbnail = null;
                 java.util.List<Attachment> attachments = task.getCurrentRevision().getAttachments();
                 if (attachments != null && attachments.size() > 0) {
                     Attachment attachment = attachments.get(0);
                     try {
-                        image = BitmapFactory.decodeStream(attachment.getContent());
-                        thumbnail = ThumbnailUtils.extractThumbnail(
-                                image, THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX);
+                        final BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeStream(attachment.getContent(), null, options);
+                        options.inSampleSize = ImageHelper.calculateInSampleSize(
+                                options, THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX);
+                        attachment.getContent().close();
+
+                        // Need to get a new attachment again as the FileInputStream
+                        // doesn't support mark and reset.
+                        attachments = task.getCurrentRevision().getAttachments();
+                        attachment = attachments.get(0);
+                        options.inJustDecodeBounds = false;
+                        Bitmap bitmap = BitmapFactory.decodeStream(attachment.getContent(), null, options);
+                        int w = bitmap.getWidth();
+                        int h = bitmap.getHeight();
+                        thumbnail = ThumbnailUtils.extractThumbnail(bitmap, THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX);
+                        attachment.getContent().close();
                     } catch (Exception e) {
                         Log.e(Application.TAG, "Cannot decode the attached image", e);
                     }
                 }
 
-                final Bitmap displayImage = image;
                 ImageView imageView = (ImageView) convertView.findViewById(R.id.image);
                 if (thumbnail != null) {
                     imageView.setImageBitmap(thumbnail);
                 } else {
                     imageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera_light));
                 }
+
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (displayImage != null) {
-                            dispatchImageViewIntent(displayImage);
+                        java.util.List<Attachment> attachments =
+                                task.getCurrentRevision().getAttachments();
+                        if (attachments != null && attachments.size() > 0) {
+                            Attachment attachment = attachments.get(0);
+                            try {
+                                Bitmap displayImage = BitmapFactory.decodeStream(attachment.getContent());
+                                dispatchImageViewIntent(displayImage);
+                                attachment.getContent().close();
+                            } catch (Exception e) {
+                                Log.e(Application.TAG, "Cannot decode the attached image", e);
+                            }
                         } else {
                             attachImage(task);
                         }
