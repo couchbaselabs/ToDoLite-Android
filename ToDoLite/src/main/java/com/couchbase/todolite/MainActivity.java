@@ -101,6 +101,25 @@ public class MainActivity extends Activity
 
         Log.d(Application.TAG, "MainActivity State: onCreate()");
 
+        Application application = (Application) getApplication();
+
+        if (application.getCurrentUserId() != null && application.getCurrentUserPassword() != null) { // basic auth
+            application.setDatabaseForName(application.getCurrentUserId());
+            application.startReplicationSyncWithBasicAuth(application.getCurrentUserId(), application.getCurrentUserPassword());
+        } else if (application.getLastReceivedFbAccessToken() != null) { // fb auth
+            application.setDatabaseForName(application.getCurrentUserId());
+            application.startReplicationSyncWithFacebookLogin(application.getLastReceivedFbAccessToken());
+        } else if (application.getCurrentUserId() != null) { // cookie auth
+            application.setDatabaseForName(application.getCurrentUserId());
+            application.startReplicationSyncWithCustomCookie(application.getCurrentUserId());
+        } else if (application.getGuestBoolean()) {
+            application.setDatabaseForGuest();
+        } else {
+            Intent i = new Intent(MainActivity.this, LoginActivity.class);
+            startActivityForResult(i, 0);
+            finish();
+        }
+
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
@@ -113,11 +132,9 @@ public class MainActivity extends Activity
 
         String currentListId = getCurrentListId();
         if (currentListId != null) {
-            displayListContent(currentListId);
+//            displayListContent(currentListId);
         }
 
-        // Log the current user in and start replication sync
-        Application application = (Application) getApplication();
         application.getOnSyncProgressChangeObservable().addObserver(new Observer() {
             @Override
             public void update(final Observable observable, final Object data) {
@@ -144,13 +161,20 @@ public class MainActivity extends Activity
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+
                         Log.d(Application.TAG, "OnSyncUnauthorizedObservable called, show toast");
 
                         // clear the saved user id, since our session is no longer valid
                         // and we want to show the login button
                         Application application = (Application) getApplication();
                         application.setCurrentUserId(null);
+                        application.setCurrentUserPassword(null);
                         invalidateOptionsMenu();
+
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                        finish();
 
                         String msg = "Sync unable to continue due to invalid session/login";
                         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
@@ -161,24 +185,6 @@ public class MainActivity extends Activity
             }
         });
 
-        if (application.getCurrentUserId() != null) {
-            switch (application.getAuthenticationType()) {
-                case BASIC:
-                    // if the user logged in before, we should have stored their username
-                    // and password.  start sync w/ those stored credentials.
-                    startSyncWithStoredBasicAuth();
-                    break;
-                case CUSTOM_COOKIE:
-                    // since the user has already logged in before, assume that we
-                    // can start sync using the persisted cookie.  if it's expired,
-                    // a message will be shown and the user can login.
-                    startSyncWithStoredCustomCookie();
-                    break;
-                case FACEBOOK:
-                    loginWithFacebookAndStartSync();
-                    break;
-            }
-        }
     }
 
     @Override
@@ -262,29 +268,6 @@ public class MainActivity extends Activity
 
             // Add Login button if the user has not been logged in.
             Application application = (Application) getApplication();
-            if (application.getCurrentUserId() == null) {
-                MenuItem shareMenuItem = menu.add(getResources().getString(R.string.action_login));
-                shareMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                shareMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        Application application = (Application) getApplication();
-                        switch (application.getAuthenticationType()) {
-                            case CUSTOM_COOKIE:
-                                loginWithCustomCookieAndStartSync();
-                                break;
-                            case BASIC:
-                                promptUserForBasicAuthAndStartSync();
-                                break;
-                            case FACEBOOK:
-                                loginWithFacebookAndStartSync();
-                                break;
-                        }
-                        invalidateOptionsMenu();
-                        return true;
-                    }
-                });
-            }
 
             // Add Share button if the user has been logged in
             if (application.getCurrentUserId() != null && getCurrentListId() != null) {
@@ -300,8 +283,33 @@ public class MainActivity extends Activity
                         return true;
                     }
                 });
+                MenuItem logoutMenuItem = menu.add("Logout");
+                logoutMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                logoutMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        Application application = (Application) getApplication();
+                        application.logoutUser();
+                        invalidateOptionsMenu();
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                        finish();
+                        return true;
+                    }
+                });
+            } else if (application.getGuestBoolean()) {
+                MenuItem loginMenuItem = menu.add("Login");
+                loginMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+                loginMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        Intent i = new Intent(MainActivity.this, LoginActivity.class);
+                        startActivityForResult(i, 0);
+                        return true;
+                    }
+                });
             }
-
             restoreActionBar();
             return true;
         }
@@ -359,179 +367,14 @@ public class MainActivity extends Activity
         Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
     }
 
-    private Session.OpenRequest getFacebookOpenRequest() {
-        Session.OpenRequest request = new Session.OpenRequest(this)
-                .setPermissions(Arrays.asList("email"))
-                .setCallback(statusCallback);
-        return request;
-    }
-
-    private void loginWithFacebookAndStartSync() {
-
-        // do we have a stored facebook auth token?
-
-        Application application = (Application) MainActivity.this.getApplication();
-        String lastReceivedFbAccessToken = application.getLastReceivedFbAccessToken();
-        if (lastReceivedFbAccessToken != null) {
-            // yes, use it
-            Toast.makeText(MainActivity.this, "Have saved FB session token!  Starting sync.", Toast.LENGTH_LONG).show();
-            application.startReplicationSyncWithFacebookLogin(lastReceivedFbAccessToken);
-
-        } else {
-            // no, get or create new FB session -- will start replication after session created
-            Session session = Session.getActiveSession();
-
-            if (session == null) {
-                session = new Session(this);
-                Session.setActiveSession(session);
-            }
-
-            if (!session.isOpened() && !session.isClosed()) {
-                Log.d(TAG, "FB session is not opened and not closed, calling openForRead()");
-                session.openForRead(getFacebookOpenRequest());
-
-            } else {
-
-                Log.d(TAG, "FB session, calling openActiveSession()");
-                session = Session.openActiveSession(this, true, statusCallback);
-                Log.d(TAG, "openActiveSession() returned: %s", session);
-
-                if (!session.isOpened()) {
-                    Log.d(TAG, "session from openActiveSession() is not open, is there an error?");
-                }
-
-            }
-
-        }
-
-
-
-    }
-
-    /**
-     * Allows user to enter basic auth username/password combo and start
-     * sync.
-     *
-     * Before this will work, you must create the user on sync gateway
-     *
-     * curl -X POST http://localhost:4985/${db}/_user/ -d '{"name":"foo", "password":"bar"}'
-     *
-     */
-    private void promptUserForBasicAuthAndStartSync() {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-        // if it's too much typing in the emulator, just replace hardcoded fake cookie here.
-        String hardcodedUsernamePassCombo = "foo:bar";
-
-        alert.setTitle("Enter username:pass combo for basic auth");
-        alert.setMessage("This user must have been already created on sync gateway.");
-
-        // Set an EditText view to get user input
-        final EditText input = new EditText(this);
-        input.setText(hardcodedUsernamePassCombo);
-        alert.setView(input);
-
-        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                try {
-                    String value = input.getText().toString();
-
-                    StringTokenizer st = new StringTokenizer(value, ":");
-                    String username = st.nextToken();
-                    String password = st.nextToken();
-
-                    Application application = (Application) MainActivity.this.getApplication();
-                    application.setCurrentUserPassword(password);
-                    application.setCurrentUserId(username);
-
-                    startSyncWithBasicAuth(username, password);
-                } catch (Exception e) {
-                    Log.e(TAG, "Error parsing username/pass or starting sync", e);
-                    Toast.makeText(MainActivity.this, "Invalid username/pass", Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                // Canceled.
-            }
-        });
-
-        alert.show();
-    }
-
-    /**
-     * This is allows the user to enter a "fake" cookie, that would have to been
-     * obtained manually.  In a real app, this would look like:
-     *
-     * - Your app prompts user for credentials
-     * - Your app directly contacts your app server with these credentials
-     * - Your app server creates a session on the Sync Gateway, which returns a cookie
-     * - Your app server returns this cookie to your app
-     *
-     * Having obtained the cookie in the manner above, you would then call
-     * startSyncWithCustomCookie() with this cookie.
-     *
-     */
-    private void loginWithCustomCookieAndStartSync() {
-
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-        // if it's too much typing in the emulator, just replace hardcoded fake cookie here.
-        String hardcodedFakeCookie = "376b9c707158a381a143060f1937935ede7cf75d";
-
-        alert.setTitle("Enter fake cookie");
-        alert.setMessage("See loginWithCustomCookieAndStartSync() for explanation.");
-
-        // Set an EditText view to get user input
-        final EditText input = new EditText(this);
-        input.setText(hardcodedFakeCookie);
-        alert.setView(input);
-
-        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                String value = input.getText().toString();
-
-                Application application = (Application) MainActivity.this.getApplication();
-                application.setCurrentUserId(value);
-
-                startSyncWithCustomCookie(value);
-            }
-        });
-
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                // Canceled.
-            }
-        });
-
-        alert.show();
-    }
-
     private void startSyncWithCustomCookie(String cookieVal) {
-
-        String cookieName = "SyncGatewaySession";
-        boolean isSecure = false;
-        boolean httpOnly = false;
-
-        // expiration date - 1 day from now
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        int numDaysToAdd = 1;
-        cal.add(Calendar.DATE, numDaysToAdd);
-        Date expirationDate = cal.getTime();
-
         Application application = (Application) MainActivity.this.getApplication();
-        application.startReplicationSyncWithCustomCookie(cookieName, cookieVal, "/", expirationDate, isSecure, httpOnly);
-
+        application.startReplicationSyncWithCustomCookie(cookieVal);
     }
 
     private void startSyncWithStoredCustomCookie() {
-
         Application application = (Application) MainActivity.this.getApplication();
         application.startReplicationSyncWithStoredCustomCookie();
-
     }
 
     private void startSyncWithStoredBasicAuth() {
@@ -540,10 +383,8 @@ public class MainActivity extends Activity
     }
 
     private void startSyncWithBasicAuth(String username, String password) {
-
         Application application = (Application) MainActivity.this.getApplication();
         application.startReplicationSyncWithBasicAuth(username, password);
-
     }
 
 

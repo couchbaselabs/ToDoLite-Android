@@ -11,6 +11,10 @@ import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.Revision;
+import com.couchbase.lite.UnsavedRevision;
+import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.Application;
 
 import java.text.SimpleDateFormat;

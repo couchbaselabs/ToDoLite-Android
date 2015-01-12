@@ -10,23 +10,38 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 
+import com.couchbase.lite.Attachment;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
+import com.couchbase.lite.Document;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.SavedRevision;
+import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.auth.Authenticator;
 import com.couchbase.lite.auth.AuthenticatorFactory;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
+import com.couchbase.todolite.document.Profile;
+import com.couchbase.todolite.document.Task;
+import com.facebook.Session;
 
+import org.apache.http.auth.AUTH;
 import org.apache.http.client.HttpResponseException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Observable;
 import java.util.StringTokenizer;
 
@@ -34,32 +49,34 @@ public class Application extends android.app.Application {
 
     public static final String TAG = "ToDoLite";
     private static final String DATABASE_NAME = "todos";
+    private static final String GUEST_DATABASE_NAME = "guest";
     private static final String SYNC_URL_HTTP = "http://demo-mobile.couchbase.com/todolite/";
     private static final String SYNC_URL_HTTPS = "https://demo-mobile.couchbase.com/todolite/";
     private static final String SYNC_URL = SYNC_URL_HTTP;
 
+    private static final String PREF_GUEST_BOOLEAN = "GuestBoolean";
     private static final String PREF_CURRENT_LIST_ID = "CurrentListId";
     private static final String PREF_CURRENT_USER_ID = "CurrentUserId";
     private static final String PREF_CURRENT_USER_PASSWORD = "CurrentUserPassword";
 
     private static final String PREF_LAST_RCVD_FB_ACCESS_TOKEN = "LastReceivedFbAccessToken";
+    private static final String PREF_VERSION_CODE = "VersionCode";
 
     private Manager manager;
     private Database database;
+    private Synchronize sync;
 
     private int syncCompletedChangedCount;
     private int syncTotalChangedCount;
     private OnSyncProgressChangeObservable onSyncProgressChangeObservable;
     private OnSyncUnauthorizedObservable onSyncUnauthorizedObservable;
 
-    private Replication pullReplication;
-    private Replication pushReplication;
-
-    public enum AuthenticationType { FACEBOOK, CUSTOM_COOKIE, BASIC }
+    public enum AuthenticationType { FACEBOOK, ALL }
 
     // By default, this should be set to FACEBOOK.  To test "custom cookie" auth,
-    // set this to CUSTOM_COOKIE.
-    private AuthenticationType authenticationType = AuthenticationType.FACEBOOK;
+    // or basic auth change it to ALL. And run the app against your local sync gateway
+    // you have control over to create custom cookies and users via the admin port.
+    public static AuthenticationType authenticationType = AuthenticationType.FACEBOOK;
 
     private void initDatabase() {
         try {
@@ -95,147 +112,146 @@ public class Application extends android.app.Application {
         onSyncProgressChangeObservable.notifyChanges(completedCount, totalCount, status);
     }
 
-    public void startReplicationSyncWithCustomCookie(String name, String value, String path, Date expirationDate, boolean secure, boolean httpOnly) {
+    public void startReplicationSyncWithCustomCookie(String cookieValue) {
 
-        if (pullReplication == null && pushReplication == null) {
-            Replication[] replications = createReplications();
-            pullReplication = replications[0];
-            pushReplication = replications[1];
-
-            pullReplication.setCookie(name, value, path, expirationDate, secure, httpOnly);
-            pushReplication.setCookie(name, value, path, expirationDate, secure, httpOnly);
-
-            pullReplication.start();
-            pushReplication.start();
-
-            Log.v(TAG, "startReplicationSyncWithCustomCookie(): Start Replication Sync ...");
-        } else {
-            Log.v(TAG, "startReplicationSyncWithCustomCookie(): doing nothing, already have existing replications");
-
-        }
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL)
+                .cookieAuth(cookieValue)
+                .addChangeListener(getReplicationChangeListener())
+                .build();
+        sync.start();
 
     }
 
     public void startReplicationSyncWithStoredCustomCookie() {
 
-        if (pullReplication == null && pushReplication == null) {
-
-            Replication[] replications = createReplications();
-            pullReplication = replications[0];
-            pushReplication = replications[1];
-
-            pullReplication.start();
-            pushReplication.start();
-
-            Log.v(TAG, "startReplicationSyncWithStoredCustomCookie(): Start Replication Sync ...");
-
-        } else {
-            Log.v(TAG, "startReplicationSyncWithStoredCustomCookie(): doing nothing, already have existing replications");
-
-        }
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL)
+                .addChangeListener(getReplicationChangeListener())
+                .build();
+        sync.start();
 
     }
 
     public void startReplicationSyncWithStoredBasicAuth() {
 
-        if (pullReplication == null && pushReplication == null) {
-
-            Replication[] replications = createReplications();
-            pullReplication = replications[0];
-            pushReplication = replications[1];
-
-            String password = getCurrentUserPassword();
-            if (password == null || password.isEmpty()) {
-                Log.w(TAG, "Cannot start replication, no saved username / password");
-                return;
-            }
-            String username = getCurrentUserId();
-
-            Authenticator basicAuthenticator = AuthenticatorFactory.createBasicAuthenticator(username, password);
-
-            pullReplication.setAuthenticator(basicAuthenticator);
-            pushReplication.setAuthenticator(basicAuthenticator);
-
-            pullReplication.start();
-            pushReplication.start();
-
-            Log.v(TAG, "startReplicationSyncWithStoredCustomCookie(): Start Replication Sync ...");
-
-        } else {
-            Log.v(TAG, "startReplicationSyncWithStoredCustomCookie(): doing nothing, already have existing replications");
-
-        }
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL)
+                .basicAuth(getCurrentUserId(), getCurrentUserPassword())
+                .addChangeListener(getReplicationChangeListener())
+                .build();
+        sync.start();
 
     }
 
 
     public void startReplicationSyncWithBasicAuth(String username, String password) {
 
-        if (pullReplication == null && pushReplication == null) {
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL)
+                .basicAuth(username, password)
+                .addChangeListener(getReplicationChangeListener())
+                .build();
+        sync.start();
 
-            Authenticator basicAuthenticator = AuthenticatorFactory.createBasicAuthenticator(username, password);
-
-            Replication[] replications = createReplications();
-            pullReplication = replications[0];
-            pushReplication = replications[1];
-
-            pullReplication.setAuthenticator(basicAuthenticator);
-            pushReplication.setAuthenticator(basicAuthenticator);
-
-            pullReplication.start();
-            pushReplication.start();
-
-            Log.v(TAG, "startReplicationSyncWithBasicAuth(): Start Replication Sync ...");
-
-        } else {
-            Log.v(TAG, "startReplicationSyncWithBasicAuth(): doing nothing, already have existing replications");
-
-        }
     }
 
     public void startReplicationSyncWithFacebookLogin(String accessToken) {
 
-        if (pullReplication == null && pushReplication == null) {
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL)
+                .facebookAuth(accessToken)
+                .addChangeListener(getReplicationChangeListener())
+                .build();
+        sync.start();
 
-            Authenticator facebookAuthenticator = AuthenticatorFactory.createFacebookAuthenticator(accessToken);
+    }
 
-            Replication[] replications = createReplications();
-            pullReplication = replications[0];
-            pushReplication = replications[1];
+    public void migrateGuestDataToUser(Document profile) {
+        Database guestDb = getDatabaseForGuest();
+        if (guestDb.getLastSequenceNumber() > 0) {
 
-            pullReplication.setAuthenticator(facebookAuthenticator);
-            pushReplication.setAuthenticator(facebookAuthenticator);
+            QueryEnumerator rows = null;
+            try {
+                rows = guestDb.createAllDocumentsQuery().run();
+            } catch (CouchbaseLiteException e) {
+                Log.e(TAG, "Cannot run all docs query", e);
+            }
 
-            pullReplication.start();
-            pushReplication.start();
+            if (rows.getCount() == 0) {
+                return;
+            }
 
-            Log.v(TAG, "startReplicationSyncWithFacebookLogin(): Start Replication Sync ...");
+            Database userDB = database;
+            for (QueryRow row : rows) {
+                Document doc = row.getDocument();
 
-        } else {
-            Log.v(TAG, "startReplicationSyncWithFacebookLogin(): doing nothing, already have existing replications");
+                Document newDoc = userDB.getDocument(doc.getId());
+                try {
+                    newDoc.putProperties(doc.getUserProperties());
+                } catch (CouchbaseLiteException e) {
+                    Log.e(TAG, "Cannot save userProperties in newDoc", e);
+                }
+
+                List<Attachment> attachments = doc.getCurrentRevision().getAttachments();
+                if (attachments.size() > 0) {
+                    UnsavedRevision rev = null;
+                    try {
+                        rev = newDoc.getCurrentRevision().createRevision();
+                    } catch (CouchbaseLiteException e) {
+                        Log.e(TAG, "Cannot create new revision", e);
+                    }
+
+                    for (Attachment attachment : attachments) {
+                        try {
+                            rev.setAttachment(attachment.getName(), attachment.getContentType(), attachment.getContent());
+                        } catch (CouchbaseLiteException e) {
+                            Log.e(TAG, "Cannot set attachment on new revision", e);
+                        }
+                    }
+
+                    try {
+                        SavedRevision saved = rev.save();
+                    } catch (CouchbaseLiteException e) {
+                        Log.e(TAG, "Cannot save new revision", e);
+                    }
+                }
+            }
+
+            try {
+                guestDb.delete();
+            } catch (CouchbaseLiteException e) {
+                Log.e(TAG, "Cannot delete guest database");
+            }
 
         }
     }
 
-    public Replication[] createReplications() {
+    public void logoutUser() {
+        callFacebookLogout(getApplicationContext());
+        sync.destroyReplications();
+        setCurrentUserId(null);
+        setCurrentUserPassword(null);
+        setLastReceivedFbAccessToken(null);
+        setCurrentListId(null);
+    }
 
-        URL syncUrl;
-        try {
-            syncUrl = new URL(SYNC_URL);
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "Invalid Sync Url", e);
-            throw new RuntimeException(e);
+    /**
+     * Logout from Facebook to make sure the session and cache are cleared
+     * See http://stackoverflow.com/a/18584885/1908348
+     */
+    public static void callFacebookLogout(Context context) {
+        Session session = Session.getActiveSession();
+        if (session != null) {
+
+            if (!session.isClosed()) {
+                session.closeAndClearTokenInformation();
+                //clear your preferences if saved
+            }
+        } else {
+
+            session = new Session(context);
+            Session.setActiveSession(session);
+
+            session.closeAndClearTokenInformation();
+            //clear your preferences if saved
+
         }
-
-        Replication pullRep = database.createPullReplication(syncUrl);
-        pullRep.setContinuous(true);
-        pullRep.addChangeListener(getReplicationChangeListener());
-
-        Replication pushRep = database.createPushReplication(syncUrl);
-        pushRep.setContinuous(true);
-        pushRep.addChangeListener(getReplicationChangeListener());
-
-        return new Replication[]{pullRep, pushRep};
 
     }
 
@@ -293,14 +309,95 @@ public class Application extends android.app.Application {
 
         Log.d(Application.TAG, "Application State: onCreate()");
 
+        migrateOldVersion();
+
         initDatabase();
         initObservable();
 
     }
 
+    private void migrateOldVersion() {
+        int v = 0;
+        try {
+            v = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        /*
+        The versionCode is defined in the build.gradle file of the ToDoLite module.
+        Version 104 adds the guest account and one db per user, instead of doing a
+        migration, we ask the user to log in and all docs will be pulled in the new
+        db from sync gateway. A better user experience would be to perform
+        the migration here.
+         */
+        if (getVersionCode() == 0) {
+            callFacebookLogout(getApplicationContext());
+            setCurrentUserId(null);
+            setCurrentUserPassword(null);
+            setLastReceivedFbAccessToken(null);
+            setCurrentListId(null);
+
+            setVersionCode(v);
+        }
+    }
 
     public Database getDatabase() {
         return this.database;
+    }
+
+    public Database setDatabaseForName(String name) {
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        try {
+            byte[] inputBytes = name.getBytes();
+            byte[] hashBytes = digest.digest(inputBytes);
+            database = manager.getDatabase("db" + byteArrayToHex(hashBytes));
+        } catch (CouchbaseLiteException e) {
+            Log.e(TAG, "Cannot get Database", e);
+        }
+        return database;
+    }
+
+    public void setDatabaseForGuest() {
+        try {
+            database = manager.getDatabase(GUEST_DATABASE_NAME);
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Database getDatabaseForGuest() {
+        Database db = null;
+        try {
+            db = manager.getDatabase(GUEST_DATABASE_NAME);
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
+        return db;
+    }
+
+    public static String byteArrayToHex(byte[] a) {
+        StringBuilder sb = new StringBuilder(a.length * 2);
+        for(byte b: a)
+            sb.append(String.format("%02x", b & 0xff));
+        return sb.toString();
+    }
+
+    public Boolean getGuestBoolean() {
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        return sp.getBoolean(PREF_GUEST_BOOLEAN, false);
+    }
+
+    public void setGuestBoolean(Boolean bool) {
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        sp.edit().putBoolean(PREF_GUEST_BOOLEAN, bool).apply();
     }
 
     public String getCurrentListId() {
@@ -316,7 +413,7 @@ public class Application extends android.app.Application {
         if (id != null) {
             sp.edit().putString(PREF_CURRENT_LIST_ID, id).apply();
         } else {
-            sp.edit().remove(PREF_CURRENT_LIST_ID);
+            sp.edit().remove(PREF_CURRENT_LIST_ID).apply();
         }
     }
 
@@ -375,16 +472,29 @@ public class Application extends android.app.Application {
         return sp.getString(PREF_LAST_RCVD_FB_ACCESS_TOKEN, null);
     }
 
+    public void setVersionCode(int versionCode) {
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+        if (versionCode != 0) {
+            sp.edit().putInt(PREF_VERSION_CODE, versionCode).apply();
+        } else {
+            sp.edit().remove(PREF_VERSION_CODE).apply();
+        }
+    }
+
+    public int getVersionCode() {
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(getApplicationContext());
+
+        return sp.getInt(PREF_VERSION_CODE, 0);
+    }
+
     public OnSyncProgressChangeObservable getOnSyncProgressChangeObservable() {
         return onSyncProgressChangeObservable;
     }
 
     public OnSyncUnauthorizedObservable getOnSyncUnauthorizedObservable() {
         return onSyncUnauthorizedObservable;
-    }
-
-    public AuthenticationType getAuthenticationType() {
-        return authenticationType;
     }
 
     static class OnSyncProgressChangeObservable extends Observable {
@@ -410,7 +520,5 @@ public class Application extends android.app.Application {
         public int totalCount;
         public Replication.ReplicationStatus status;
     }
-
-
 
 }
