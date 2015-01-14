@@ -63,6 +63,8 @@ public class Application extends android.app.Application {
 
     private void initDatabase() {
         try {
+
+            Manager.enableLogging(TAG, Log.VERBOSE);
             Manager.enableLogging(Log.TAG, Log.VERBOSE);
             Manager.enableLogging(Log.TAG_SYNC_ASYNC_TASK, Log.VERBOSE);
             Manager.enableLogging(Log.TAG_SYNC, Log.VERBOSE);
