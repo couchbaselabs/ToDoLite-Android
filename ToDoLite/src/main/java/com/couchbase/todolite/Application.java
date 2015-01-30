@@ -34,7 +34,7 @@ public class Application extends android.app.Application {
 
     public static final String TAG = "ToDoLite";
     private static final String DATABASE_NAME = "todos";
-    private static final String SYNC_URL_HTTP = "http://demo.mobile.couchbase.com/todolite/";
+    private static final String SYNC_URL_HTTP = "http://demo-mobile.couchbase.com/todolite/";
     private static final String SYNC_URL_HTTPS = "https://demo-mobile.couchbase.com/todolite/";
     private static final String SYNC_URL = SYNC_URL_HTTP;
 
