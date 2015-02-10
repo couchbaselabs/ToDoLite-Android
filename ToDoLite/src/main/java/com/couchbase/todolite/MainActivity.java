@@ -574,7 +574,7 @@ public class MainActivity extends Activity
                 @Override
                 public void onCompleted(GraphUser user, Response response) {
                     if (user != null) {
-                        String userId = (String) user.getProperty("email");
+                        String userId = (String) user.getId();
                         String name = (String) user.getName();
 
                         Application application = (Application) MainActivity.this.getApplication();
