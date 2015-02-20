@@ -4,6 +4,7 @@
     <string name="app_id">510926975701287</string>
     <string name="action_new_list">New list</string>
     <string name="action_login">Log in</string>
+    <string name="action_logout">Logout</string>
     <string name="action_share">Share</string>
     <string name="action_delete">Delete</string>
     <string name="action_show_document">Show Document</string>
