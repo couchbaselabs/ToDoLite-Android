@@ -28,4 +28,14 @@
         android:singleLine="false"
         android:textColor="@color/primary_text_color"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/userIdLabel"
+        android:layout_marginLeft="8dp"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:singleLine="false"
+        android:textColor="@color/primary_text_color"/>
+
 </LinearLayout>

@@ -289,6 +289,15 @@ public class TasksFragment extends Fragment {
                                     updatedProperties.put("title", input.getText().toString());
                                     updatedProperties.put("updated_at", currentTimeString);
 
+                                    /*
+                                    Update the task document with the user id,
+                                    will be shown on the conflict resolution
+                                    screen.
+                                     */
+                                    Application application = (Application) getActivity().getApplication();
+                                    String user_id = application.getCurrentUserId();
+                                    updatedProperties.put("user_id", user_id);
+
                                     try {
                                         task.putProperties(updatedProperties);
                                     } catch (CouchbaseLiteException e) {
@@ -323,6 +332,20 @@ public class TasksFragment extends Fragment {
         LiveQuery query = Task.getQuery(getDatabase(), listId).toLiveQuery();
         mAdapter = new TaskAdapter(getActivity(), query);
         listView.setAdapter(mAdapter);
+
+        /*
+        Database change listener is called when new non current revisions
+        are inserted.
+         */
+        Application application = (Application) getActivity().getApplication();
+        application.getDatabase().addChangeListener(new Database.ChangeListener() {
+            @Override
+            public void changed(Database.ChangeEvent event) {
+                if (event.isExternal()) {
+                    mAdapter.updateQueryToShowConflictingRevisions(event);
+                }
+            }
+        });
 
         return listView;
     }

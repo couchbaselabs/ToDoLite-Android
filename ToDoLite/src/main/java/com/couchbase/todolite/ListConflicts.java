@@ -9,6 +9,7 @@ import android.widget.ListView;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.SavedRevision;
+import com.couchbase.lite.TransactionalTask;
 import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.Application;
@@ -47,26 +48,36 @@ public class ListConflicts extends ListActivity {
         getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                SavedRevision selectedRevision = conflicts.get(i);
-                SavedRevision currentRevision = task.getCurrentRevision();
+                final SavedRevision selectedRevision = conflicts.get(i);
+                final SavedRevision currentRevision = task.getCurrentRevision();
 
                 /*
                 Create a new revision with the properties of the revision selected by
                 the user and delete all other revisions.
                  */
-                for (SavedRevision rev : conflicts) {
-                    try {
-                        UnsavedRevision newRev = rev.createRevision();
-                        if (rev == currentRevision) {
-                            newRev.setUserProperties(selectedRevision.getUserProperties());
-                        } else {
-                            newRev.setIsDeletion(true);
+                Application application = (Application) getApplication();
+                application.getDatabase().runInTransaction(new TransactionalTask() {
+                    @Override
+                    public boolean run() {
+
+                        for (SavedRevision rev : conflicts) {
+                            try {
+                                UnsavedRevision newRev = rev.createRevision();
+                                if (rev == currentRevision) {
+                                    newRev.setUserProperties(selectedRevision.getUserProperties());
+                                } else {
+                                    newRev.setIsDeletion(true);
+                                }
+                                newRev.save(true);
+                            } catch (CouchbaseLiteException e) {
+                                Log.e(Application.TAG, "Cannot create a new revision", e);
+                            }
                         }
-                        newRev.save(true);
-                    } catch (CouchbaseLiteException e) {
-                        Log.e(Application.TAG, "Cannot create a new revision", e);
+
+                        return true;
                     }
-                }
+                });
+
 
                 /*
                 Return to list page, it should be updated with the desired properties

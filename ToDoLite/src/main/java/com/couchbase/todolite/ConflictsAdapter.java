@@ -51,9 +51,16 @@ public class ConflictsAdapter extends ArrayAdapter<SavedRevision> {
 
         TextView tvTitle = (TextView) convertView.findViewById(R.id.titleLabel);
         TextView tvDate = (TextView) convertView.findViewById(R.id.updatedDateLabel);
+        TextView tvUserId = (TextView) convertView.findViewById(R.id.userIdLabel);
 
         tvTitle.setText((String) task.getProperty("title"));
         tvDate.setText("Last edited: " + dateString);
+
+        String userId = (String) task.getProperty("user_id");
+        Application application = (Application) getContext().getApplicationContext();
+        Document profile = (Document) application.getDatabase().getDocument("profile:" + userId);
+
+        tvUserId.setText("Edited by: " + ((String) profile.getProperty("name")));
 
         return convertView;
     }
