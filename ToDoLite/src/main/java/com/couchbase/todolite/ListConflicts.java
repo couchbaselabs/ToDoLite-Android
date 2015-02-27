@@ -17,6 +17,7 @@ import com.couchbase.todolite.ConflictsAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class ListConflicts extends ListActivity {
@@ -48,8 +49,8 @@ public class ListConflicts extends ListActivity {
         getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final SavedRevision selectedRevision = conflicts.get(i);
                 final SavedRevision currentRevision = task.getCurrentRevision();
+                final Map<String, Object> selectedProperties = conflicts.get(i).getUserProperties();
 
                 /*
                 Create a new revision with the properties of the revision selected by
@@ -60,11 +61,12 @@ public class ListConflicts extends ListActivity {
                     @Override
                     public boolean run() {
 
+
                         for (SavedRevision rev : conflicts) {
                             try {
                                 UnsavedRevision newRev = rev.createRevision();
                                 if (rev == currentRevision) {
-                                    newRev.setUserProperties(selectedRevision.getUserProperties());
+                                    newRev.setUserProperties(selectedProperties);
                                 } else {
                                     newRev.setIsDeletion(true);
                                 }
