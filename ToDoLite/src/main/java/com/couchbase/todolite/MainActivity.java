@@ -51,20 +51,16 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
-
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.StringTokenizer;
 
 public class MainActivity extends Activity
         implements ListDrawerFragment.ListSelectionCallback {
