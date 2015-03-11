@@ -38,7 +38,7 @@ import com.couchbase.todolite.document.Task;
 import com.couchbase.todolite.helper.ImageHelper;
 import com.couchbase.todolite.helper.LiveQueryAdapter;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
