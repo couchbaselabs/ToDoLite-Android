@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 
 import com.facebook.widget.LoginButton;
 
+import java.util.Arrays;
+
 public class LoginFragment extends Fragment {
 
     public LoginButton mLoginButton;
@@ -17,6 +19,7 @@ public class LoginFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_login, container, false);
 
         mLoginButton = (LoginButton) view.findViewById(R.id.authButton);
+        mLoginButton.setReadPermissions(Arrays.asList("email"));
 
         return view;
     }
