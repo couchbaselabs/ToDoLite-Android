@@ -10,8 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.couchbase.lite.CouchbaseLiteException;
+import com.couchbase.lite.Database;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.util.Log;
+import com.couchbase.todolite.Application;
 
 public class LiveQueryAdapter extends BaseAdapter {
     private LiveQuery query;
@@ -62,5 +66,23 @@ public class LiveQueryAdapter extends BaseAdapter {
     public void invalidate() {
         if (query != null)
             query.stop();
+    }
+
+    /*
+    Method called in the database change listener when a new change is detected.
+    Because live queries do not trigger a change event when non current revisions are saved
+    or pulled from a remote database.
+     */
+    public void updateQueryToShowConflictingRevisions(final Database.ChangeEvent event) {
+
+        ((Activity) LiveQueryAdapter.this.context).runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                query.stop();
+                enumerator = query.getRows();
+                notifyDataSetChanged();
+            }
+        });
+
     }
 }

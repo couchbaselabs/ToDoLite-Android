@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.couchbase.todolite.R;
 import com.facebook.widget.LoginButton;
 
 import java.util.Arrays;
