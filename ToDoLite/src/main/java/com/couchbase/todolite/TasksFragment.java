@@ -354,7 +354,7 @@ public class TasksFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode != 1) {
+        if (resultCode != getActivity().RESULT_OK) {
             if (mCurrentTaskToAttachImage != null) {
                 mCurrentTaskToAttachImage = null;
             }
