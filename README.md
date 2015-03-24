@@ -31,9 +31,24 @@ See [Running Unit Tests for Couchbase Lite Android](https://github.com/couchbase
 
 ## Point to your own Sync Gateway (Optional)
 
-By default, the app is pointed to a [Sync Gateway](https://github.com/couchbase/sync_gateway) instance hosted by Couchbase on a demo server.  
+There are three build variants: `debug`, `dev`, `release`.
 
-If you want to user your own Sync Gateway instance, you can change the URL in the `SYNC_URL` variable to point to your instance.  You'll want to use the following [Sync Gateway Config](https://github.com/couchbaselabs/ToDoLite-iOS/blob/master/sync-gateway-config.json)
+You can change the build variant in the Build Variants tab in Android Studio:
+
+![img](http://f.cl.ly/items/3q413k063O061I2g2j1x/Screen%20Shot%202015-03-24%20at%2022.02.11.png)
+
+The `debug` and `release` variants point to a [Sync Gateway](https://github.com/couchbase/sync_gateway) instance hosted by Couchbase on a demo server. 
+
+If you want to use your own Sync Gateway instance, you can select the `dev` build variant and make sure to have `sync_url_http` and `sync_url_https` set in `local.properties` in the **root directory** of the project. For example, if you're running the app on the android emulator it would be:
+
+```
+sync_url_http=http://10.0.2.2:4984/todos/
+sync_url_https=https://10.0.2.2:4984/todos/
+```
+
+If you're running the app on a `Genymotion` emulator, the IP address would be `10.0.3.2`. Note the `local.properties` file is not committed to git. You can now use the `dev` build variant for developing with SyncGateway running locally and your emulator of choice.
+
+You'll want to use the following [Sync Gateway Config](https://github.com/couchbaselabs/ToDoLite-iOS/blob/master/sync-gateway-config.json)
 
 ## Community
 

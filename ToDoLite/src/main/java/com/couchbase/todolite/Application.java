@@ -50,8 +50,8 @@ public class Application extends android.app.Application {
     public static final String TAG = "ToDoLite";
     private static final String DATABASE_NAME = "todos";
     private static final String GUEST_DATABASE_NAME = "guest";
-    private static final String SYNC_URL_HTTP = "http://demo-mobile.couchbase.com/todolite/";
-    private static final String SYNC_URL_HTTPS = "https://demo-mobile.couchbase.com/todolite/";
+    private static final String SYNC_URL_HTTP = BuildConfig.SYNC_URL_HTTP;
+    private static final String SYNC_URL_HTTPS = BuildConfig.SYNC_URL_HTTPS;
     private static final String SYNC_URL = SYNC_URL_HTTP;
 
     private static final String PREF_GUEST_BOOLEAN = "GuestBoolean";
