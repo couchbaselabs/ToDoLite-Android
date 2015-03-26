@@ -8,15 +8,22 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
+import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
@@ -26,13 +33,11 @@ import com.facebook.Session;
 import java.util.Observable;
 import java.util.Observer;
 
-public class MainActivity extends Activity
-        implements ListDrawerFragment.ListSelectionCallback {
-    private ListDrawerFragment mDrawerFragment;
-
-    private CharSequence mTitle;
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = Application.TAG;
+    private CharSequence mTitle;
+    private DrawerLayout mDrawerLayout;
 
     private Database getDatabase() {
         Application application = (Application) getApplication();
@@ -55,11 +60,11 @@ public class MainActivity extends Activity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         Log.d(Application.TAG, "MainActivity State: onCreate()");
-
-        Application application = (Application) getApplication();
 
         if (application.getCurrentUserId() != null && application.getCurrentUserPassword() != null) { // basic auth
             application.setDatabaseForName(application.getCurrentUserId());
@@ -78,19 +83,16 @@ public class MainActivity extends Activity
             finish();
         }
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setContentView(R.layout.activity_main);
+        setupTodoLists();
+        setupDrawer();
 
-        mDrawerFragment = (ListDrawerFragment)
-                getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        ((TextView) findViewById(R.id.name)).setText(application.getCurrentUserId());
+
         mTitle = getTitle();
-
-        mDrawerFragment.setUp(R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
 
         String currentListId = getCurrentListId();
         if (currentListId != null) {
-//            displayListContent(currentListId);
+            displayListContent(currentListId);
         }
 
         application.getOnSyncProgressChangeObservable().addObserver(new Observer() {
@@ -113,6 +115,7 @@ public class MainActivity extends Activity
                 });
             }
         });
+
         application.getOnSyncUnauthorizedObservable().addObserver(new Observer() {
             @Override
             public void update(Observable observable, Object data) {
@@ -143,6 +146,48 @@ public class MainActivity extends Activity
             }
         });
 
+    }
+
+    void setupTodoLists() {
+        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        LiveQuery liveQuery = List.getQuery(getDatabase()).toLiveQuery();
+        RecyclerView.Adapter mAdapter = new LiveQueryRecyclerAdapter(this, liveQuery, new LiveQueryRecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(String listId) {
+                displayListContent(listId);
+
+                mDrawerLayout.closeDrawers();
+            }
+        }, application.getCurrentUserId());
+        mRecyclerView.setAdapter(mAdapter);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+    }
+
+    void setupDrawer() {
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        android.support.v7.app.ActionBarDrawerToggle mDrawerToggle = new android.support.v7.app.ActionBarDrawerToggle(
+                this,
+                mDrawerLayout,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+
+            }
+        };
+
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
     }
 
     @Override
@@ -196,7 +241,7 @@ public class MainActivity extends Activity
 
     private void displayListContent(String listDocId) {
         Document document = getDatabase().getDocument(listDocId);
-        getActionBar().setSubtitle((String)document.getProperty("title"));
+        getSupportActionBar().setSubtitle((String)document.getProperty("title"));
 
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
@@ -207,13 +252,8 @@ public class MainActivity extends Activity
         application.setCurrentListId(listDocId);
     }
 
-    @Override
-    public void onListSelected(String id) {
-        displayListContent(id);
-    }
-
     public void restoreActionBar() {
-        ActionBar actionBar = getActionBar();
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
         actionBar.setTitle(mTitle);
@@ -221,7 +261,7 @@ public class MainActivity extends Activity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mDrawerFragment.isDrawerOpen()) {
+        if (!mDrawerLayout.isDrawerOpen(findViewById(R.id.drawer))) {
             getMenuInflater().inflate(R.menu.main, menu);
 
             // Add Login button if the user has not been logged in.
@@ -334,7 +374,5 @@ public class MainActivity extends Activity
         Application application = (Application) MainActivity.this.getApplication();
         application.startReplicationSyncWithBasicAuth(username, password);
     }
-
-
 
 }

@@ -23,7 +23,7 @@ import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
 import com.couchbase.todolite.helper.LiveQueryAdapter;
 
-public class ShareActivity extends Activity {
+public class ShareActivity extends BaseActivity {
     public static final String SHARE_ACTIVITY_CURRENT_LIST_ID_EXTRA = "current_list_id";
     public static final String STATE_CURRENT_LIST_ID = "current_list_id";
 
@@ -41,7 +41,7 @@ public class ShareActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_share);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         if (savedInstanceState != null) {
             mCurrentListId = savedInstanceState.getString(STATE_CURRENT_LIST_ID);
