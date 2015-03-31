@@ -45,7 +45,7 @@ public class Synchronize {
                 }
 
                 pullReplication = database.createPullReplication(syncUrl);
-                pullReplication.setContinuous(true);
+//                pullReplication.setContinuous(true);
 
                 pushReplication = database.createPushReplication(syncUrl);
                 pushReplication.setContinuous(true);

@@ -4,8 +4,13 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -29,7 +34,9 @@ import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.facebook.Session;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -82,6 +89,8 @@ public class MainActivity extends BaseActivity {
             startActivityForResult(i, 0);
             finish();
         }
+
+        getDeviceToken();
 
         setupTodoLists();
         setupDrawer();
@@ -146,6 +155,28 @@ public class MainActivity extends BaseActivity {
             }
         });
 
+    }
+
+    void getDeviceToken() {
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+
+                String msg = "";
+                String deviceToken = "";
+                GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+
+                try {
+                    deviceToken = gcm.register("632113338862");
+                    Log.i("GCM", "Device token : " + deviceToken);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+                return null;
+            }
+        }.execute(null, null, null);
     }
 
     void setupTodoLists() {
