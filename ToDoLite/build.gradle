@@ -6,12 +6,12 @@ android {
     def syncUrlHttp = properties.getProperty('sync_url_http')
     def syncUrlHttps = properties.getProperty('sync_url_https')
 
-    compileSdkVersion 19
-    buildToolsVersion "19.1.0"
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 19
+        targetSdkVersion 21
         versionCode 104
         versionName "1.0.3"
     }
@@ -48,9 +48,10 @@ android {
 
 
 dependencies {
-
-    compile 'com.android.support:support-v4:19.0.0'
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:21.+'
+    compile 'de.hdodenhof:circleimageview:1.2.1'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
 
     compile project(':libraries:couchbase-lite-android')
     compile project(':libraries:couchbase-lite-java-core')
