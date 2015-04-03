@@ -33,10 +33,13 @@ import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
+import com.couchbase.todolite.document.Profile;
 import com.facebook.Session;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -169,6 +172,19 @@ public class MainActivity extends BaseActivity {
                 try {
                     deviceToken = gcm.register("632113338862");
                     Log.i("GCM", "Device token : " + deviceToken);
+
+                    // update user document
+                    Document profile = Profile.getUserProfileById(application.getDatabase(), application.getCurrentUserId());
+                    Map<String, Object> updatedProperties = new HashMap<String, Object>();
+                    updatedProperties.putAll(profile.getProperties());
+                    updatedProperties.put("device_token", deviceToken);
+
+                    try {
+                        profile.putProperties(updatedProperties);
+                    } catch (CouchbaseLiteException e) {
+                        e.printStackTrace();
+                    }
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

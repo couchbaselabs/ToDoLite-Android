@@ -2,13 +2,11 @@ package com.couchbase.todolite;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.couchbase.lite.replicator.Replication;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,28 +21,13 @@ public class GcmMessageHandler extends IntentService {
 
     @Override
     public void onCreate() {
-        // TODO Auto-generated method stub
         super.onCreate();
         handler = new Handler();
     }
     @Override
     protected void onHandleIntent(Intent intent) {
         mIntent = intent;
-
-        Bundle extras = intent.getExtras();
-
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        // The getMessageType() intent parameter must be the intent you received
-        // in your BroadcastReceiver.
-        String messageType = gcm.getMessageType(intent);
-
         showToast();
-        Log.i("GCM", "Received : (" + messageType + ")  " + extras.getString("title"));
-
-        /*
-        pull, non continuous, with event listener
-         */
-
         Application application = (Application) getApplication();
 
         try {
@@ -73,7 +56,7 @@ public class GcmMessageHandler extends IntentService {
     public void showToast(){
         handler.post(new Runnable() {
             public void run() {
-                Toast.makeText(getApplicationContext(), "Server ping - sync up!", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Server ping - sync down!", Toast.LENGTH_LONG).show();
             }
         });
 
