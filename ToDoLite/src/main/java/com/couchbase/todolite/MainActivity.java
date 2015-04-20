@@ -4,21 +4,29 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
@@ -28,8 +36,15 @@ import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
+import com.couchbase.todolite.document.Profile;
 import com.facebook.Session;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -38,6 +53,7 @@ public class MainActivity extends BaseActivity {
     private static final String TAG = Application.TAG;
     private CharSequence mTitle;
     private DrawerLayout mDrawerLayout;
+    private SwitchCompat mToggleGCM;
 
     private Database getDatabase() {
         Application application = (Application) getApplication();
@@ -63,6 +79,7 @@ public class MainActivity extends BaseActivity {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mToggleGCM = (SwitchCompat) findViewById(R.id.toggleGCM);
 
         Log.d(Application.TAG, "MainActivity State: onCreate()");
 
@@ -146,6 +163,55 @@ public class MainActivity extends BaseActivity {
             }
         });
 
+    }
+
+    public void onSyncMethodToggleClicked(View view) {
+        SwitchCompat syncToggle = (SwitchCompat) view;
+        if (syncToggle.isChecked()) {
+            // GCM
+            getDeviceToken();
+            application.startContinuousPushAndOneShotPull(application.getLastReceivedFbAccessToken());
+        } else {
+            application.startReplicationSyncWithFacebookLogin(application.getLastReceivedFbAccessToken());
+        }
+    }
+
+    void getDeviceToken() {
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... params) {
+
+                GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+
+                try {
+                    String deviceToken = gcm.register("632113338862");
+                    Log.i("GCM", "Device token : " + deviceToken);
+
+                    // update user document
+                    Document profile = Profile.getUserProfileById(application.getDatabase(), application.getCurrentUserId());
+                    Map<String, Object> updatedProperties = new HashMap<String, Object>();
+                    updatedProperties.putAll(profile.getProperties());
+
+                    ArrayList<String> deviceTokens = (ArrayList<String>) profile.getProperty("device_tokens");
+                    if (deviceTokens == null) {
+                        deviceTokens = new ArrayList<String>();
+                    }
+
+                    deviceTokens.add(deviceToken);
+                    updatedProperties.put("device_tokens", deviceTokens);
+
+                    try {
+                        profile.putProperties(updatedProperties);
+                    } catch (CouchbaseLiteException e) {
+                        e.printStackTrace();
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute(null, null, null);
     }
 
     void setupTodoLists() {

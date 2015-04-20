@@ -33,7 +33,7 @@ public class Synchronize {
         private boolean basicAuth;
         private boolean cookieAuth;
 
-        public Builder(Database database, String url) {
+        public Builder(Database database, String url, Boolean continuousPull) {
 
             if (pullReplication == null && pushReplication == null) {
 
@@ -45,7 +45,8 @@ public class Synchronize {
                 }
 
                 pullReplication = database.createPullReplication(syncUrl);
-                pullReplication.setContinuous(true);
+                if (continuousPull == true)
+                    pullReplication.setContinuous(true);
 
                 pushReplication = database.createPushReplication(syncUrl);
                 pushReplication.setContinuous(true);
