@@ -46,5 +46,49 @@ public class ListConflicts extends ListActivity {
         ConflictsAdapter adapter = new ConflictsAdapter(this, conflicts);
         this.setListAdapter(adapter);
 
+        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                final SavedRevision currentRevision = task.getCurrentRevision();
+                final Map<String, Object> selectedProperties = conflicts.get(i).getUserProperties();
+
+                /*
+                Create a new revision with the properties of the revision selected by
+                the user and delete all other revisions.
+                 */
+                Application application = (Application) getApplication();
+                application.getDatabase().runInTransaction(new TransactionalTask() {
+                    @Override
+                    public boolean run() {
+
+
+                        for (SavedRevision rev : conflicts) {
+                            try {
+                                UnsavedRevision newRev = rev.createRevision();
+                                if (rev == currentRevision) {
+                                    newRev.setUserProperties(selectedProperties);
+                                } else {
+                                    newRev.setIsDeletion(true);
+                                }
+                                newRev.save(true);
+                            } catch (CouchbaseLiteException e) {
+                                Log.e(Application.TAG, "Cannot create a new revision", e);
+                            }
+                        }
+
+                        return true;
+                    }
+                });
+
+
+                /*
+                Return to list page, it should be updated with the desired properties
+                and the conflict icon should be hidden
+                 */
+                finish();
+
+            }
+        });
+
     }
 }
