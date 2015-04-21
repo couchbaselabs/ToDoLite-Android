@@ -52,12 +52,28 @@ You'll want to use the following [Sync Gateway Config](https://github.com/couchb
 
 ## Syncing with Google Cloud Messaging
 
-* Build Sync Gateway from master and start it with the sync-gateway-config.json
-* Download the notification worker binary from [here](http://cl.ly/1c103T1b0R2B) and start it from the command line
-* Start the application and switch the GCM toggle, now the emulators/devices should sync with GCM and you should
-see a toast message when a notification to sync was received
+* Build Sync Gateway from [master](https://github.com/couchbase/sync_gateway) and start it with the sync-gateway-config.json file
+* Start the application and make sure it connects to the Sync Gateway.
+* Open the drawer panel and toggle the switcher to GCM. Then, check in the admin UI (`http://localhost:4985/_admin/db/todos`)
+that the device token was saved and synced on the profile document:
+```
+{
+  "device_tokens": [
+    "APA91bHE6LfnaKK9DDe9aHLnfim6IfkLLkqvWvFMLsF8BKhv6nEhaNwNo_e9dvdYoWQ2LDFszWhI-B4Dmvvwl8GCbqQ-fpAB-hqGtcheLk48BqnmWJsmQ-1ELlb9v1Hwx4ZzGnzCM7ydNf9ayEinKHnfOXPmG4_Zxw"
+  ],
+  "name": "James Nocentini",
+  "type": "profile",
+  "user_id": "1406037206384636",
+  "_rev": "2-26d69939231b1e6a07bc3af44fb334dc",
+  "_id": "profile:1406037206384636"
+}
+```
+* Download the notification worker binary from [here](https://github.com/jamiltz/ToDoLite-Notifications/releases/latest) and start it from the command line
+* Now the emulators/devices should sync with GCM and you should see a toast message when a notification is received
 
-![img](http://f.cl.ly/items/3E270p0K1o3e3C1Z0m0W/Screen%20Shot%202015-04-20%20at%2022.12.58.png)
+**Note:** the source for the notification worker is in the [ToDoLite-Notifications](https://github.com/jamiltz/ToDoLite-Notifications) repo.
+
+![img](http://f.cl.ly/items/1m1e3T3w160X3Z0l3E34/screenshots.png)
 
 ## Community
 
