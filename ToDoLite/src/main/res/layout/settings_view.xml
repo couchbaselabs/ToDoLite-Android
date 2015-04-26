@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/navigation_drawer_width"
+    android:layout_height="wrap_content"
+    android:padding="12dp"
+    android:columnCount="3"
+    android:background="#ffffff"
+    tools:ignore="UselessParent">
+
+    <!-- Sync Gateway -->
+
+    <TextView
+        android:layout_columnSpan="3"
+        android:layout_width="0dp"
+        android:layout_gravity="start|fill_horizontal"
+        android:text="Sync Gateway"/>
+
+    <TextView
+        android:layout_gravity="start|center_vertical"
+        android:text="Continuous"/>
+
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/toggleGCM"
+        android:layout_gravity="start|center_vertical"
+        android:onClick="onSyncMethodToggleClicked"/>
+
+    <TextView
+        android:layout_gravity="start|center_vertical"
+        android:text="GCM"/>
+
+</GridLayout>

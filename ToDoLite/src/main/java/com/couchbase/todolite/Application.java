@@ -114,7 +114,7 @@ public class Application extends android.app.Application {
 
     public void startReplicationSyncWithCustomCookie(String cookieValue) {
 
-        sync = new Synchronize.Builder(getDatabase(), SYNC_URL)
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL, true)
                 .cookieAuth(cookieValue)
                 .addChangeListener(getReplicationChangeListener())
                 .build();
@@ -124,7 +124,7 @@ public class Application extends android.app.Application {
 
     public void startReplicationSyncWithStoredCustomCookie() {
 
-        sync = new Synchronize.Builder(getDatabase(), SYNC_URL)
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL, true)
                 .addChangeListener(getReplicationChangeListener())
                 .build();
         sync.start();
@@ -133,7 +133,7 @@ public class Application extends android.app.Application {
 
     public void startReplicationSyncWithStoredBasicAuth() {
 
-        sync = new Synchronize.Builder(getDatabase(), SYNC_URL)
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL, true)
                 .basicAuth(getCurrentUserId(), getCurrentUserPassword())
                 .addChangeListener(getReplicationChangeListener())
                 .build();
@@ -144,7 +144,7 @@ public class Application extends android.app.Application {
 
     public void startReplicationSyncWithBasicAuth(String username, String password) {
 
-        sync = new Synchronize.Builder(getDatabase(), SYNC_URL)
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL, true)
                 .basicAuth(username, password)
                 .addChangeListener(getReplicationChangeListener())
                 .build();
@@ -154,12 +154,37 @@ public class Application extends android.app.Application {
 
     public void startReplicationSyncWithFacebookLogin(String accessToken) {
 
-        sync = new Synchronize.Builder(getDatabase(), SYNC_URL)
+        if (sync != null) {
+            sync.destroyReplications();
+        }
+
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL, true)
                 .facebookAuth(accessToken)
                 .addChangeListener(getReplicationChangeListener())
                 .build();
         sync.start();
 
+    }
+
+    public void startContinuousPushAndOneShotPull(String accessToken) {
+
+        if (sync != null) {
+            sync.destroyReplications();
+        }
+
+        sync = new Synchronize.Builder(getDatabase(), SYNC_URL, false)
+                .facebookAuth(accessToken)
+                .addChangeListener(getReplicationChangeListener())
+                .build();
+
+
+       sync.start();
+
+    }
+
+    public void stopSync() {
+        sync.destroyReplications();
+        sync = null;
     }
 
     public void migrateGuestDataToUser(Document profile) {

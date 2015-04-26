@@ -50,6 +50,31 @@ If you're running the app on a `Genymotion` emulator, the IP address would be `1
 
 You'll want to use the following [Sync Gateway Config](https://github.com/couchbaselabs/ToDoLite-iOS/blob/master/sync-gateway-config.json)
 
+## Syncing with Google Cloud Messaging
+
+* Build Sync Gateway from [master](https://github.com/couchbase/sync_gateway) and start it with the sync-gateway-config.json file
+* Start the application and make sure it connects to the Sync Gateway.
+* Open the drawer panel and toggle the switcher to GCM. Then, check in the admin UI (`http://localhost:4985/_admin/db/todos`)
+that the device token was saved and synced on the profile document:
+```
+{
+  "device_tokens": [
+    "APA91bHE6LfnaKK9DDe9aHLnfim6IfkLLkqvWvFMLsF8BKhv6nEhaNwNo_e9dvdYoWQ2LDFszWhI-B4Dmvvwl8GCbqQ-fpAB-hqGtcheLk48BqnmWJsmQ-1ELlb9v1Hwx4ZzGnzCM7ydNf9ayEinKHnfOXPmG4_Zxw"
+  ],
+  "name": "James Nocentini",
+  "type": "profile",
+  "user_id": "1406037206384636",
+  "_rev": "2-26d69939231b1e6a07bc3af44fb334dc",
+  "_id": "profile:1406037206384636"
+}
+```
+* Download the notification worker binary from [here](https://github.com/jamiltz/ToDoLite-Notifications/releases/latest) and start it from the command line
+* Now the emulators/devices should sync with GCM and you should see a toast message when a notification is received
+
+**Note:** the source for the notification worker is in the [ToDoLite-Notifications](https://github.com/jamiltz/ToDoLite-Notifications) repo.
+
+![img](http://f.cl.ly/items/1m1e3T3w160X3Z0l3E34/screenshots.png)
+
 ## Community
 
 If you have any comments or suggestions, please join [our mailing list](https://groups.google.com/forum/#!forum/mobile-couchbase) and let us know.
