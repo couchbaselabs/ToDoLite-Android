@@ -6,7 +6,7 @@ A shared todo app that shows how to use the uses the [Couchbase Lite Android](ht
 
 The app is available for download in [Google Play](https://play.google.com/store/apps/details?id=com.couchbase.todolite&hl=en).
 
-![screenshot](http://cl.ly/image/0C2N2F1X3J2a/todolite_screenshot.png)
+![screenshot](http://f.cl.ly/items/1K2e200t2D3s1l0i473e/ToDoLite.gif)
 
 ## Prequisites
 
