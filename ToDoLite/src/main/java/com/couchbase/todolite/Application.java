@@ -23,27 +23,17 @@ import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.SavedRevision;
 import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.android.AndroidContext;
-import com.couchbase.lite.auth.Authenticator;
-import com.couchbase.lite.auth.AuthenticatorFactory;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
-import com.couchbase.todolite.document.Profile;
-import com.couchbase.todolite.document.Task;
 import com.facebook.Session;
 
-import org.apache.http.auth.AUTH;
 import org.apache.http.client.HttpResponseException;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Observable;
-import java.util.StringTokenizer;
 
 public class Application extends android.app.Application {
 
@@ -215,13 +205,7 @@ public class Application extends android.app.Application {
 
                 List<Attachment> attachments = doc.getCurrentRevision().getAttachments();
                 if (attachments.size() > 0) {
-                    UnsavedRevision rev = null;
-                    try {
-                        rev = newDoc.getCurrentRevision().createRevision();
-                    } catch (CouchbaseLiteException e) {
-                        Log.e(TAG, "Cannot create new revision", e);
-                    }
-
+                    UnsavedRevision rev = newDoc.getCurrentRevision().createRevision();
                     for (Attachment attachment : attachments) {
                         try {
                             rev.setAttachment(attachment.getName(), attachment.getContentType(), attachment.getContent());
