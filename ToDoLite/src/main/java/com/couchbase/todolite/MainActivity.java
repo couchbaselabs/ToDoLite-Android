@@ -35,6 +35,7 @@ import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
+import com.couchbase.todolite.helper.ModelHelper;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
 import com.facebook.Session;
@@ -42,7 +43,10 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -397,14 +401,24 @@ public class MainActivity extends BaseActivity {
                     // TODO: Show an error message.
                     return;
                 }
-                try {
-                    String currentUserId = ((Application)getApplication()).getCurrentUserId();
-                    Document document = List.createNewList(getDatabase(), title, currentUserId);
-                    displayListContent(document.getId());
-                    invalidateOptionsMenu();
-                } catch (CouchbaseLiteException e) {
-                    Log.e(Application.TAG, "Cannot create a new list", e);
-                }
+                String currentUserId = ((Application)getApplication()).getCurrentUserId();
+
+                SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                Calendar calendar = GregorianCalendar.getInstance();
+                String currentTimeString = dateFormatter.format(calendar.getTime());
+
+                List list = new List();
+                list.setType("list");
+                list.setTitle(title);
+                list.setCreateAt(currentTimeString);
+                list.setMembers(new ArrayList<String>());
+
+                if (currentUserId != null)
+                    list.setOwner("profile" + currentUserId);
+
+                Document document = ModelHelper.save(getDatabase(), list);
+                displayListContent(document.getId());
+                invalidateOptionsMenu();
             }
         });
 

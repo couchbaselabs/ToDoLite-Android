@@ -16,6 +16,8 @@ import com.couchbase.lite.Revision;
 import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.Application;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -24,9 +26,27 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class List {
     private static final String VIEW_NAME = "lists";
     private static final String DOC_TYPE = "list";
+
+    @JsonProperty(value = "_id")
+    private String documentId;
+
+    private String title;
+
+    @JsonProperty(value = "user_id")
+    private int userId;
+
+    @JsonProperty(value = "created_at")
+    private String createAt;
+
+    private String type;
+
+    private ArrayList<String> members;
+
+    private String owner;
 
     public static Query getQuery(Database database) {
         com.couchbase.lite.View view = database.getView(VIEW_NAME);
@@ -44,26 +64,6 @@ public class List {
 
         Query query = view.createQuery();
         return query;
-    }
-
-    public static Document createNewList(Database database, String title, String userId)
-            throws CouchbaseLiteException {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        Calendar calendar = GregorianCalendar.getInstance();
-        String currentTimeString = dateFormatter.format(calendar.getTime());
-
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put("type", "list");
-        properties.put("title", title);
-        properties.put("created_at", currentTimeString);
-        properties.put("members", new ArrayList<String>());
-        if (userId != null)
-            properties.put("owner", "profile:" + userId);
-
-        Document document = database.createDocument();
-        document.putProperties(properties);
-
-        return document;
     }
 
     public static void assignOwnerToListsIfNeeded(Database database, Document user)
@@ -113,5 +113,45 @@ public class List {
         newProperties.put("members", members);
 
         list.putProperties(newProperties);
+    }
+
+    public String getCreateAt() {
+        return createAt;
+    }
+
+    public void setCreateAt(String createAt) {
+        this.createAt = createAt;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public ArrayList<String> getMembers() {
+        return members;
+    }
+
+    public void setMembers(ArrayList<String> members) {
+        this.members = members;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 }
