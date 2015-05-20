@@ -13,6 +13,9 @@ import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.todolite.helper.LiveQueryRecyclerAdapter;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 public class ListAdapter extends LiveQueryRecyclerAdapter<ListAdapter.ViewHolder> implements View.OnClickListener {
 
     private OnItemClickListener onItemClickListener;
@@ -56,14 +59,24 @@ public class ListAdapter extends LiveQueryRecyclerAdapter<ListAdapter.ViewHolder
         public void onItemClick(View view, int position);
     }
 
-    // Creating a ViewHolder class which extends the RecyclerView.ViewHolder
-    // ViewHolder are used to store the inflated views in order to recycle them
+    /*
+    The ViewHolder class extends the RecyclerView.ViewHolder and
+    is responsible for storing the inflated views in order to
+    recycle them. It's a parameter type on the ListAdapter class.
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        @InjectView(R.id.listRowText)
         TextView textView;
 
         public ViewHolder(View itemView, int ViewType) {
             super(itemView);
-            textView = (TextView) itemView.findViewById(R.id.listRowText);
+
+            /*
+            With Butter Knife, not need to set the view fields one by one
+            using the findById method. Instead, we use annotations and call
+            the inject method here.
+             */
+            ButterKnife.inject(this, itemView);
         }
 
     }
