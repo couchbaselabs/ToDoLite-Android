@@ -15,6 +15,7 @@ import com.couchbase.lite.Document;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
+import com.couchbase.todolite.preferences.ToDoLitePreferences;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
@@ -36,9 +37,14 @@ public class LoginActivity extends FragmentActivity {
     private Button mCookieAuthButton;
     private Button mGuestLoginButton;
 
+    private ToDoLitePreferences preferences;
+    private Application application;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.preferences = new ToDoLitePreferences(getApplication());
+        this.application = (Application) getApplication();
         setContentView(R.layout.activity_login);
 
         if (savedInstanceState == null) {
@@ -55,14 +61,12 @@ public class LoginActivity extends FragmentActivity {
         uiHelper = new UiLifecycleHelper(this, callback);
         uiHelper.onCreate(savedInstanceState);
 
-        final Application application = (Application) getApplication();
-
         mGuestLoginButton = (Button)findViewById(R.id.guestLoginButton);
         mGuestLoginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 application.setDatabaseForGuest();
-                application.setGuestBoolean(true);
+                preferences.setGuestBoolean(true);
 
                 Intent i = new Intent(LoginActivity.this, MainActivity.class);
                 startActivityForResult(i, 0);
@@ -98,8 +102,7 @@ public class LoginActivity extends FragmentActivity {
     protected void onStart() {
         super.onStart();
 
-        final Application application = (Application) getApplication();
-        if (application.getGuestBoolean()) {
+        if (preferences.getGuestBoolean()) {
             loginFragment.mLoginButton.performClick();
         }
     }
@@ -114,9 +117,7 @@ public class LoginActivity extends FragmentActivity {
     private void onSessionStateChange(final Session session, SessionState state, Exception exception) {
         if (state.isOpened()) {
 
-            final Application application = (Application) getApplication();
-
-            if (application.getCurrentUserId() == null) {
+            if (preferences.getCurrentUserId() == null) {
 
                 Request.newMeRequest(session, new Request.GraphUserCallback() {
                     @Override
@@ -132,7 +133,7 @@ public class LoginActivity extends FragmentActivity {
                             if (profile == null)
                                 profile = Profile.createProfile(application.getDatabase(), userId, name);
                                 application.migrateGuestDataToUser(profile);
-                                application.setGuestBoolean(false);
+                                preferences.setGuestBoolean(false);
                         } catch (CouchbaseLiteException e) { }
 
                         try {
@@ -141,8 +142,8 @@ public class LoginActivity extends FragmentActivity {
 
                         Toast.makeText(LoginActivity.this, "Login successful!  Starting sync.", Toast.LENGTH_LONG).show();
 
-                        application.setCurrentUserId(userId);
-                        application.setLastReceivedFbAccessToken(session.getAccessToken());
+                        preferences.setCurrentUserId(userId);
+                        preferences.setLastReceivedFbAccessToken(session.getAccessToken());
 
                         Intent i = new Intent(LoginActivity.this, MainActivity.class);
                         startActivityForResult(i, 0);
@@ -193,9 +194,8 @@ public class LoginActivity extends FragmentActivity {
                     String username = st.nextToken();
                     String password = st.nextToken();
 
-                    Application application = (Application) getApplication();
-                    application.setCurrentUserId(username);
-                    application.setCurrentUserPassword(password);
+                    preferences.setCurrentUserId(username);
+                    preferences.setCurrentUserPassword(password);
 
                     Intent i = new Intent(LoginActivity.this, MainActivity.class);
                     startActivityForResult(i, 0);
@@ -248,8 +248,7 @@ public class LoginActivity extends FragmentActivity {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String value = input.getText().toString();
 
-                Application application = (Application) getApplication();
-                application.setCurrentUserId(value);
+                preferences.setCurrentUserId(value);
 
                 Intent i = new Intent(LoginActivity.this, MainActivity.class);
                 startActivityForResult(i, 0);

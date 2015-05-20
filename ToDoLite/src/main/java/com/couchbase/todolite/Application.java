@@ -25,6 +25,7 @@ import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
+import com.couchbase.todolite.preferences.ToDoLitePreferences;
 import com.facebook.Session;
 
 import org.apache.http.client.HttpResponseException;
@@ -44,14 +45,6 @@ public class Application extends android.app.Application {
     private static final String SYNC_URL_HTTPS = BuildConfig.SYNC_URL_HTTPS;
     private static final String SYNC_URL = SYNC_URL_HTTP;
 
-    private static final String PREF_GUEST_BOOLEAN = "GuestBoolean";
-    private static final String PREF_CURRENT_LIST_ID = "CurrentListId";
-    private static final String PREF_CURRENT_USER_ID = "CurrentUserId";
-    private static final String PREF_CURRENT_USER_PASSWORD = "CurrentUserPassword";
-
-    private static final String PREF_LAST_RCVD_FB_ACCESS_TOKEN = "LastReceivedFbAccessToken";
-    private static final String PREF_VERSION_CODE = "VersionCode";
-
     private Manager manager;
     private Database database;
     private Synchronize sync;
@@ -67,6 +60,8 @@ public class Application extends android.app.Application {
     // or basic auth change it to ALL. And run the app against your local sync gateway
     // you have control over to create custom cookies and users via the admin port.
     public static AuthenticationType authenticationType = AuthenticationType.FACEBOOK;
+
+    private ToDoLitePreferences preferences;
 
     private void initDatabase() {
         try {
@@ -124,7 +119,7 @@ public class Application extends android.app.Application {
     public void startReplicationSyncWithStoredBasicAuth() {
 
         sync = new Synchronize.Builder(getDatabase(), SYNC_URL, true)
-                .basicAuth(getCurrentUserId(), getCurrentUserPassword())
+                .basicAuth(preferences.getCurrentUserId(), preferences.getCurrentUserPassword())
                 .addChangeListener(getReplicationChangeListener())
                 .build();
         sync.start();
@@ -234,10 +229,10 @@ public class Application extends android.app.Application {
     public void logoutUser() {
         callFacebookLogout(getApplicationContext());
         sync.destroyReplications();
-        setCurrentUserId(null);
-        setCurrentUserPassword(null);
-        setLastReceivedFbAccessToken(null);
-        setCurrentListId(null);
+        preferences.setCurrentUserId(null);
+        preferences.setCurrentUserPassword(null);
+        preferences.setLastReceivedFbAccessToken(null);
+        preferences.setCurrentListId(null);
     }
 
     /**
@@ -315,6 +310,7 @@ public class Application extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        this.preferences = new ToDoLitePreferences(getApplicationContext());
 
         Log.d(Application.TAG, "Application State: onCreate()");
 
@@ -340,14 +336,14 @@ public class Application extends android.app.Application {
         db from sync gateway. A better user experience would be to perform
         the migration here.
          */
-        if (getVersionCode() == 0) {
+        if (preferences.getVersionCode() == 0) {
             callFacebookLogout(getApplicationContext());
-            setCurrentUserId(null);
-            setCurrentUserPassword(null);
-            setLastReceivedFbAccessToken(null);
-            setCurrentListId(null);
+            preferences.setCurrentUserId(null);
+            preferences.setCurrentUserPassword(null);
+            preferences.setLastReceivedFbAccessToken(null);
+            preferences.setCurrentListId(null);
 
-            setVersionCode(v);
+            preferences.setVersionCode(v);
         }
     }
 
@@ -395,107 +391,6 @@ public class Application extends android.app.Application {
         for(byte b: a)
             sb.append(String.format("%02x", b & 0xff));
         return sb.toString();
-    }
-
-    public Boolean getGuestBoolean() {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-        return sp.getBoolean(PREF_GUEST_BOOLEAN, false);
-    }
-
-    public void setGuestBoolean(Boolean bool) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-        sp.edit().putBoolean(PREF_GUEST_BOOLEAN, bool).apply();
-    }
-
-    public String getCurrentListId() {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-        return sp.getString(PREF_CURRENT_LIST_ID, null);
-    }
-
-    public void setCurrentListId(String id) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-
-        if (id != null) {
-            sp.edit().putString(PREF_CURRENT_LIST_ID, id).apply();
-        } else {
-            sp.edit().remove(PREF_CURRENT_LIST_ID).apply();
-        }
-    }
-
-    public String getCurrentUserId() {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-
-        String userId = sp.getString(PREF_CURRENT_USER_ID, null);
-        return userId;
-    }
-
-    public void setCurrentUserId(String id) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-
-        if (id != null) {
-            sp.edit().putString(PREF_CURRENT_USER_ID, id).apply();
-        } else {
-            sp.edit().remove(PREF_CURRENT_USER_ID).apply();
-        }
-    }
-
-    public void setCurrentUserPassword(String userNamePass) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-
-        if (userNamePass != null) {
-            sp.edit().putString(PREF_CURRENT_USER_PASSWORD, userNamePass).apply();
-        } else {
-            sp.edit().remove(PREF_CURRENT_USER_PASSWORD).apply();
-        }
-    }
-
-    public String getCurrentUserPassword() {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-
-        String userId = sp.getString(PREF_CURRENT_USER_PASSWORD, null);
-        return userId;
-    }
-
-    public void setLastReceivedFbAccessToken(String fbAccessToken) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-        if (fbAccessToken != null) {
-            sp.edit().putString(PREF_LAST_RCVD_FB_ACCESS_TOKEN, fbAccessToken).apply();
-        } else {
-            sp.edit().remove(PREF_LAST_RCVD_FB_ACCESS_TOKEN).apply();
-        }
-    }
-
-    public String getLastReceivedFbAccessToken() {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-
-        return sp.getString(PREF_LAST_RCVD_FB_ACCESS_TOKEN, null);
-    }
-
-    public void setVersionCode(int versionCode) {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-        if (versionCode != 0) {
-            sp.edit().putInt(PREF_VERSION_CODE, versionCode).apply();
-        } else {
-            sp.edit().remove(PREF_VERSION_CODE).apply();
-        }
-    }
-
-    public int getVersionCode() {
-        SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(getApplicationContext());
-
-        return sp.getInt(PREF_VERSION_CODE, 0);
     }
 
     public OnSyncProgressChangeObservable getOnSyncProgressChangeObservable() {
