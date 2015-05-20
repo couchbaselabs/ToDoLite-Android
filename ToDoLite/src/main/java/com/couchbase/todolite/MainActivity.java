@@ -1,32 +1,23 @@
 package com.couchbase.todolite;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
@@ -41,19 +32,19 @@ import com.facebook.Session;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements ListAdapter.OnItemClickListener {
 
     private static final String TAG = Application.TAG;
     private CharSequence mTitle;
     private DrawerLayout mDrawerLayout;
     private SwitchCompat mToggleGCM;
+    private LiveQuery liveQuery;
 
     private Database getDatabase() {
         Application application = (Application) getApplication();
@@ -217,15 +208,11 @@ public class MainActivity extends BaseActivity {
     void setupTodoLists() {
         RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        LiveQuery liveQuery = List.getQuery(getDatabase()).toLiveQuery();
-        RecyclerView.Adapter mAdapter = new LiveQueryRecyclerAdapter(this, liveQuery, new LiveQueryRecyclerAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(String listId) {
-                displayListContent(listId);
+        liveQuery = List.getQuery(getDatabase()).toLiveQuery();
 
-                mDrawerLayout.closeDrawers();
-            }
-        }, application.getCurrentUserId());
+        ListAdapter mAdapter = new ListAdapter(this, liveQuery);
+        mAdapter.setOnItemClickListener(this);
+
         mRecyclerView.setAdapter(mAdapter);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -254,6 +241,14 @@ public class MainActivity extends BaseActivity {
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        String listId = liveQuery.getRows().getRow(position).getDocumentId();
+
+        displayListContent(listId);
+        mDrawerLayout.closeDrawers();
     }
 
     @Override
