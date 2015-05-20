@@ -28,6 +28,7 @@ import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
+import com.couchbase.todolite.preferences.ToDoLitePreferences;
 import com.facebook.Session;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -46,17 +47,13 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
     private SwitchCompat mToggleGCM;
     private LiveQuery liveQuery;
 
-    private Database getDatabase() {
-        Application application = (Application) getApplication();
-        return application.getDatabase();
-    }
+    private ToDoLitePreferences preferences;
 
     private String getCurrentListId() {
-        Application application = (Application) getApplication();
-        String currentListId = application.getCurrentListId();
+        String currentListId = preferences.getCurrentListId();
         if (currentListId == null) {
             try {
-                QueryEnumerator enumerator = List.getQuery(getDatabase()).run();
+                QueryEnumerator enumerator = List.getQuery(application.getDatabase()).run();
                 if (enumerator.getCount() > 0) {
                     currentListId = enumerator.getRow(0).getDocument().getId();
                 }
@@ -69,21 +66,22 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
+        this.preferences = new ToDoLitePreferences(getApplication());
         setContentView(R.layout.activity_main);
         mToggleGCM = (SwitchCompat) findViewById(R.id.toggleGCM);
 
         Log.d(Application.TAG, "MainActivity State: onCreate()");
 
-        if (application.getCurrentUserId() != null && application.getCurrentUserPassword() != null) { // basic auth
-            application.setDatabaseForName(application.getCurrentUserId());
-            application.startReplicationSyncWithBasicAuth(application.getCurrentUserId(), application.getCurrentUserPassword());
-        } else if (application.getLastReceivedFbAccessToken() != null) { // fb auth
-            application.setDatabaseForName(application.getCurrentUserId());
-            application.startReplicationSyncWithFacebookLogin(application.getLastReceivedFbAccessToken());
-        } else if (application.getCurrentUserId() != null) { // cookie auth
-            application.setDatabaseForName(application.getCurrentUserId());
-            application.startReplicationSyncWithCustomCookie(application.getCurrentUserId());
-        } else if (application.getGuestBoolean()) {
+        if (preferences.getCurrentUserId() != null && preferences.getCurrentUserPassword() != null) { // basic auth
+            application.setDatabaseForName(preferences.getCurrentUserId());
+            application.startReplicationSyncWithBasicAuth(preferences.getCurrentUserId(), preferences.getCurrentUserPassword());
+        } else if (preferences.getLastReceivedFbAccessToken() != null) { // fb auth
+            application.setDatabaseForName(preferences.getCurrentUserId());
+            application.startReplicationSyncWithFacebookLogin(preferences.getLastReceivedFbAccessToken());
+        } else if (preferences.getCurrentUserId() != null) { // cookie auth
+            application.setDatabaseForName(preferences.getCurrentUserId());
+            application.startReplicationSyncWithCustomCookie(preferences.getCurrentUserId());
+        } else if (preferences.getGuestBoolean()) {
             application.setDatabaseForGuest();
         } else {
             Intent i = new Intent(MainActivity.this, LoginActivity.class);
@@ -94,7 +92,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         setupTodoLists();
         setupDrawer();
 
-        ((TextView) findViewById(R.id.name)).setText(application.getCurrentUserId());
+        ((TextView) findViewById(R.id.name)).setText(preferences.getCurrentUserId());
 
         mTitle = getTitle();
 
@@ -135,9 +133,8 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
 
                         // clear the saved user id, since our session is no longer valid
                         // and we want to show the login button
-                        Application application = (Application) getApplication();
-                        application.setCurrentUserId(null);
-                        application.setCurrentUserPassword(null);
+                        preferences.setCurrentUserId(null);
+                        preferences.setCurrentUserPassword(null);
                         invalidateOptionsMenu();
 
                         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
@@ -161,9 +158,9 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         if (syncToggle.isChecked()) {
             // GCM
             getDeviceToken();
-            application.startContinuousPushAndOneShotPull(application.getLastReceivedFbAccessToken());
+            application.startContinuousPushAndOneShotPull(preferences.getLastReceivedFbAccessToken());
         } else {
-            application.startReplicationSyncWithFacebookLogin(application.getLastReceivedFbAccessToken());
+            application.startReplicationSyncWithFacebookLogin(preferences.getLastReceivedFbAccessToken());
         }
     }
 
@@ -179,7 +176,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
                     Log.i("GCM", "Device token : " + deviceToken);
 
                     // update user document
-                    Document profile = Profile.getUserProfileById(application.getDatabase(), application.getCurrentUserId());
+                    Document profile = Profile.getUserProfileById(application.getDatabase(), preferences.getCurrentUserId());
                     Map<String, Object> updatedProperties = new HashMap<String, Object>();
                     updatedProperties.putAll(profile.getProperties());
 
@@ -208,7 +205,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
     void setupTodoLists() {
         RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        liveQuery = List.getQuery(getDatabase()).toLiveQuery();
+        liveQuery = List.getQuery(application.getDatabase()).toLiveQuery();
 
         ListAdapter mAdapter = new ListAdapter(this, liveQuery);
         mAdapter.setOnItemClickListener(this);
@@ -301,7 +298,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
 
 
     private void displayListContent(String listDocId) {
-        Document document = getDatabase().getDocument(listDocId);
+        Document document = application.getDatabase().getDocument(listDocId);
         getSupportActionBar().setSubtitle((String)document.getProperty("title"));
 
         FragmentManager fragmentManager = getFragmentManager();
@@ -309,8 +306,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
                 .replace(R.id.container, TasksFragment.newInstance(listDocId))
                 .commit();
 
-        Application application = (Application)getApplication();
-        application.setCurrentListId(listDocId);
+        preferences.setCurrentListId(listDocId);
     }
 
     public void restoreActionBar() {
@@ -325,11 +321,8 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         if (!mDrawerLayout.isDrawerOpen(findViewById(R.id.drawer))) {
             getMenuInflater().inflate(R.menu.main, menu);
 
-            // Add Login button if the user has not been logged in.
-            Application application = (Application) getApplication();
-
             // Add Share button if the user has been logged in
-            if (application.getCurrentUserId() != null && getCurrentListId() != null) {
+            if (preferences.getCurrentUserId() != null && getCurrentListId() != null) {
                 MenuItem shareMenuItem = menu.add(getResources().getString(R.string.action_share));
                 shareMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
                 shareMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -357,7 +350,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
                         return true;
                     }
                 });
-            } else if (application.getGuestBoolean()) {
+            } else if (preferences.getGuestBoolean()) {
                 MenuItem loginMenuItem = menu.add("Login");
                 loginMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
                 loginMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -393,8 +386,8 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
                     return;
                 }
                 try {
-                    String currentUserId = ((Application)getApplication()).getCurrentUserId();
-                    Document document = List.createNewList(getDatabase(), title, currentUserId);
+                    String currentUserId = preferences.getCurrentUserId();
+                    Document document = List.createNewList(application.getDatabase(), title, currentUserId);
                     displayListContent(document.getId());
                     invalidateOptionsMenu();
                 } catch (CouchbaseLiteException e) {

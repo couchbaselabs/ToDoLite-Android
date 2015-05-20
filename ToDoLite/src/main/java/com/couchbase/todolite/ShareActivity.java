@@ -22,6 +22,7 @@ import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
 import com.couchbase.todolite.helper.LiveQueryAdapter;
+import com.couchbase.todolite.preferences.ToDoLitePreferences;
 
 public class ShareActivity extends BaseActivity {
     public static final String SHARE_ACTIVITY_CURRENT_LIST_ID_EXTRA = "current_list_id";
@@ -31,14 +32,12 @@ public class ShareActivity extends BaseActivity {
     private String mCurrentListId = null;
     private Document mCurrentList = null;
 
-    private Database getDatabase() {
-        Application application = (Application) getApplication();
-        return application.getDatabase();
-    }
+    private ToDoLitePreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.preferences = new ToDoLitePreferences(getApplication());
         setContentView(R.layout.activity_share);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -50,10 +49,9 @@ public class ShareActivity extends BaseActivity {
             mCurrentListId = intent.getStringExtra(SHARE_ACTIVITY_CURRENT_LIST_ID_EXTRA);
         }
 
-        mCurrentList = getDatabase().getDocument(mCurrentListId);
+        mCurrentList = application.getDatabase().getDocument(mCurrentListId);
 
-        Application application = (Application) getApplication();
-        Query query = Profile.getQuery(getDatabase(), application.getCurrentUserId());
+        Query query = Profile.getQuery(application.getDatabase(), preferences.getCurrentUserId());
         mAdapter = new UserAdapter(this, query.toLiveQuery());
 
         ListView listView = (ListView) findViewById(R.id.listView);

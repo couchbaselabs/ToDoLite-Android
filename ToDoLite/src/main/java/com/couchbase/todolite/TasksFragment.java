@@ -38,6 +38,7 @@ import com.couchbase.todolite.document.Task;
 import com.couchbase.todolite.helper.ImageHelper;
 import com.couchbase.todolite.helper.LiveQueryAdapter;
 
+import com.couchbase.todolite.preferences.ToDoLitePreferences;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayOutputStream;
@@ -62,6 +63,8 @@ public class TasksFragment extends Fragment {
     private String mImagePathToBeAttached;
     private Bitmap mImageToBeAttached;
     private Document mCurrentTaskToAttachImage;
+
+    private ToDoLitePreferences preferences;
 
     public static TasksFragment newInstance(String id) {
         TasksFragment fragment = new TasksFragment();
@@ -176,6 +179,7 @@ public class TasksFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        this.preferences = new ToDoLitePreferences(getActivity());
         final ListView listView = (ListView) inflater.inflate(
                 R.layout.fragment_main, container, false);
 
@@ -294,8 +298,7 @@ public class TasksFragment extends Fragment {
                                     will be shown on the conflict resolution
                                     screen.
                                      */
-                                    Application application = (Application) getActivity().getApplication();
-                                    String user_id = application.getCurrentUserId();
+                                    String user_id = preferences.getCurrentUserId();
                                     updatedProperties.put("user_id", user_id);
 
                                     try {
