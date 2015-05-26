@@ -19,7 +19,14 @@ public class BaseActivity extends ActionBarActivity {
     public void setContentView(int layoutResID) {
         super.setContentView(layoutResID);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+
+        setupToolbar();
+    }
+
+    protected void setupToolbar() {
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+        }
     }
 
     public Toolbar getToolbar() {

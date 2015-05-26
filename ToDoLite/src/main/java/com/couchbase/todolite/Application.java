@@ -26,7 +26,8 @@ import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.preferences.ToDoLitePreferences;
-import com.facebook.Session;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
 
 import org.apache.http.client.HttpResponseException;
 
@@ -229,6 +230,7 @@ public class Application extends android.app.Application {
     public void logoutUser() {
         callFacebookLogout(getApplicationContext());
         sync.destroyReplications();
+        sync = null;
         preferences.setCurrentUserId(null);
         preferences.setCurrentUserPassword(null);
         preferences.setLastReceivedFbAccessToken(null);
@@ -240,23 +242,7 @@ public class Application extends android.app.Application {
      * See http://stackoverflow.com/a/18584885/1908348
      */
     public static void callFacebookLogout(Context context) {
-        Session session = Session.getActiveSession();
-        if (session != null) {
-
-            if (!session.isClosed()) {
-                session.closeAndClearTokenInformation();
-                //clear your preferences if saved
-            }
-        } else {
-
-            session = new Session(context);
-            Session.setActiveSession(session);
-
-            session.closeAndClearTokenInformation();
-            //clear your preferences if saved
-
-        }
-
+        LoginManager.getInstance().logOut();
     }
 
     public void pushLocalNotification(String title, String notificationText){
@@ -313,6 +299,12 @@ public class Application extends android.app.Application {
         this.preferences = new ToDoLitePreferences(getApplicationContext());
 
         Log.d(Application.TAG, "Application State: onCreate()");
+
+        /*
+        We need to initialized the Facebook SDK before we can use it
+        (https://developers.facebook.com/docs/android/getting-started)
+         */
+        FacebookSdk.sdkInitialize(getApplicationContext());
 
         migrateOldVersion();
 

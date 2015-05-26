@@ -1,10 +1,9 @@
-package com.couchbase.todolite;
+package com.couchbase.todolite.ui.login;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,25 +12,35 @@ import android.widget.Toast;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.util.Log;
+import com.couchbase.todolite.Application;
+import com.couchbase.todolite.BaseActivity;
+import com.couchbase.todolite.MainActivity;
+import com.couchbase.todolite.R;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
 import com.couchbase.todolite.preferences.ToDoLitePreferences;
-import com.facebook.Request;
-import com.facebook.Response;
-import com.facebook.Session;
-import com.facebook.SessionState;
-import com.facebook.UiLifecycleHelper;
-import com.facebook.model.GraphUser;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.login.LoginFragment;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
-public class LoginActivity extends FragmentActivity {
+public class LoginActivity extends BaseActivity {
 
     private static final String TAG = "LoginActivity";
 
-    private UiLifecycleHelper uiHelper;
-    private Button mLoginButton;
     private LoginFragment loginFragment;
+    private LoginButton loginButton;
 
     private Button mBasicAuthButton;
     private Button mCookieAuthButton;
@@ -40,26 +49,38 @@ public class LoginActivity extends FragmentActivity {
     private ToDoLitePreferences preferences;
     private Application application;
 
+    private CallbackManager callbackManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.preferences = new ToDoLitePreferences(getApplication());
         this.application = (Application) getApplication();
+
         setContentView(R.layout.activity_login);
 
-        if (savedInstanceState == null) {
-            loginFragment = new LoginFragment();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.fragmentContainer, loginFragment)
-                    .commit();
-        } else {
-            loginFragment = (LoginFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.fragmentContainer);
-        }
+        loginButton = (LoginButton) findViewById(R.id.authButton);
+        loginButton.setReadPermissions(Arrays.asList("email"));
 
-        uiHelper = new UiLifecycleHelper(this, callback);
-        uiHelper.onCreate(savedInstanceState);
+        callbackManager = CallbackManager.Factory.create();
+        loginButton.registerCallback(callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        // App code
+                        loginUser(loginResult);
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        // App code
+                    }
+
+                    @Override
+                    public void onError(FacebookException exception) {
+                        // App code
+                    }
+                });
 
         mGuestLoginButton = (Button)findViewById(R.id.guestLoginButton);
         mGuestLoginButton.setOnClickListener(new View.OnClickListener() {
@@ -98,67 +119,64 @@ public class LoginActivity extends FragmentActivity {
 
     }
 
+    private void loginUser(final LoginResult loginResult) {
+        if (preferences.getCurrentUserId() == null) {
+            GraphRequest.newMeRequest(
+                    loginResult.getAccessToken(),
+                    new GraphRequest.GraphJSONObjectCallback() {
+                        @Override
+                        public void onCompleted(JSONObject jsonObject, GraphResponse graphResponse) {
+
+                            if (preferences.getCurrentUserId() == null) {
+                                String userId = null;
+                                String name = null;
+                                try {
+                                    userId = jsonObject.getString("id");
+                                    name = jsonObject.getString("name");
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                                application.setDatabaseForName(userId);
+
+                                try {
+                                    Document profile = Profile.getUserProfileById(application.getDatabase(), userId);
+                                    if (profile == null)
+                                        profile = Profile.createProfile(application.getDatabase(), userId, name);
+                                    application.migrateGuestDataToUser(profile);
+                                    preferences.setGuestBoolean(false);
+
+                                    List.assignOwnerToListsIfNeeded(application.getDatabase(), profile);
+                                } catch (CouchbaseLiteException e) {
+                                    e.printStackTrace();
+                                }
+
+                                Toast.makeText(LoginActivity.this, "Login successful!  Starting sync.", Toast.LENGTH_LONG).show();
+
+                                preferences.setCurrentUserId(userId);
+                                preferences.setLastReceivedFbAccessToken(loginResult.getAccessToken().getToken());
+
+                                Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivityForResult(i, 0);
+                                finish(); // call finish to remove this activity from history stack (for Back button to work as expected)
+                            } else {
+                                Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivityForResult(i, 0);
+                                finish(); // call finish to remove this activity from history stack (convenience for Back button to work)
+                            }
+
+                        }
+                    }).executeAsync();
+
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
 
         if (preferences.getGuestBoolean()) {
-            loginFragment.mLoginButton.performClick();
-        }
-    }
-
-    private Session.StatusCallback callback = new Session.StatusCallback() {
-        @Override
-        public void call(Session session, SessionState state, Exception exception) {
-            onSessionStateChange(session, state, exception);
-        }
-    };
-
-    private void onSessionStateChange(final Session session, SessionState state, Exception exception) {
-        if (state.isOpened()) {
-
-            if (preferences.getCurrentUserId() == null) {
-
-                Request.newMeRequest(session, new Request.GraphUserCallback() {
-                    @Override
-                    public void onCompleted(GraphUser user, Response response) {
-                        String userId = (String) user.getId();
-                        String name = (String) user.getName();
-
-                        application.setDatabaseForName(userId);
-
-                        Document profile = null;
-                        try {
-                            profile = Profile.getUserProfileById(application.getDatabase(), userId);
-                            if (profile == null)
-                                profile = Profile.createProfile(application.getDatabase(), userId, name);
-                                application.migrateGuestDataToUser(profile);
-                                preferences.setGuestBoolean(false);
-                        } catch (CouchbaseLiteException e) { }
-
-                        try {
-                            List.assignOwnerToListsIfNeeded(application.getDatabase(), profile);
-                        } catch (CouchbaseLiteException e) { }
-
-                        Toast.makeText(LoginActivity.this, "Login successful!  Starting sync.", Toast.LENGTH_LONG).show();
-
-                        preferences.setCurrentUserId(userId);
-                        preferences.setLastReceivedFbAccessToken(session.getAccessToken());
-
-                        Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivityForResult(i, 0);
-                        finish(); // call finish to remove this activity from history stack (for Back button to work as expected)
-                    }
-                }).executeAsync();
-
-            } else {
-
-                Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                startActivityForResult(i, 0);
-                finish(); // call finish to remove this activity from history stack (convenience for Back button to work)
-
-            }
-
+//            loginFragment.loginButton.performClick();
         }
     }
 
@@ -267,32 +285,9 @@ public class LoginActivity extends FragmentActivity {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        uiHelper.onResume();
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        uiHelper.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        uiHelper.onPause();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        uiHelper.onDestroy();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        uiHelper.onSaveInstanceState(outState);
-    }
 }

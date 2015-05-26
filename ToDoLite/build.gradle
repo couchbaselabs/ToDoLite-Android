@@ -54,10 +54,10 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:21.0.+'
     compile 'com.google.android.gms:play-services:3.1.+'
     compile 'com.jakewharton:butterknife:6.0.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.1.0'
 
     compile project(':libraries:couchbase-lite-android')
     compile project(':libraries:couchbase-lite-java-core')
-    compile project(':libraries:facebook')
 
     // To depend on couchbase lite via the maven artifact, comment above lines:
     // :libraries:couchbase-lite-android and :libraries:couchbase-lite-java-core
