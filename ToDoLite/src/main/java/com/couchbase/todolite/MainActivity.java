@@ -29,7 +29,7 @@ import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
 import com.couchbase.todolite.preferences.ToDoLitePreferences;
-import com.facebook.Session;
+import com.couchbase.todolite.ui.login.LoginActivity;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
@@ -299,7 +299,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
 
     private void displayListContent(String listDocId) {
         Document document = application.getDatabase().getDocument(listDocId);
-        getSupportActionBar().setSubtitle((String)document.getProperty("title"));
+        getSupportActionBar().setSubtitle((String) document.getProperty("title"));
 
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction()
@@ -411,12 +411,6 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Session.getActiveSession().onActivityResult(this, requestCode, resultCode, data);
     }
 
     private void startSyncWithCustomCookie(String cookieVal) {

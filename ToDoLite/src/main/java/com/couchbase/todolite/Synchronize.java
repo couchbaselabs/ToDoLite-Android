@@ -6,7 +6,6 @@ import com.couchbase.lite.auth.Authenticator;
 import com.couchbase.lite.auth.AuthenticatorFactory;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.Database;
-import com.facebook.AppLinkData;
 
 import java.net.MalformedURLException;
 import java.net.URL;

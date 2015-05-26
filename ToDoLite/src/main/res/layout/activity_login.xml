@@ -5,10 +5,10 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <FrameLayout
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/authButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/fragmentContainer"/>
+        android:layout_height="wrap_content" />
 
     <Button
         android:layout_width="wrap_content"
