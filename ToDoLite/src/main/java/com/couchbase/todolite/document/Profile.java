@@ -90,7 +90,7 @@ public class Profile {
         properties.put("user_id", userId);
         properties.put("name", name);
 
-        Document document = database.getDocument("profile:" + userId);
+        Document document = database.getDocument("p:" + userId);
         document.putProperties(properties);
 
         return document;
