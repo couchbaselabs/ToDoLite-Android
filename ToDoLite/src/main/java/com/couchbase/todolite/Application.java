@@ -55,7 +55,7 @@ public class Application extends android.app.Application {
     private OnSyncProgressChangeObservable onSyncProgressChangeObservable;
     private OnSyncUnauthorizedObservable onSyncUnauthorizedObservable;
 
-    public enum AuthenticationType { FACEBOOK, ALL }
+    public enum AuthenticationType { BASIC, CUSTOM_COOKIE, FACEBOOK, ALL }
 
     // By default, this should be set to FACEBOOK.  To test "custom cookie" auth,
     // or basic auth change it to ALL. And run the app against your local sync gateway

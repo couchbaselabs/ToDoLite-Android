@@ -44,7 +44,6 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
     private static final String TAG = Application.TAG;
     private CharSequence mTitle;
     private DrawerLayout mDrawerLayout;
-    private SwitchCompat mToggleGCM;
     private LiveQuery liveQuery;
 
     private ToDoLitePreferences preferences;
@@ -68,19 +67,22 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         super.onCreate(savedInstanceState);
         this.preferences = new ToDoLitePreferences(getApplication());
         setContentView(R.layout.activity_main);
-        mToggleGCM = (SwitchCompat) findViewById(R.id.toggleGCM);
 
         Log.d(Application.TAG, "MainActivity State: onCreate()");
 
-        if (preferences.getCurrentUserId() != null && preferences.getCurrentUserPassword() != null) { // basic auth
+        if (preferences.getCurrentUserId() != null) {
             application.setDatabaseForName(preferences.getCurrentUserId());
-            application.startReplicationSyncWithBasicAuth(preferences.getCurrentUserId(), preferences.getCurrentUserPassword());
-        } else if (preferences.getLastReceivedFbAccessToken() != null) { // fb auth
-            application.setDatabaseForName(preferences.getCurrentUserId());
-            application.startReplicationSyncWithFacebookLogin(preferences.getLastReceivedFbAccessToken());
-        } else if (preferences.getCurrentUserId() != null) { // cookie auth
-            application.setDatabaseForName(preferences.getCurrentUserId());
-            application.startReplicationSyncWithCustomCookie(preferences.getCurrentUserId());
+            switch (application.authenticationType) {
+                case BASIC:
+                    application.startReplicationSyncWithBasicAuth(preferences.getCurrentUserId(), preferences.getCurrentUserPassword());
+                    break;
+                case CUSTOM_COOKIE:
+                    application.startReplicationSyncWithCustomCookie(preferences.getCurrentUserId());
+                    break;
+                case FACEBOOK:
+                    application.startReplicationSyncWithFacebookLogin(preferences.getLastReceivedFbAccessToken());
+                    break;
+            }
         } else if (preferences.getGuestBoolean()) {
             application.setDatabaseForGuest();
         } else {
@@ -249,54 +251,6 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         mDrawerLayout.closeDrawers();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(Application.TAG, "MainActivity State: onStart()");
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.d(Application.TAG, "MainActivity State: onRestart()");
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(Application.TAG, "MainActivity State: onResume()");
-
-    }
-
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        Log.d(Application.TAG, "MainActivity State: onPostResume()");
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d(Application.TAG, "MainActivity State: onPause()");
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d(Application.TAG, "MainActivity State: onStop()");
-
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(Application.TAG, "MainActivity State: onDestroy()");
-
-    }
-
 
     private void displayListContent(String listDocId) {
         Document document = application.getDatabase().getDocument(listDocId);
@@ -412,16 +366,6 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void startSyncWithCustomCookie(String cookieVal) {
-        Application application = (Application) MainActivity.this.getApplication();
-        application.startReplicationSyncWithCustomCookie(cookieVal);
-    }
-
-    private void startSyncWithBasicAuth(String username, String password) {
-        Application application = (Application) MainActivity.this.getApplication();
-        application.startReplicationSyncWithBasicAuth(username, password);
     }
 
 }

@@ -95,28 +95,6 @@ public class LoginActivity extends BaseActivity {
             }
         });
 
-        if (Application.authenticationType == Application.AuthenticationType.ALL) {
-
-            mBasicAuthButton = (Button)findViewById(R.id.basicAuthLoginButton);
-            mBasicAuthButton.setVisibility(View.VISIBLE);
-            mBasicAuthButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    promptUserForBasicAuthAndStartSync();
-                }
-            });
-
-            mCookieAuthButton = (Button)findViewById(R.id.cookieAuthLoginButton);
-            mCookieAuthButton.setVisibility(View.VISIBLE);
-            mCookieAuthButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    loginWithCustomCookieAndStartSync();
-                }
-            });
-
-        }
-
     }
 
     private void loginUser(final LoginResult loginResult) {
