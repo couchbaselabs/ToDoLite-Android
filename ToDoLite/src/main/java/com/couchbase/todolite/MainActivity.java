@@ -203,16 +203,17 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
     }
 
     void setupTodoLists() {
-        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setHasFixedSize(true);
+
         liveQuery = List.getQuery(application.getDatabase()).toLiveQuery();
 
-        ListAdapter mAdapter = new ListAdapter(this, liveQuery);
-        mAdapter.setOnItemClickListener(this);
+        ListAdapter listAdapter = new ListAdapter(this, liveQuery);
+        listAdapter.setOnItemClickListener(this);
 
-        mRecyclerView.setAdapter(mAdapter);
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setAdapter(listAdapter);
+        recyclerView.setLayoutManager(mLayoutManager);
     }
 
     void setupDrawer() {
