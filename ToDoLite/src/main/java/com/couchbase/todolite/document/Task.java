@@ -58,10 +58,7 @@ public class Task {
         return query;
     }
 
-    public static Document createTask(Database database,
-                                      String title,
-                                      Bitmap image,
-                                      String listId) throws CouchbaseLiteException {
+    public static Document createTask(Database database, String title, Bitmap image, String listId) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Calendar calendar = GregorianCalendar.getInstance();
         String currentTimeString = dateFormatter.format(calendar.getTime());
@@ -85,7 +82,12 @@ public class Task {
             revision.setAttachment("image", "image/jpg", in);
         }
 
-        revision.save();
+        try {
+            revision.save();
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+            Log.e(Application.TAG, "Cannot create the revision", e);
+        }
 
         Log.d(Application.TAG, "Created doc: %s", document.getId());
 
