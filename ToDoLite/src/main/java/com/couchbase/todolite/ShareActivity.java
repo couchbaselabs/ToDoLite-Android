@@ -51,10 +51,10 @@ public class ShareActivity extends BaseActivity {
 
         mCurrentList = application.getDatabase().getDocument(mCurrentListId);
 
+        ListView listView = (ListView) findViewById(R.id.listView);
+
         Query query = Profile.getQuery(application.getDatabase(), preferences.getCurrentUserId());
         mAdapter = new UserAdapter(this, query.toLiveQuery());
-
-        ListView listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(mAdapter);
     }
 
