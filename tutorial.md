@@ -6,7 +6,7 @@ This paper will guide you through the steps to build the application and know al
 
 ## 30 minutes: Couchbase Mobile Presentation
 
-## 180 minutes: Hands on building Todo-Lite
+## 120 minutes: Hands on Couchbase Lite
 
 ### Getting started
 
