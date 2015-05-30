@@ -58,7 +58,7 @@ public class List {
         properties.put("created_at", currentTimeString);
         properties.put("members", new ArrayList<String>());
         if (userId != null)
-            properties.put("owner", "profile:" + userId);
+            properties.put("owner", "p:" + userId);
 
         Document document = database.createDocument();
         document.putProperties(properties);
