@@ -10,9 +10,9 @@ This paper will guide you through the steps to build the application and know al
 
 ### Getting started
 
-Clone the ToDoLite [repository](https://github.com/couchbaselabs/ToDoLite-Android) to your computer. Open the app in Android Studio and run it on the simulator. This application has three main screens, the drawer to display the List, the Main screen to display the Tasks in a particular screen and finally the Share screen to share a List with other users.
+Clone the ToDoLite [repository][1] to your computer. Open the app in Android Studio and run it on the simulator. This application has three main screens, the drawer to display the List, the Main screen to display the Tasks in a particular screen and finally the Share screen to share a List with other users.
 
-![](http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif)
+![][image-1]
 
 Every step of the tutorial are saved to a branch on the GitHub repository. If you find yourself in trouble and want to skip a step or catch up, you can just check out to the next branch. For example, to start at `step4`:
 
@@ -34,13 +34,13 @@ The topics below are the fundamental aspects of Couchbase Mobile. If you underst
 
 Throughout this tutorial, we will refer to the logs in LogCat to check that things are working as expected. You can filter logs on the `ToDoLite` Tag name and `com.couchbase.todolite` package name. Create a new Filter Configuration.
 
-![](http://i.gyazo.com/daf65b5f80afe626877348635aefcead.gif)
+![][image-2]
 
 ### ToDoLite Data Model
 
 In ToDoLite, there are 3 types of documents: a profile, a list and a task. The task document holds a reference to the list it belongs to and a list has an owner and a members array.
 
-![](http://f.cl.ly/items/0r2I3p2C0I041G3P0C0C/Model.png)
+![][image-3]
 
 ### STEP 1: Working with HashMap\<String, Object\>
 
@@ -66,23 +66,23 @@ Finally, add a log statement to check that the document was saved.
 
 Run the app and create a couple lists. Nothing will display in the UI just yet but you see the Log statement you added above. In the next section, you will learn how to query those documents.
 
-![](http://i.gyazo.com/332190d6d46fb059d7f0953bb938321f.gif)
+![][image-4]
 
 The solution is on the `workshop/saving_list_document` branch.
 
-### STEP 3: Creating Views
+### STEP 2: Creating Views
 
 Couchbase views enable indexing and querying of data.
 
 The main component of a view is its **map function**. This function is written in the same language as your app—most likely Objective-C or Java—so it’s very flexible. It takes a document's JSON as input, and emits (outputs) any number of key/value pairs to be indexed. The view generates a complete index by calling the map function on every document in the database, and adding each emitted key/value pair to the index, sorted by key.
 
-You will find the `getQuery` method in `List.java` and the objective is to add the missing code to index the List documents. The emit function will emit the List title as key and null as the value.
+You will find the `queryListsInDatabase` method in `List.java` and the objective is to add the missing code to index the List documents. The emit function will emit the List title as key and null as the value.
 
 In sudo code, the map function will look like:
 
 	var type = document.type;
 	if document.type == "list"
-		emit(document.title, null)
+	    emit(document.title, null)
 
 The solution is on the `workshop/create_views` branch.
 
@@ -94,7 +94,7 @@ Now you have created the view to index List documents, you can query it. In `Mai
 
 Iterate on the result and print the title of every List document. If you saved List documents in Step 1, you should now see the titles in LogCat.
 
-![](http://i.gyazo.com/71c39cfdc9ed1aa5c90b1521906a92ef.gif)
+![][image-5]
 
 The solution is on the `workshop/query_views` branch.
 
@@ -108,13 +108,13 @@ We will use the query to populate a Recycler View with those documents. To have 
 
 Open `LiveQueryRecyclerAdapter.java` and let’s discuss the methods in this file:
 
-![](http://cl.ly/image/3w0m352S0k0s/Screen%20Shot%202015-05-27%20at%2021.28.06.png)
+![][image-6]
 
 There are a few things to note here that you will see over and over again when using View Queries with UI classes. The constructor takes a LiveQuery as the second parameter. We subsequently use the `addChangeListener` method to register a listener for changes to the view result (also called an `enumerator`). That’s great because it means the adapter will get notified when it needs to redraw the Recycler View.
 
 Next up, open `ListAdapter.java`:
 
-![](http://cl.ly/image/2b0S2E0v1F1L/Screen%20Shot%202015-05-27%20at%2021.35.30.png)
+![][image-7]
 
 The responsibility of this class is to bind the data from the document to the `viewHolder`. In particular, the `onCreateViewHolder` creates the view holder.
 
@@ -128,11 +128,11 @@ Back in `setupTodoLists` of `MainActivity.java`, we will need to make slight cha
 - create a new `listAdapter` variable of type ListAdapter and pass in the liveQuery object
 - click events on a row are handled by this class, use the `setOnItemClickListener` method passing in `this` as the argument
 
-- use the `setAdapter` method on the `recyclerView` variable to wire up the adapter to the Recycler View 
+- use the `setAdapter` method on the `recyclerView` variable to wire up the adapter to the Recycler View
 
 Run the app on the simulator and start creating ToDo lists, you can see they are persisted and displayed in the Drawer.
 
-![](http://i.gyazo.com/e7faa2e8a395a12bf4ce8315372f8a71.gif)
+![][image-8]
 
 The solution is on the `workshop/persist_task_document` branch.
 
@@ -149,7 +149,7 @@ Instantiate a new HashMap and add the following properties:
 
 So far, we’ve added valid JSON types similarly to Step 1. 
 
-![](http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif)
+![][image-9]
 
 However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document api doesn’t allow to save an attachment. To do so, we’ll have to go one step further and use the underlying Revision api.
 
@@ -165,7 +165,7 @@ To create a Revision, we must first create a Document:
 
 Run the app and you should now be able to attach images to tasks:
 
-![](http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif)
+![][image-10]
 
 The solution is on the `workshop/replication` branch.
 
@@ -173,7 +173,7 @@ The solution is on the `workshop/replication` branch.
 
 The goal is to add the sync feature to our application. The speaker will go through the steps to install Sync Gateway and get it running with Couchbase Server.
 
-Then, we will all attempt to connect to the same instance of Sync Gateway running [here](#).
+Then, we will all attempt to connect to the same instance of Sync Gateway running [here][2].
 
 ## 30 minutes: Hands-on, Replications
 
@@ -244,7 +244,7 @@ That way, we can display all the user Profiles and let the user pick who to shar
 
 Similarly to the LiveQuery for the RecyclerView, the `LiveQueryAdapter.java` serves as the glue between the LiveQuery change events and the ListView api to redraw the results.
 
-![](http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png) 
+![][image-11] 
 
 The UserAdapter class inherits from this class. In the `onCreate` method of the ShareActivity:
 
@@ -278,3 +278,18 @@ The solution is on the `workshop/final` branch.
 ## The End
 
 Congratulations on building the main features of ToDoLite. Now you have a deeper understanding of Couchbase Lite and how to use the sync features with Sync Gateway you can start using the SDKs in your own apps.
+
+[1]:	https://github.com/couchbaselabs/ToDoLite-Android
+[2]:	#
+
+[image-1]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
+[image-2]:	http://i.gyazo.com/daf65b5f80afe626877348635aefcead.gif
+[image-3]:	http://f.cl.ly/items/0r2I3p2C0I041G3P0C0C/Model.png
+[image-4]:	http://i.gyazo.com/332190d6d46fb059d7f0953bb938321f.gif
+[image-5]:	http://i.gyazo.com/71c39cfdc9ed1aa5c90b1521906a92ef.gif
+[image-6]:	http://cl.ly/image/3w0m352S0k0s/Screen%20Shot%202015-05-27%20at%2021.28.06.png
+[image-7]:	http://cl.ly/image/2b0S2E0v1F1L/Screen%20Shot%202015-05-27%20at%2021.35.30.png
+[image-8]:	http://i.gyazo.com/e7faa2e8a395a12bf4ce8315372f8a71.gif
+[image-9]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
+[image-10]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
+[image-11]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
