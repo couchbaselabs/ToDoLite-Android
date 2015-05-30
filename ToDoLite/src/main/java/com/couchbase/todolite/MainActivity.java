@@ -20,7 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.couchbase.lite.CouchbaseLiteException;
-import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.QueryEnumerator;
@@ -52,7 +51,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         String currentListId = preferences.getCurrentListId();
         if (currentListId == null) {
             try {
-                QueryEnumerator enumerator = List.getQuery(application.getDatabase()).run();
+                QueryEnumerator enumerator = List.queryListsInDatabase(application.getDatabase()).run();
                 if (enumerator.getCount() > 0) {
                     currentListId = enumerator.getRow(0).getDocument().getId();
                 }
@@ -210,7 +209,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
 
-        liveQuery = List.getQuery(application.getDatabase()).toLiveQuery();
+        liveQuery = List.queryListsInDatabase(application.getDatabase()).toLiveQuery();
 
         ListAdapter listAdapter = new ListAdapter(this, liveQuery);
         listAdapter.setOnItemClickListener(this);
