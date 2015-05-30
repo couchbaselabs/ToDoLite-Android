@@ -38,7 +38,7 @@ Throughout this tutorial, we will refer to the logs in LogCat to check that thin
 
 ### ToDoLite Data Model
 
-In ToDoLite, there are 3 types of documents: a profile, a list and a task. The task document holds a reference to the list it belongs to and a list has an owner and a members array.
+In ToDoLite, there are 3 types of documents: a profile, a list and a task. The List document has an owner and a members array, the Task document holds a reference to the List it belongs to.
 
 ![][image-3]
 
@@ -46,7 +46,7 @@ In ToDoLite, there are 3 types of documents: a profile, a list and a task. The t
 
 You will learn how to save documents and consequently revisions as well.
 
-In Couchbase Lite a document’s body takes the form of a JSON object - a collection a key/value pairs where the values can be different types of data such as numbers, strings, arrays or even nested objects.
+In Couchbase Lite a document’s body takes the form of a JSON object - a collection of key/value pairs where the values can be different types of data such as numbers, strings, arrays or even nested objects.
 
 Open `List.java` and add the necessary code in the `createNewList` method to persist a List document to a Couchbase Lite database. Instantiate a new HashMap and save a couple of properties:
 - `type` » the document type `list`
