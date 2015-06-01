@@ -59,23 +59,6 @@ public class Application extends android.app.Application {
         }
     }
 
-    public void setupReplication(){
-        URL syncURL = null;
-        try {
-            syncURL = new URL(SYNC_URL);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-        pullReplication = database.createPullReplication(syncURL);
-        pushReplication = database.createPullReplication(syncURL);
-
-        pullReplication.setContinuous(true);
-        pushReplication.setContinuous(true);
-
-        pullReplication.start();
-        pushReplication.start();
-    }
-
     private Replication.ChangeListener getReplicationChangeListener() {
         return new Replication.ChangeListener() {
 
@@ -113,8 +96,6 @@ public class Application extends android.app.Application {
         } catch (CouchbaseLiteException e) {
             Log.d(Application.TAG, "conflict, user already exist.");
         }
-
-        setupReplication();
     }
 
     public Database getDatabase() {
