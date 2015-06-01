@@ -21,9 +21,12 @@ import com.couchbase.lite.Document;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.preferences.ToDoLitePreferences;
+
+import java.util.Iterator;
 
 public class MainActivity extends BaseActivity implements ListAdapter.OnItemClickListener {
 
@@ -82,12 +85,16 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
 
-        liveQuery = List.queryListsInDatabase(application.getDatabase()).toLiveQuery();
-
-        ListAdapter listAdapter = new ListAdapter(this, liveQuery);
-        listAdapter.setOnItemClickListener(this);
-
-        recyclerView.setAdapter(listAdapter);
+        Query query = List.queryListsInDatabase(application.getDatabase());
+        try {
+            QueryEnumerator qe = query.run();
+            Iterator<QueryRow> queryIterator = qe.iterator();
+            while (qe.hasNext()) {
+                Log.d(Application.TAG, qe.next().toString());
+            }
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
     }
 
     void setupDrawer() {
