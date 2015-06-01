@@ -11,6 +11,7 @@ import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.Application;
 
 import java.text.SimpleDateFormat;
@@ -53,12 +54,12 @@ public class List {
         properties.put("title", title);
         properties.put("created_at", currentTimeString);
         properties.put("members", new ArrayList<String>());
-        if (userId != null)
+        if (userId != null) {
             properties.put("owner", "p:" + userId);
-
+        }
         Document document = database.createDocument();
         document.putProperties(properties);
-
+        Log.d(Application.TAG, "Creating List " + document.getProperty("title") + " with user " + document.getProperty("owner") + ".");
         return document;
     }
 

@@ -5,39 +5,25 @@ import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SwitchCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
-import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
-import com.couchbase.todolite.document.Profile;
 import com.couchbase.todolite.preferences.ToDoLitePreferences;
-import com.couchbase.todolite.ui.login.LoginActivity;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 
 public class MainActivity extends BaseActivity implements ListAdapter.OnItemClickListener {
 
@@ -53,6 +39,9 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         if (currentListId == null) {
             try {
                 Query query = List.queryListsInDatabase(application.getDatabase());
+                if (query == null) {
+                    return null;
+                }
                 QueryEnumerator enumerator = query.run();
                 if (enumerator.getCount() > 0) {
                     currentListId = enumerator.getRow(0).getDocument().getId();
@@ -73,27 +62,6 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
 
         Log.d(Application.TAG, "MainActivity State: onCreate()");
 
-        if (preferences.getCurrentUserId() != null) {
-            application.setDatabaseForName(preferences.getCurrentUserId());
-            switch (application.authenticationType) {
-                case BASIC:
-                    application.startReplicationSyncWithBasicAuth(preferences.getCurrentUserId(), preferences.getCurrentUserPassword());
-                    break;
-                case CUSTOM_COOKIE:
-                    application.startReplicationSyncWithCustomCookie(preferences.getCurrentUserId());
-                    break;
-                case FACEBOOK:
-                    application.startReplicationSyncWithFacebookLogin(preferences.getLastReceivedFbAccessToken());
-                    break;
-            }
-        } else if (preferences.getGuestBoolean()) {
-            application.setDatabaseForGuest();
-        } else {
-            Intent i = new Intent(MainActivity.this, LoginActivity.class);
-            startActivityForResult(i, 0);
-            finish();
-        }
-
         setupTodoLists();
         setupDrawer();
 
@@ -106,105 +74,6 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
             displayListContent(currentListId);
         }
 
-        application.getOnSyncProgressChangeObservable().addObserver(new Observer() {
-            @Override
-            public void update(final Observable observable, final Object data) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Application.SyncProgress progress = (Application.SyncProgress) data;
-                        Log.d(TAG, "Sync progress changed.  Completed: %d Total: %d Status: %s", progress.completedCount, progress.totalCount, progress.status);
-
-                        if (progress.status == Replication.ReplicationStatus.REPLICATION_ACTIVE) {
-                            Log.d(TAG, "Turn on progress spinny");
-                            setProgressBarIndeterminateVisibility(true);
-                        } else {
-                            Log.d(TAG, "Turn off progress spinny");
-                            setProgressBarIndeterminateVisibility(false);
-                        }
-                    }
-                });
-            }
-        });
-
-        application.getOnSyncUnauthorizedObservable().addObserver(new Observer() {
-            @Override
-            public void update(Observable observable, Object data) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        Log.d(Application.TAG, "OnSyncUnauthorizedObservable called, show toast");
-
-                        // clear the saved user id, since our session is no longer valid
-                        // and we want to show the login button
-                        preferences.setCurrentUserId(null);
-                        preferences.setCurrentUserPassword(null);
-                        invalidateOptionsMenu();
-
-                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                        finish();
-
-                        String msg = "Sync unable to continue due to invalid session/login";
-                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
-
-                    }
-                });
-
-            }
-        });
-
-    }
-
-    public void onSyncMethodToggleClicked(View view) {
-        SwitchCompat syncToggle = (SwitchCompat) view;
-        if (syncToggle.isChecked()) {
-            // GCM
-            getDeviceToken();
-            application.startContinuousPushAndOneShotPull(preferences.getLastReceivedFbAccessToken());
-        } else {
-            application.startReplicationSyncWithFacebookLogin(preferences.getLastReceivedFbAccessToken());
-        }
-    }
-
-    void getDeviceToken() {
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-
-                GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-
-                try {
-                    String deviceToken = gcm.register("632113338862");
-                    Log.i("GCM", "Device token : " + deviceToken);
-
-                    // update user document
-                    Document profile = Profile.getUserProfileById(application.getDatabase(), preferences.getCurrentUserId());
-                    Map<String, Object> updatedProperties = new HashMap<String, Object>();
-                    updatedProperties.putAll(profile.getProperties());
-
-                    ArrayList<String> deviceTokens = (ArrayList<String>) profile.getProperty("device_tokens");
-                    if (deviceTokens == null) {
-                        deviceTokens = new ArrayList<String>();
-                    }
-
-                    deviceTokens.add(deviceToken);
-                    updatedProperties.put("device_tokens", deviceTokens);
-
-                    try {
-                        profile.putProperties(updatedProperties);
-                    } catch (CouchbaseLiteException e) {
-                        e.printStackTrace();
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        }.execute(null, null, null);
     }
 
     void setupTodoLists() {
@@ -256,7 +125,11 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
 
 
     private void displayListContent(String listDocId) {
-        Document document = application.getDatabase().getDocument(listDocId);
+        Document document = application.getDatabase().getExistingDocument(listDocId);
+        if (document == null){
+            // doc does not exist
+            return;
+        }
         getSupportActionBar().setSubtitle((String) document.getProperty("title"));
 
         FragmentManager fragmentManager = getFragmentManager();
@@ -290,32 +163,6 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
                         intent.putExtra(ShareActivity.SHARE_ACTIVITY_CURRENT_LIST_ID_EXTRA,
                                 getCurrentListId());
                         MainActivity.this.startActivity(intent);
-                        return true;
-                    }
-                });
-                MenuItem logoutMenuItem = menu.add("Logout");
-                logoutMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                logoutMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        Application application = (Application) getApplication();
-                        application.logoutUser();
-                        invalidateOptionsMenu();
-                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
-                        finish();
-                        return true;
-                    }
-                });
-            } else if (preferences.getGuestBoolean()) {
-                MenuItem loginMenuItem = menu.add("Login");
-                loginMenuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-                loginMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        Intent i = new Intent(MainActivity.this, LoginActivity.class);
-                        startActivityForResult(i, 0);
                         return true;
                     }
                 });
