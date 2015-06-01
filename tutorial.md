@@ -362,10 +362,10 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [image-10]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
 [image-11]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
 [image-12]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
-[image-13]: http://cl.ly/image/0W0G1y2I3V0x
-[image-14]: http://cl.ly/image/1x2n29463f1C 
-[image-15]: http://cl.ly/image/0J0s152M3D3V
-[image-16]: http://cl.ly/image/1D3r0e0P1a3K
-[image-17]: http://cl.ly/image/1k1t3R3K2T0K
-[image-18]: http://cl.ly/image/270B0D3h2j1X
-[image-19]: http://cl.ly/image/043Q0M0C0v3w
+[image-13]: http://cl.ly/bTt7/git%20submodule%20git%20init.png
+[image-14]: http://cl.ly/bUlx/To-Do-Lite%20Android%20folder%20content.png
+[image-15]: http://cl.ly/bSYg/file_import_project.png
+[image-16]: http://cl.ly/bTxP/import%20project.png
+[image-17]: http://cl.ly/bU5d/ToLite%20App%20in%20Android.png
+[image-18]: http://cl.ly/bUZe/Run%20Android%20App.png
+[image-19]: http://cl.ly/bRmh/Build%20ToDo-Lite.png
