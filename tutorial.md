@@ -24,36 +24,36 @@ Let us get the ToDoLite [repository][1] cloned to your computer.  First open up 
 
 ## Get the code
 
-```
+\`\`\`
 $ git clone https://github.com/couchbaselabs/ToDoLite-Android.git
 $ cd ToDoLite-Android
 $ git submodule init && git submodule update
-```
+\`\`\`
 
 We also added the submodules required for our project and now we are ready to begin.  You should now be at the step below and see something like:
-![][image-13]
+![][image-1]
 
 The ToDoLite-Android folder now will contain the files below:
-![][image-14]
+![][image-2]
 
-Within Android Studio, click:  File>New>Import Project 
-![][image-15]
+Within Android Studio, click:  File\>New\>Import Project 
+![][image-3]
 
 Locate the ToDoLite-Android folder and import the project:  
-![][image-16]
+![][image-4]
 
 Run the app now to see Couchbase Lite working within the ToDoLite Android app.  Click on the green button to build the app.  
-![][image-19]
+![][image-5]
 
 Choose to launch the app on the device or using the Android emulator:
-![][image-18]
+![][image-6]
 
 When complete, you will have a mobile app that looks like below:
-![][image-17]
+![][image-7]
 
 This application has three main screens, the drawer to display the List, the Main screen to display the Tasks in a particular screen and finally the Share screen to share a List with other users.
 
-![][image-1]
+![][image-8]
 
 Every step of the tutorial are saved to a branch on the GitHub repository. If you find yourself in trouble and want to skip a step or catch up, you can just check out to the next branch. For example, to start checkout on `workshop/starter`:
 
@@ -75,13 +75,13 @@ The topics below are the fundamental aspects of Couchbase Mobile. If you underst
 
 Throughout this tutorial, we will refer to the logs in LogCat to check that things are working as expected. You can filter logs on the `ToDoLite` Tag name and `com.couchbase.todolite` package name. Create a new Filter Configuration.
 
-![][image-2]
+![][image-9]
 
 ### ToDoLite Data Model
 
 In ToDoLite, there are 3 types of documents: a profile, a list and a task. The task document holds a reference to the list it belongs to and a list has an owner and a members array.
 
-![][image-3]
+![][image-10]
 
 ### STEP 1: Create a database
 
@@ -123,7 +123,7 @@ Finally, add a log statement to check that the document was saved.
 
 Run the app and create a couple lists. Nothing will display in the UI just yet but you see the Log statement you added above. In the next section, you will learn how to query those documents.
 
-![][image-5]
+![][image-12]
 
 The solution is on the `workshop/saving_list_document` branch.
 
@@ -151,7 +151,7 @@ Now you have created the view to index List documents, you can query it. In `Mai
 
 Iterate on the result and print the title of every List document. If you saved List documents in Step 1, you should now see the titles in LogCat.
 
-![][image-6]
+![][image-13]
 
 The solution is on the `workshop/query_views` branch.
 
@@ -165,13 +165,13 @@ We will use the query to populate a Recycler View with those documents. To have 
 
 Open `LiveQueryRecyclerAdapter.java` and let’s discuss the methods in this file:
 
-![][image-7]
+![][image-14]
 
 There are a few things to note here that you will see over and over again when using View Queries with UI classes. The constructor takes a LiveQuery as the second parameter. We subsequently use the `addChangeListener` method to register a listener for changes to the view result (also called an `enumerator`). That’s great because it means the adapter will get notified when it needs to redraw the Recycler View.
 
 Next up, open `ListAdapter.java`:
 
-![][image-8]
+![][image-15]
 
 The responsibility of this class is to bind the data from the document to the `viewHolder`. In particular, the `onCreateViewHolder` creates the view holder.
 
@@ -188,7 +188,7 @@ Back in `setupTodoLists` of `MainActivity.java`, we will need to make slight cha
 
 Run the app on the simulator and start creating ToDo lists, you can see they are persisted and displayed in the Drawer.
 
-![][image-9]
+![][image-16]
 
 The solution is on the `workshop/persist_task_document` branch.
 
@@ -207,7 +207,7 @@ So far, we’ve added valid JSON types similarly to Step 1.
 
 	need steps on where to call it
 
-![][image-10]
+![][image-17]
 
 However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document api doesn’t allow to save an attachment. To do so, we’ll have to go one step further and use the underlying Revision api.
 
@@ -223,7 +223,7 @@ To create a Revision, we must first create a Document:
 
 Run the app and you should now be able to attach images to tasks:
 
-![][image-11]
+![][image-18]
 
 The solution is on the `workshop/attachments_and_revisions` branch.
 
@@ -290,7 +290,7 @@ That way, we can display all the user Profiles and let the user pick who to shar
 
 Similarly to the LiveQuery for the RecyclerView, the `LiveQueryAdapter.java` serves as the glue between the LiveQuery change events and the ListView api to redraw the results.
 
-![][image-12] 
+![][image-19] 
 
 The UserAdapter class inherits from this class. In the `onCreate` method of the ShareActivity:
 
@@ -325,32 +325,36 @@ Next time a push replication (or immediately if it’s continuous) occurs, Sync 
 
 The solution is on the `workshop/final` branch.
 
+### Testing the final result
+
+Run the app, you can now see the different users from the `profiles` channel and share lists with other attendees.
+
+The result is on the `workshop/final` branch.
+
 ## The End
 
 Congratulations on building the main features of ToDoLite. Now you have a deeper understanding of Couchbase Lite and how to use the sync features with Sync Gateway you can start using the SDKs in your own apps.
-
-### Optional: Working with the Sync Gateway REST API
 
 [1]:	https://github.com/couchbaselabs/ToDoLite-Android
 [2]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html
 [3]:	#
 
 
-[image-1]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
-[image-2]:	http://i.gyazo.com/daf65b5f80afe626877348635aefcead.gif
-[image-3]:	http://f.cl.ly/items/0r2I3p2C0I041G3P0C0C/Model.png
-[image-5]:	http://i.gyazo.com/332190d6d46fb059d7f0953bb938321f.gif
-[image-6]:	http://i.gyazo.com/71c39cfdc9ed1aa5c90b1521906a92ef.gif
-[image-7]:	http://cl.ly/image/3w0m352S0k0s/Screen%20Shot%202015-05-27%20at%2021.28.06.png
-[image-8]:	http://cl.ly/image/2b0S2E0v1F1L/Screen%20Shot%202015-05-27%20at%2021.35.30.png
-[image-9]:	http://i.gyazo.com/e7faa2e8a395a12bf4ce8315372f8a71.gif
-[image-10]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
-[image-11]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
-[image-12]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
-[image-13]: http://cl.ly/bTt7/git%20submodule%20git%20init.png
-[image-14]: http://cl.ly/bUlx/To-Do-Lite%20Android%20folder%20content.png
-[image-15]: http://cl.ly/bSYg/file_import_project.png
-[image-16]: http://cl.ly/bTxP/import%20project.png
-[image-17]: http://cl.ly/bU5d/ToLite%20App%20in%20Android.png
-[image-18]: http://cl.ly/bUZe/Run%20Android%20App.png
-[image-19]: http://cl.ly/bRmh/Build%20ToDo-Lite.png
+[image-1]:	http://cl.ly/bTt7/git%20submodule%20git%20init.png
+[image-2]:	http://cl.ly/bUlx/To-Do-Lite%20Android%20folder%20content.png
+[image-3]:	http://cl.ly/bSYg/file_import_project.png
+[image-4]:	http://cl.ly/bTxP/import%20project.png
+[image-5]:	http://cl.ly/bRmh/Build%20ToDo-Lite.png
+[image-6]:	http://cl.ly/bUZe/Run%20Android%20App.png
+[image-7]:	http://cl.ly/bU5d/ToLite%20App%20in%20Android.png
+[image-8]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
+[image-9]:	http://i.gyazo.com/daf65b5f80afe626877348635aefcead.gif
+[image-10]:	http://f.cl.ly/items/0r2I3p2C0I041G3P0C0C/Model.png
+[image-12]:	http://i.gyazo.com/332190d6d46fb059d7f0953bb938321f.gif
+[image-13]:	http://i.gyazo.com/71c39cfdc9ed1aa5c90b1521906a92ef.gif
+[image-14]:	http://cl.ly/image/3w0m352S0k0s/Screen%20Shot%202015-05-27%20at%2021.28.06.png
+[image-15]:	http://cl.ly/image/2b0S2E0v1F1L/Screen%20Shot%202015-05-27%20at%2021.35.30.png
+[image-16]:	http://i.gyazo.com/e7faa2e8a395a12bf4ce8315372f8a71.gif
+[image-17]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
+[image-18]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
+[image-19]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
