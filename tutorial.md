@@ -36,11 +36,11 @@ In the source code, you will find comments to help locate where the missing code
 
 The topics below are the fundamental aspects of Couchbase Mobile. If you understand all of them and their purposes, you’ll be in a very good spot after reading this tutorial.
 
-- Document: the primary entity stored in a database
-- Revision: with every change to a document, we get a new revision
-- View: persistent index of documents in a database, which you then query to find data
-- Query: the action of looking up results from a view’s index
-- Attachment: stores data associated with a document, but are not part of the document’s JSON object
+- Document: the primary entity stored in a database.
+- Revision: with every change to a document, we get a new revision.
+- View: persistent index of documents in a database, which you then query to find data.
+- Query: the action of looking up results from a view’s index.
+- Attachment: stores data associated with a document, but are not part of the document’s JSON object.
 
 Throughout this tutorial, we will refer to the logs in LogCat to check that things are working as expected. You can filter logs on the `ToDoLite` Tag name and `com.couchbase.todolite` package name. Create a new Filter Configuration.
 
@@ -61,10 +61,10 @@ You will learn how to save documents and consequently revisions as well.
 In Couchbase Lite a document’s body takes the form of a JSON object - a collection a key/value pairs where the values can be different types of data such as numbers, strings, arrays or even nested objects.
 
 Open `document/List.java` and add the necessary code in the `createNewList` method to persist a List document to a Couchbase Lite database. Instantiate a new HashMap and save a few properties:
-- `type` » the document type `list`
-- `title` » parameter that’s passed to the function
-- `created_at` » the `currentTimeString` variable
-- `members` » an empty `ArrayList`
+- `type` » the document type `list`.
+- `title` » parameter that’s passed to the function.
+- `created_at` » the `currentTimeString` variable.
+- `members` » an empty `ArrayList`.
 
 Create a new document using the `createDocument` method available on the [database](http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html) object.
 
@@ -136,11 +136,10 @@ Now we understand the mechanics from Query » LiveQueryRecyclerAdapter » ListAd
 
 Back in `setupTodoLists` of `MainActivity.java`, we will need to make slight changes to accommodate for a live query instead of a simple query. There is a `liveQuery` property on the Main Activity class that we can use in `setupTodoLists`:
 
-- initialise the liveQuery with the query from Step 4 (all queries have a `toLiveQuery` method we can use to convert the query into a Live Query)
-- create a new `listAdapter` variable of type ListAdapter and pass in the liveQuery object
-- click events on a row are handled by this class, use the `setOnItemClickListener` method passing in `this` as the argument
-
-- use the `setAdapter` method on the `recyclerView` variable to wire up the adapter to the Recycler View
+- Initialise the liveQuery with the query from Step 4 (all queries have a `toLiveQuery` method we can use to convert the query into a Live Query).
+- Create a new `listAdapter` variable of type ListAdapter and pass in the liveQuery object.
+- Click events on a row are handled by this class, use the `setOnItemClickListener` method passing in `this` as the argument.
+- Use the `setAdapter` method on the `recyclerView` variable to wire up the adapter to the Recycler View.
 
 Run the app on the simulator and start creating ToDo lists, you can see they are persisted and displayed in the Drawer.
 
@@ -153,11 +152,11 @@ The solution is on the `workshop/persist_task_document` branch.
 Open `Task.java` and find the `createTask` method. Similarly to Step 1 & 2, complete the body of the function to persist the HashMap of properties in a document.
 
 Instantiate a new HashMap and add the following properties:
-- `type` » the type of document, in this case `task`
-- `title` » the title parameter passed in
-- `checked` » a boolean to track if a task has been completed, the default is `Boolean.FALSE`
-- `created_at` » the `currentTimeString` variable
-- `list_id` » the listId parameter passed in 
+- `type` » the type of document, in this case `task`.
+- `title` » the title parameter passed in.
+- `checked` » a boolean to track if a task has been completed, the default is `Boolean.FALSE`.
+- `created_at` » the `currentTimeString` variable.
+- `list_id` » the listId parameter passed in .
 
 So far, we’ve added valid JSON types similarly to Step 1. 
 
@@ -171,17 +170,17 @@ However, a Task document can have an image. In Couchbase Lite, all binary proper
 
 To create a Revision, we must first create a Document:
 
-- create a new variable named `document` of type Document using the `createDocument` method
-- in turn, create a new variable name revision of type Revision with the document’s `createRevision` method
-- call the `setUserProperties` passing in the properties HashMap. In this context, user properties represent any property except the `_id` and `rev`, those two properties are important to save the revision as we’ll see in a bit. If we called the `setProperties`, the `_id` and `rev` would get deleted in the process
-- if an image was passed in, use the `setAttachment` method on the revision to save it as attachment.
-- call `revision.save()` and this will create the new revision with the image attachment
+- Create a new variable named `document` of type Document using the `createDocument` method.
+- In turn, create a new variable name revision of type Revision with the document’s `createRevision` method.
+- Call the `setUserProperties` passing in the properties HashMap. In this context, user properties represent any property except the `_id` and `rev`, those two properties are important to save the revision as we’ll see in a bit. If we called the `setProperties`, the `_id` and `rev` would get deleted in the process.
+- If an image was passed in, use the `setAttachment` method on the revision to save it as attachment.
+- Call `revision.save()` and this will create the new revision with the image attachment.
 
 Run the app and you should now be able to attach images to tasks:
 
 ![][image-10]
 
-The solution is on the `workshop/attachments_and_revisions ` branch.
+The solution is on the `workshop/attachments_and_revisions` branch.
 
 ## 30 minutes: Sync Gateway in-depth
 
@@ -195,11 +194,11 @@ Then, we will all attempt to connect to the same instance of Sync Gateway runnin
 
 In `MainActivity.java`, create a new method called `startReplications` to create the push/pull replications:
 
-- initialise a new NSURL object. The string url for this tutorial is `http://todolite-syncgateway.cluster.com`
-- initialise the pull replication with the `createPullReplication` method
-- initialise the push replication with the `createPushReplication  ` method
-- set the continuous property to true on both replications
-- call the `start` method on each replication
+- Initialise a new NSURL object. The string url for this tutorial is `http://todolite-syncgateway.cluster.com`.
+- Initialise the pull replication with the `createPullReplication` method.
+- Initialise the push replication with the `createPushReplication  ` method.
+- Set the continuous property to true on both replications.
+- Call the `start` method on each replication.
 
 Finally, call the `startReplications` method in the `onCreate` method.
 
@@ -219,10 +218,10 @@ Create a new user account on the [signup page]().
 
 Back in the iOS app in AppDelegate.m, refactor the `startReplications` method to provide a username and password:
 
-- rename the `startReplications` method to take the login credentials as arguments `startReplicationsWithBasicAuth(String username, String password)`
-- refactor the method to use those credentials to instantiate a new `authenticator` of type Authenticator
-- wire up the authenticator to the replications using the `setAuthenticator` method
-- call the refactored method in the `onCreate` method
+- Rename the `startReplications` method to take the login credentials as arguments `startReplicationsWithBasicAuth(String username, String password)`.
+- Refactor the method to use those credentials to instantiate a new `authenticator` of type Authenticator.
+- Wire up the authenticator to the replications using the `setAuthenticator` method.
+- Call the refactored method in the `onCreate` method.
 
 Notice in LogCat that the documents are now syncing to Sync Gateway.
 
@@ -236,10 +235,10 @@ The solution is on the `workshop/replication_basic_auth` branch.
 
 If you logged into the app with Facebook then the access token should be saved to the SharedPreferences and we can retrieve it using the `preferences.getLastReceivedFbAccessToken()` method.
 
-- rename the `startReplications` method to take the Facebook access token as argument `startReplicationsWithFacebook(String accessToken)`
-- refactor the method to use the access token to instantiate a new `authenticator` of type Authenticator
-- wire up the authenticator to the replications using the `setAuthenticator` method
-- call the refactored method in the `onCreate` method
+- Rename the `startReplications` method to take the Facebook access token as argument `startReplicationsWithFacebook(String accessToken)`.
+- Refactor the method to use the access token to instantiate a new `authenticator` of type Authenticator.
+- Wire up the authenticator to the replications using the `setAuthenticator` method.
+- Call the refactored method in the `onCreate` method.
 
 Notice in LogCat that the documents are now syncing to Sync Gateway.
 
@@ -265,16 +264,16 @@ Similarly to the LiveQuery for the RecyclerView, the `LiveQueryAdapter.java` ser
 
 The UserAdapter class inherits from this class. In the `onCreate` method of the ShareActivity:
 
-- create a new variable called `query` of type Query and the `getQuery`
-- the `getQuery` takes the database and user id as parameters
-- initialise the `mAdapter` property passing in the live query
-- wire up the adapter to the ListView
+- Create a new variable called `query` of type Query and the `getQuery`.
+- The `getQuery` takes the database and user id as parameters.
+- Initialise the `mAdapter` property passing in the live query.
+- Wire up the adapter to the ListView.
 
 The `UserAdapter` is an inner class to serve as the adapter to populate the ListView. But the `getView` method is missing some code to bind the data to the item view.
 
 Where the code is missing add the following:
-- initialise a new `user` variable of type `Document` using the `getItem` method
-- set the text property on the `textView` to the `name` property of the document
+- Initialise a new `user` variable of type `Document` using the `getItem` method.
+- Set the text property on the `textView` to the `name` property of the document.
 
 The `mCurrentList` property of type document refers to the List Document that was selected, check if the user id is in the array. If it’s the case then set the checked property of `checkBox` to true.
 
