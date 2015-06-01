@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.LiveQuery;
+import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
@@ -51,11 +52,14 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         String currentListId = preferences.getCurrentListId();
         if (currentListId == null) {
             try {
-                QueryEnumerator enumerator = List.queryListsInDatabase(application.getDatabase()).run();
+                Query query = List.queryListsInDatabase(application.getDatabase());
+                QueryEnumerator enumerator = query.run();
                 if (enumerator.getCount() > 0) {
                     currentListId = enumerator.getRow(0).getDocument().getId();
                 }
-            } catch (CouchbaseLiteException e) { }
+            } catch (CouchbaseLiteException e) {
+                throw new RuntimeException(e);
+            }
         }
         return currentListId;
     }
