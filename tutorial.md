@@ -369,4 +369,4 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [image-18]: http://cl.ly/bUZe/Run%20Android%20App.png
 [image-19]: http://cl.ly/bRmh/Build%20ToDo-Lite.png
 [image-20]: http://cl.ly/bVhe/application-java%20file.png
-[image-21]: http://cl.ly/document-list.png
+[image-21]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/document-list.png
