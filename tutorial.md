@@ -20,7 +20,38 @@ This paper will guide you through the steps to build the application and know al
 
 ### Getting started
 
-Clone the ToDoLite [repository][1] to your computer. Open the app in Android Studio and run it on the simulator. This application has three main screens, the drawer to display the List, the Main screen to display the Tasks in a particular screen and finally the Share screen to share a List with other users.
+Let us get the ToDoLite [repository][1] cloned to your computer.  First open up Terminal all and run the commands below:  
+
+## Get the code
+
+```
+$ git clone https://github.com/couchbaselabs/ToDoLite-Android.git
+$ cd ToDoLite-Android
+$ git submodule init && git submodule update
+```
+
+We also added the submodules required for our project and now we are ready to begin.  You should now be at the step below and see something like:
+![][image-13]
+
+The ToDoLite-Android folder now will contain the files below:
+![][image-14]
+
+Within Android Studio, click:  File>New>Import Project 
+![][image-15]
+
+Locate the ToDoLite-Android folder and import the project:  
+![][image-16]
+
+Run the app now to see Couchbase Lite working within the ToDoLite Android app.  Click on the green button to build the app.  
+![][image-17]
+
+Choose to launch the app on the device or using the Android emulator:
+![][image-18]
+
+When complete, you will have a mobile app that looks like below:
+![][image-19]
+
+This application has three main screens, the drawer to display the List, the Main screen to display the Tasks in a particular screen and finally the Share screen to share a List with other users.
 
 ![][image-1]
 
@@ -331,3 +362,10 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [image-10]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
 [image-11]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
 [image-12]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
+[image-13]: http://cl.ly/image/0W0G1y2I3V0x
+[image-14]: http://cl.ly/image/1x2n29463f1C 
+[image-15]: http://cl.ly/image/0J0s152M3D3V
+[image-16]: http://cl.ly/image/1D3r0e0P1a3K
+[image-17]: http://cl.ly/image/1k1t3R3K2T0K
+[image-18]: http://cl.ly/image/270B0D3h2j1X
+[image-19]: http://cl.ly/image/043Q0M0C0v3w
