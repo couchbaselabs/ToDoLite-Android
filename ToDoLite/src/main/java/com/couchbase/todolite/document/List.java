@@ -30,10 +30,6 @@ public class List {
         if (view.getMap() == null) {
             Mapper mapper = new Mapper() {
                 public void map(Map<String, Object> document, Emitter emitter) {
-                    String type = (String)document.get("type");
-                    if (DOC_TYPE.equals(type)) {
-                        emitter.emit(document.get("title"), document);
-                    }
                 }
             };
             view.setMap(mapper, "1");
