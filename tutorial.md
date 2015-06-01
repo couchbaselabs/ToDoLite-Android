@@ -83,7 +83,7 @@ In ToDoLite, there are 3 types of documents: a profile, a list and a task. The t
 
 ![][image-3]
 
-### STEP 0: Create a database
+### STEP 1: Create a database
 
 Open `Application.java`, notice there is a property called database of type CBLDatabase. We will use this property throughout the application to get access to our database.
 
@@ -99,7 +99,7 @@ Launch the app and log the properties of the Profile document to LogCat:
 
 ![]()
 
-### STEP 1: Working with HashMap\<String, Object\>
+### STEP 2: Working with HashMap\<String, Object\>
 
 You will learn how to save documents and consequently revisions as well.
 
@@ -127,7 +127,7 @@ Run the app and create a couple lists. Nothing will display in the UI just yet b
 
 The solution is on the `workshop/saving_list_document` branch.
 
-### STEP 2: Creating Views
+### STEP 3: Creating Views
 
 Couchbase views enable indexing and querying of data.
 
@@ -143,7 +143,7 @@ In pseudo code, the map function will look like:
 
 The solution is on the `workshop/create_views` branch.
 
-### STEP 3: Query Views
+### STEP 4: Query Views
 
 A query is the action of looking up results from a view's index. In Couchbase Lite, queries are objects of the Query class. To perform a query you create one of these, customise its properties (such as the key range or the maximum number of rows) and then run it. The result is a QueryEnumerator, which provides a list of QueryRow objects, each one describing one row from the view's index.
 
@@ -157,7 +157,7 @@ The solution is on the `workshop/query_views` branch.
 
 At this point, we could pass the result enumerator to a ArrayAdapter or RecyclerViewAdapter to display the lists on screen. However, we will jump slightly ahead of ourselves and use a Live Query to have Reactive UI capabilities.
 
-### STEP 4: A Recycler View meets a Live Query
+### STEP 5: A Recycler View meets a Live Query
 
 Couchbase Lite provides live queries. Once created, a live query remains active and monitors changes to the view's index, notifying observers whenever the query results change. Live queries are very useful for driving UI components like lists.
 
@@ -177,7 +177,7 @@ The responsibility of this class is to bind the data from the document to the `v
 
 Now we understand the mechanics from Query » LiveQueryRecyclerAdapter » ListAdapter, we can use it to display with the Query we wrote in Step 4.
 
-### STEP 5: Using the ListsAdapter
+### STEP 6: Using the ListsAdapter
 
 Back in `setupTodoLists` of `MainActivity.java`, we will need to make slight changes to accommodate for a live query instead of a simple query. There is a `liveQuery` property on the Main Activity class that we can use in `setupTodoLists`:
 
@@ -192,7 +192,7 @@ Run the app on the simulator and start creating ToDo lists, you can see they are
 
 The solution is on the `workshop/persist_task_document` branch.
 
-### STEP 6: Persist the Task document
+### STEP 7: Persist the Task document
 
 Open `Task.java` and find the `createTask` method. Similarly to Step 1 & 2, complete the body of the function to persist the HashMap of properties in a document.
 
@@ -211,7 +211,7 @@ So far, we’ve added valid JSON types similarly to Step 1.
 
 However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document api doesn’t allow to save an attachment. To do so, we’ll have to go one step further and use the underlying Revision api.
 
-### STEP 7: Working with Attachments and Revisions
+### STEP 8: Working with Attachments and Revisions
 
 To create a Revision, we must first create a Document:
 
@@ -235,7 +235,7 @@ Then, we will all attempt to connect to the same instance of Sync Gateway runnin
 
 ## 30 minutes: Hands-on, Replications
 
-### STEP 8: Replications without authentication
+### STEP 9: Replications without authentication
 
 In `MainActivity.java`, create a new method called `startReplications` to create the push/pull replications:
 
@@ -255,7 +255,7 @@ The solution is on the `workshop/replication` branch.
 
 In the next section, you will add user authentication with Sync Gateway. You can choose to use Facebook Login or Basic Authentication for this workshop.
 
-### STEP 9: Sync Gateway Basic Authentication
+### STEP 10: Sync Gateway Basic Authentication
 
 Currently, the functionality to create a user with a username/password is not implemented in ToDoLite-iOS or ToDoLite-Android. But you can create one using the ToDoLite-Web app, the demo app is available at `http://todolite-web.herokuapp.com` and is connecting to the same Sync Gateway instance.
 
@@ -273,21 +273,6 @@ Notice in LogCat that the documents are now syncing to Sync Gateway.
 	Gif TBA
 
 The solution is on the `workshop/replication_basic_auth` branch.
-
-### STEP 10: Sync Gateway Facebook Authentication
-
-	add paragraph to get the facebook token
-
-If you logged into the app with Facebook then the access token should be saved to the SharedPreferences and we can retrieve it using the `preferences.getLastReceivedFbAccessToken()` method.
-
-- Rename the `startReplications` method to take the Facebook access token as argument `startReplicationsWithFacebook(String accessToken)`.
-- Refactor the method to use the access token to instantiate a new `authenticator` of type Authenticator.
-- Wire up the authenticator to the replications using the `setAuthenticator` method.
-- Call the refactored method in the `onCreate` method.
-
-Notice in LogCat that the documents are now syncing to Sync Gateway.
-
-	Gif TBA
 
 ## 30 minutes: Data orchestration with Sync Gateway
 
