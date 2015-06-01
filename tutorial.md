@@ -20,7 +20,7 @@ This paper will guide you through the steps to build the application and know al
 
 ### Getting started
 
-Let us get the ToDoLite [repository][1] cloned to your computer.  First open up Terminal all and run the commands below:  
+Let us get the ToDoLite [repository][1] cloned to your computer.  First open up the Terminal and run the commands below:  
 
 ## Get the code
 
@@ -43,13 +43,13 @@ Locate the ToDoLite-Android folder and import the project:
 ![][image-16]
 
 Run the app now to see Couchbase Lite working within the ToDoLite Android app.  Click on the green button to build the app.  
-![][image-17]
+![][image-19]
 
 Choose to launch the app on the device or using the Android emulator:
 ![][image-18]
 
 When complete, you will have a mobile app that looks like below:
-![][image-19]
+![][image-17]
 
 This application has three main screens, the drawer to display the List, the Main screen to display the Tasks in a particular screen and finally the Share screen to share a List with other users.
 
