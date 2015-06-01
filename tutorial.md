@@ -112,11 +112,14 @@ Launch the app and log the properties of the Profile document to LogCat:
 
 ### STEP 2: Working with HashMap\<String, Object\>
 
-You will learn how to save documents and consequently revisions as well.
+This section you will learn how to save documents and consequently the document revisions as well.
 
-In Couchbase Lite a document’s body takes the form of a JSON object - a collection a key/value pairs where the values can be different types of data such as numbers, strings, arrays or even nested objects.
+In Couchbase Lite, a document’s body takes the form of a JSON object where the it is a collection a key/value pairs.   The values can be different types of data such as numbers, strings, arrays or even nested objects.
 
-Open `document/List.java` and add the necessary code in the `createNewList` method to persist a List document to a Couchbase Lite database. Instantiate a new HashMap and save a few properties:
+Locate and open the `document/List.java` file over at:  ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/document/List.java  
+![][image-21]
+
+Add the necessary code in the `createNewList` method to persist a List document to a Couchbase Lite database. Instantiate a new HashMap and save a few properties:
 - `type` » the document type `list`.
 - `title` » parameter that’s passed to the function.
 - `created_at` » the `currentTimeString` variable.
@@ -366,3 +369,4 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [image-18]: http://cl.ly/bUZe/Run%20Android%20App.png
 [image-19]: http://cl.ly/bRmh/Build%20ToDo-Lite.png
 [image-20]: http://cl.ly/bVhe/application-java%20file.png
+[image-21]: http://cl.ly/document-list.png
