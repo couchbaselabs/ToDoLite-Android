@@ -44,19 +44,7 @@ public class List {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Calendar calendar = GregorianCalendar.getInstance();
         String currentTimeString = dateFormatter.format(calendar.getTime());
-
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put("type", "list");
-        properties.put("title", title);
-        properties.put("created_at", currentTimeString);
-        properties.put("members", new ArrayList<String>());
-        if (userId != null) {
-            properties.put("owner", "p:" + userId);
-        }
-        Document document = database.createDocument();
-        document.putProperties(properties);
-        Log.d(Application.TAG, "Creating List " + document.getProperty("title") + " with user " + document.getProperty("owner") + ".");
-        return document;
+        return null;
     }
 
     public static void assignOwnerToListsIfNeeded(Database database, Document user)

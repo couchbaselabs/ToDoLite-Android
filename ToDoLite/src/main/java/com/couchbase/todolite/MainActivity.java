@@ -189,7 +189,9 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
                 try {
                     String currentUserId = preferences.getCurrentUserId();
                     Document document = List.createNewList(application.getDatabase(), title, currentUserId);
-                    displayListContent(document.getId());
+                    if (document != null) {
+                        displayListContent(document.getId());
+                    }
                     invalidateOptionsMenu();
                 } catch (CouchbaseLiteException e) {
                     Log.e(Application.TAG, "Cannot create a new list", e);
