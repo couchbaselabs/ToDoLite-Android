@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/updateTask"
+        android:title="@string/action_update"/>
+    <item
+        android:id="@+id/deleteTask"
+        android:title="@string/action_delete"/>
+    <item
+        android:id="@+id/showDocument"
+        android:title="@string/action_show_document"/>
+</menu>

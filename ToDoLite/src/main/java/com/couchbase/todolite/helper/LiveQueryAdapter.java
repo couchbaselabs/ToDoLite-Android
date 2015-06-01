@@ -10,26 +10,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.QueryEnumerator;
-import com.couchbase.lite.util.Log;
-import com.couchbase.todolite.Application;
 
 public class LiveQueryAdapter extends BaseAdapter {
-    private LiveQuery query;
+    private LiveQuery liveQuery;
     private QueryEnumerator enumerator;
     private Context context;
 
-    public LiveQueryAdapter(Context context, LiveQuery query) {
+    public LiveQueryAdapter(Context context, LiveQuery liveQuery) {
         this.context = context;
-        this.query = query;
+        this.liveQuery = liveQuery;
 
-        query.addChangeListener(new LiveQuery.ChangeListener() {
+        this.liveQuery.addChangeListener(new LiveQuery.ChangeListener() {
             @Override
             public void changed(final LiveQuery.ChangeEvent event) {
-                //TODO: Revise
                 ((Activity) LiveQueryAdapter.this.context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -40,7 +36,7 @@ public class LiveQueryAdapter extends BaseAdapter {
             }
         });
 
-        query.start();
+        this.liveQuery.start();
     }
 
     @Override
@@ -64,8 +60,8 @@ public class LiveQueryAdapter extends BaseAdapter {
     }
 
     public void invalidate() {
-        if (query != null)
-            query.stop();
+        if (liveQuery != null)
+            liveQuery.stop();
     }
 
     /*
@@ -78,8 +74,8 @@ public class LiveQueryAdapter extends BaseAdapter {
         ((Activity) LiveQueryAdapter.this.context).runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                query.stop();
-                enumerator = query.getRows();
+                liveQuery.stop();
+                enumerator = liveQuery.getRows();
                 notifyDataSetChanged();
             }
         });

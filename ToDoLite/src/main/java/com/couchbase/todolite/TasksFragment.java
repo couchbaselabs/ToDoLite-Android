@@ -204,11 +204,7 @@ public class TasksFragment extends Fragment {
                         (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     String inputText = text.getText().toString();
                     if (inputText.length() > 0) {
-                        try {
-                            Task.createTask(getDatabase(), inputText, mImageToBeAttached, listId);
-                        } catch (CouchbaseLiteException e) {
-                            Log.e(Application.TAG, "Cannot create new task", e);
-                        }
+                        Task.createTask(getDatabase(), inputText, mImageToBeAttached, listId);
                     }
 
                     // Reset text and current selected photo if available.
@@ -227,10 +223,9 @@ public class TasksFragment extends Fragment {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position,
                                            long id) {
-                PopupMenu popup = new PopupMenu(getActivity(), view);
-                popup.getMenu().add(getResources().getString(R.string.action_update));
-                popup.getMenu().add(getResources().getString(R.string.action_delete));
-                popup.getMenu().add(getResources().getString(R.string.action_show_document));
+                PopupMenu popupMenu = new PopupMenu(getActivity(), view);
+                popupMenu.inflate(R.menu.task);
+                popupMenu.show();
 
                 /*
                 Only show the Resolve conflict tab if there are conflicting revisions
@@ -238,13 +233,13 @@ public class TasksFragment extends Fragment {
                 Document task = (Document) mAdapter.getItem(position - 1);
                 try {
                     if (task.getConflictingRevisions().size() > 1) {
-                        popup.getMenu().add("Resolve Conflict");
+                        popupMenu.getMenu().add("Resolve Conflict");
                     }
                 } catch (CouchbaseLiteException e) {
                     e.printStackTrace();
                 }
 
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getTitle().equals(getResources().getString(R.string.action_delete))) {
@@ -327,7 +322,7 @@ public class TasksFragment extends Fragment {
                     }
                 });
 
-                popup.show();
+                popupMenu.show();
                 return true;
             }
         });

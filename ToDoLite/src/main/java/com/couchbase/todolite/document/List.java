@@ -11,9 +11,6 @@ import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
-import com.couchbase.lite.QueryRow;
-import com.couchbase.lite.Revision;
-import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.Application;
 
@@ -28,7 +25,7 @@ public class List {
     private static final String VIEW_NAME = "lists";
     private static final String DOC_TYPE = "list";
 
-    public static Query getQuery(Database database) {
+    public static Query queryListsInDatabase(Database database) {
         com.couchbase.lite.View view = database.getView(VIEW_NAME);
         if (view.getMap() == null) {
             Mapper mapper = new Mapper() {
@@ -57,18 +54,18 @@ public class List {
         properties.put("title", title);
         properties.put("created_at", currentTimeString);
         properties.put("members", new ArrayList<String>());
-        if (userId != null)
-            properties.put("owner", "profile:" + userId);
-
+        if (userId != null) {
+            properties.put("owner", "p:" + userId);
+        }
         Document document = database.createDocument();
         document.putProperties(properties);
-
+        Log.d(Application.TAG, "Creating List " + document.getProperty("title") + " with user " + document.getProperty("owner") + ".");
         return document;
     }
 
     public static void assignOwnerToListsIfNeeded(Database database, Document user)
             throws CouchbaseLiteException {
-        QueryEnumerator enumerator = getQuery(database).run();
+        QueryEnumerator enumerator = queryListsInDatabase(database).run();
 
         if (enumerator == null)
             return;

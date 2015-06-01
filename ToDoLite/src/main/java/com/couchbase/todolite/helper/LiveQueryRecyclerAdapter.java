@@ -7,19 +7,18 @@ import android.view.ViewGroup;
 
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.QueryEnumerator;
-import com.couchbase.todolite.ListAdapter;
 
 public class LiveQueryRecyclerAdapter<T extends RecyclerView.ViewHolder> extends RecyclerView.Adapter {
 
     public Context context;
-    private LiveQuery query;
+    private LiveQuery liveQuery;
     private QueryEnumerator enumerator;
 
-    public LiveQueryRecyclerAdapter(Context context, LiveQuery query) {
+    public LiveQueryRecyclerAdapter(Context context, LiveQuery liveQuery) {
         this.context = context;
-        this.query = query;
+        this.liveQuery = liveQuery;
 
-        query.addChangeListener(new LiveQuery.ChangeListener() {
+        this.liveQuery.addChangeListener(new LiveQuery.ChangeListener() {
             @Override
             public void changed(final LiveQuery.ChangeEvent event) {
                 ((ActionBarActivity) LiveQueryRecyclerAdapter.this.context).runOnUiThread(new Runnable() {
@@ -31,7 +30,7 @@ public class LiveQueryRecyclerAdapter<T extends RecyclerView.ViewHolder> extends
                 });
             }
         });
-        query.start();
+        this.liveQuery.start();
     }
 
     @Override
