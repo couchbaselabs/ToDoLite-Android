@@ -52,10 +52,6 @@ public class ShareActivity extends BaseActivity {
         mCurrentList = application.getDatabase().getDocument(mCurrentListId);
 
         ListView listView = (ListView) findViewById(R.id.listView);
-
-        Query query = Profile.getQuery(application.getDatabase(), preferences.getCurrentUserId());
-        mAdapter = new UserAdapter(this, query.toLiveQuery());
-        listView.setAdapter(mAdapter);
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -103,16 +99,6 @@ public class ShareActivity extends BaseActivity {
                         getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(R.layout.view_user, null);
             }
-
-            final Document task = (Document) getItem(position);
-
-            TextView text = (TextView) convertView.findViewById(R.id.text);
-            text.setText((String) task.getProperty("name"));
-
-            final Document user = (Document) getItem(position);
-            final CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checked);
-            boolean checked = isMemberOfTheCurrentList(user);
-            checkBox.setChecked(checked);
 
             return convertView;
         }
