@@ -257,16 +257,41 @@ In the next section, you will add user authentication with Sync Gateway. You can
 
 ### STEP 10: Sync Gateway Basic Authentication
 
-Currently, the functionality to create a user with a username/password is not implemented in ToDoLite-iOS or ToDoLite-Android. But you can create one using the ToDoLite-Web app, the demo app is available at `http://todolite-web.herokuapp.com` and is connecting to the same Sync Gateway instance.
+Currently, the functionality to create a user with a username/password is not implemented in ToDoLite-iOS or ToDoLite-Android. 
 
-Create a new user account on the [signup page](). 
+To register users on Sync Gateway, we can use the Admin REST API `_user` endpoint. The Admin REST API is available on post `4985` and can only be accessed on the internal network that Sync Gateway is running on. That’s a good use case for using an app server to proxy the request to Sync Gateway.
 
-Back in the iOS app in AppDelegate.m, refactor the `startReplications` method to provide a username and password:
+For this workshop, the endpoint is `/signup` on port `8080`:
 
-- Rename the `startReplications` method to take the login credentials as arguments `startReplicationsWithBasicAuth(String username, String password)`.
-- Refactor the method to use those credentials to instantiate a new `authenticator` of type Authenticator.
-- Wire up the authenticator to the replications using the `setAuthenticator` method.
-- Call the refactored method in the `onCreate` method.
+	curl -vX POST -H 'Content-Type: application/json' \
+		-d '{"name": "your username", "password": "your password"}' \
+		http://localhost:8080/signup
+
+You should get a 200 OK if the user was created successfully.
+
+	* Hostname was NOT found in DNS cache
+	*   Trying ::1...
+	* Connected to localhost (::1) port 8080 (#0)
+	> POST /signup HTTP/1.1
+	> User-Agent: curl/7.37.1
+	> Host: localhost:8080
+	> Accept: */*
+	> Content-Type: application/json
+	> Content-Length: 49
+	>
+	* upload completely sent off: 49 out of 49 bytes
+	< HTTP/1.1 200 OK
+	< Content-Type: application/json
+	< Date: Mon, 01 Jun 2015 21:57:32 GMT
+	< Content-Length: 0
+	<
+	* Connection #0 to host localhost left intact
+
+Back in the Android app in Application.java, create a new method `setupReplicationWithName` method to provide the username and password:
+
+- this time use the Authenticator class to create an authenticator of type basic auth passing in the name and password
+- wire up the authenticator to the replications using the `setAuthenticator` method
+- call the refactored method in `onCreate`
 
 Notice in LogCat that the documents are now syncing to Sync Gateway.
 
@@ -329,6 +354,8 @@ The solution is on the `workshop/final` branch.
 
 Run the app, you can now see the different users from the `profiles` channel and share lists with other attendees.
 
+![][image-20]
+
 The result is on the `workshop/final` branch.
 
 ## The End
@@ -338,7 +365,6 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [1]:	https://github.com/couchbaselabs/ToDoLite-Android
 [2]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html
 [3]:	#
-
 
 [image-1]:	http://cl.ly/bTt7/git%20submodule%20git%20init.png
 [image-2]:	http://cl.ly/bUlx/To-Do-Lite%20Android%20folder%20content.png
@@ -358,3 +384,4 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [image-17]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
 [image-18]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
 [image-19]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
+[image-20]:	http://i.gyazo.com/80c7dda4371ecf2343d2fe36c59890e1.gif
