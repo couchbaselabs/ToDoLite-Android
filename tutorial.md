@@ -65,32 +65,43 @@ In the source code, you will find comments to help locate where the missing code
 
 ### Introduction
 
-The topics below are the fundamental aspects of Couchbase Mobile. If you understand all of them and their purposes, you’ll be in a very good spot after reading this tutorial.
+The topics below are fundamental aspects for Couchbase Mobile. If you understand all of them and their purposes, you will be in a very good position after reading this tutorial.
 
-- Document: the primary entity stored in a database.
-- Revision: with every change to a document, we get a new revision.
+- Document: the primary entity stored in a database for Couchbase.
+- Revision: with every change to a document, we get a new document revision.
 - View: persistent index of documents in a database, which you then query to find data.
-- Query: the action of looking up results from a view’s index.
+- Query: the action of looking up results from a View’s index.
 - Attachment: stores data associated with a document, but are not part of the document’s JSON object.
 
-Throughout this tutorial, we will refer to the logs in LogCat to check that things are working as expected. You can filter logs on the `ToDoLite` Tag name and `com.couchbase.todolite` package name. Create a new Filter Configuration.
+Throughout this tutorial, we will refer to the logs in LogCat to check everything is working as expected. You can filter logs on the `ToDoLite` Tag name and `com.couchbase.todolite` package name. We create a new Filter Configuration.
 
 ![][image-9]
 
 ### ToDoLite Data Model
 
-In ToDoLite, there are 3 types of documents: a profile, a list and a task. The task document holds a reference to the list it belongs to and a list has an owner and a members array.
+In ToDoLite, there are 3 types of documents: profile, list and task. 
+The task document holds a reference to the list it belongs to and a list has an owner and a members array.
 
 ![][image-10]
 
 ### STEP 1: Create a database
 
-Open `Application.java`, notice there is a property called database of type CBLDatabase. We will use this property throughout the application to get access to our database.
+Open `Application.java` under ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/Application.java
+![][image-20]
 
-In `Application.java`:
+Notice there is a property called database of type CBLDatabase. We will use this property throughout the application to get access to our database.
 
 - set up a new instance of the manager
+```
+private Manager manager;
+manager = new Manager(new AndroidContext(getApplicationContext()), Manager.DEFAULT_OPTIONS);
+```
 - create a new database called name `todos`
+```
+private static final String DATABASE_NAME = "todos";
+private Database database;
+database = manager.getDatabase(DATABASE_NAME);
+```
 - set the user id to your name
 - use the Profile’s createNewProfile class method to create a new Profile document with the user you chose above
 - log the properties of the Profile document to the Console
@@ -101,27 +112,54 @@ Launch the app and log the properties of the Profile document to LogCat:
 
 ### STEP 2: Working with HashMap\<String, Object\>
 
-You will learn how to save documents and consequently revisions as well.
+This section we will learn how to save documents and consequently the document revisions as well.
 
-In Couchbase Lite a document’s body takes the form of a JSON object - a collection a key/value pairs where the values can be different types of data such as numbers, strings, arrays or even nested objects.
+In Couchbase Lite, a document’s body takes the form of a JSON object where the it is a collection a key/value pairs.   The values can be different types of data such as numbers, strings, arrays or even nested objects.
 
-Open `document/List.java` and add the necessary code in the `createNewList` method to persist a List document to a Couchbase Lite database. Instantiate a new HashMap and save a few properties:
-- `type` » the document type `list`.
+Locate and open the `document/List.java` file over at:  
+ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/document/List.java  
+![][image-21]
+
+Add the necessary code within the `createNewList` method to persist a List document to a local Couchbase Lite database.  Instantiate a new HashMap variable by:
+```
+Map<String, Object> properties = new HashMap<String, Object>();
+```
+Now we can save a few properties by calling the put method on our HashMap object: 
+- `type` » the document type `list`
+```
+properties.put("type", "list");
+```
 - `title` » parameter that’s passed to the function.
+```
+properties.put("title", title);
+```
 - `created_at` » the `currentTimeString` variable.
 - `members` » an empty `ArrayList`.
 
 Create a new document using the `createDocument` method available on the [database][2] object.
+```
+Document document = database.createDocument();
+```
+With a new document created, use the [`putProperties` method][3] to pass in the HashMap. This method creates a new revision and persists the document to the local database on the device.
+```
+document.putProperties(properties);
+```
 
-With a new document, use the `putProperties` method passing in the HashMap. This method persists the document to the database.
+Do not forget to return the saved document at the end of the `createNewList` method.
 
-Don’t forget to return the saved document.
+Now let us test if the `createNewList` method is working as expected. 
+Open `MainActivity.java` and navigate to the `createNewList` method. 
+![][image-22]
 
-Now let’s test this method is working as expected. Open `MainActivity.java` and navigate to the `createNewList` method, in the onClick listener call the `List.createNewList` method passing in the database, title and currentUserId.
+Within the onClick listener, call the `List.createNewList` method and pass in the database, title and currentUserId:
+```
+Document document = List.createNewList(application.getDatabase(), title, currentUserId);
+```
 
 Finally, add a log statement to check that the document was saved.
 
-Run the app and create a couple lists. Nothing will display in the UI just yet but you see the Log statement you added above. In the next section, you will learn how to query those documents.
+Run the app and create a couple of lists. Nothing will display in the UI just yet but you see the Log statement you added above. 
+In the next section, we will learn how to query those documents.
 
 ![][image-12]
 
@@ -364,24 +402,28 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 
 [1]:	https://github.com/couchbaselabs/ToDoLite-Android
 [2]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html
-[3]:	#
+[3]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/document/document/index.html#savedrevision-putpropertiesmapstring-object-properties
+[4]: 
 
-[image-1]:	http://cl.ly/bTt7/git%20submodule%20git%20init.png
-[image-2]:	http://cl.ly/bUlx/To-Do-Lite%20Android%20folder%20content.png
-[image-3]:	http://cl.ly/bSYg/file_import_project.png
-[image-4]:	http://cl.ly/bTxP/import%20project.png
-[image-5]:	http://cl.ly/bRmh/Build%20ToDo-Lite.png
-[image-6]:	http://cl.ly/bUZe/Run%20Android%20App.png
-[image-7]:	http://cl.ly/bU5d/ToLite%20App%20in%20Android.png
-[image-8]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
-[image-9]:	http://i.gyazo.com/daf65b5f80afe626877348635aefcead.gif
-[image-10]:	http://f.cl.ly/items/0r2I3p2C0I041G3P0C0C/Model.png
-[image-12]:	http://i.gyazo.com/332190d6d46fb059d7f0953bb938321f.gif
-[image-13]:	http://i.gyazo.com/71c39cfdc9ed1aa5c90b1521906a92ef.gif
-[image-14]:	http://cl.ly/image/3w0m352S0k0s/Screen%20Shot%202015-05-27%20at%2021.28.06.png
-[image-15]:	http://cl.ly/image/2b0S2E0v1F1L/Screen%20Shot%202015-05-27%20at%2021.35.30.png
-[image-16]:	http://i.gyazo.com/e7faa2e8a395a12bf4ce8315372f8a71.gif
-[image-17]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
-[image-18]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
-[image-19]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
-[image-20]:	http://i.gyazo.com/80c7dda4371ecf2343d2fe36c59890e1.gif
+
+[image-1]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
+[image-2]:	http://i.gyazo.com/daf65b5f80afe626877348635aefcead.gif
+[image-3]:	http://f.cl.ly/items/0r2I3p2C0I041G3P0C0C/Model.png
+[image-5]:	http://i.gyazo.com/332190d6d46fb059d7f0953bb938321f.gif
+[image-6]:	http://i.gyazo.com/71c39cfdc9ed1aa5c90b1521906a92ef.gif
+[image-7]:	http://cl.ly/image/3w0m352S0k0s/Screen%20Shot%202015-05-27%20at%2021.28.06.png
+[image-8]:	http://cl.ly/image/2b0S2E0v1F1L/Screen%20Shot%202015-05-27%20at%2021.35.30.png
+[image-9]:	http://i.gyazo.com/e7faa2e8a395a12bf4ce8315372f8a71.gif
+[image-10]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
+[image-11]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
+[image-12]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
+[image-13]: http://cl.ly/bTt7/git%20submodule%20git%20init.png
+[image-14]: http://cl.ly/bUlx/To-Do-Lite%20Android%20folder%20content.png
+[image-15]: http://cl.ly/bSYg/file_import_project.png
+[image-16]: http://cl.ly/bTxP/import%20project.png
+[image-17]: http://cl.ly/bU5d/ToLite%20App%20in%20Android.png
+[image-18]: http://cl.ly/bUZe/Run%20Android%20App.png
+[image-19]: http://cl.ly/bRmh/Build%20ToDo-Lite.png
+[image-20]: http://cl.ly/bVhe/application-java%20file.png
+[image-21]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/document-list.png
+[image-22]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/list-createnewlist.png
