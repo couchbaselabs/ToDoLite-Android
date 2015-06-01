@@ -75,13 +75,6 @@ public class Task {
         UnsavedRevision revision = document.createRevision();
         revision.setUserProperties(properties);
 
-        if (image != null) {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            image.compress(Bitmap.CompressFormat.JPEG, 50, out);
-            ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-            revision.setAttachment("image", "image/jpg", in);
-        }
-
         try {
             revision.save();
         } catch (CouchbaseLiteException e) {
@@ -92,19 +85,6 @@ public class Task {
         Log.d(Application.TAG, "Created doc: %s", document.getId());
 
         return document;
-    }
-
-    public static void attachImage(Document task, Bitmap image) throws CouchbaseLiteException {
-        if (task == null || image == null) return;
-
-        UnsavedRevision revision = task.createRevision();
-
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 50, out);
-        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-        revision.setAttachment("image", "image/jpg", in);
-
-        revision.save();
     }
 
     public static void updateCheckedStatus(Document task, boolean checked)

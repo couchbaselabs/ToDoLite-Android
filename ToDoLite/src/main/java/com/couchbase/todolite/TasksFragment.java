@@ -389,12 +389,6 @@ public class TasksFragment extends Fragment {
 
         if (mImageToBeAttached != null) {
             if (mCurrentTaskToAttachImage != null) {
-                try {
-                    Task.attachImage(mCurrentTaskToAttachImage, mImageToBeAttached);
-                    mImageToBeAttached = null;
-                } catch (CouchbaseLiteException e) {
-                    Log.e(Application.TAG, "Cannot attach an image to a task.", e);
-                }
             } else { // Attach an image for a new task
                 ImageView imageView = (ImageView) getActivity().findViewById(R.id.image);
                 imageView.setImageBitmap(thumbnail);
