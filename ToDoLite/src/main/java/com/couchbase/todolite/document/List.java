@@ -85,19 +85,7 @@ public class List {
 
     public static void addMemberToList(Document list, Document user)
             throws CouchbaseLiteException {
-        Map<String, Object> newProperties = new HashMap<String, Object>();
-        newProperties.putAll(list.getProperties());
 
-        java.util.List<String> members = (java.util.List<String>) newProperties.get("members");
-        if (members == null) members = new ArrayList<String>();
-        members.add(user.getId());
-        newProperties.put("members", members);
-
-        try {
-            list.putProperties(newProperties);
-        } catch (CouchbaseLiteException e) {
-            com.couchbase.lite.util.Log.e(Application.TAG, "Cannot add member to the list", e);
-        }
     }
 
     public static void removeMemberFromList(Document list, Document user)

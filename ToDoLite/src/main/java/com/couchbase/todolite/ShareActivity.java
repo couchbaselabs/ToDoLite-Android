@@ -113,20 +113,6 @@ public class ShareActivity extends BaseActivity {
             final CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checked);
             boolean checked = isMemberOfTheCurrentList(user);
             checkBox.setChecked(checked);
-            checkBox.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    try {
-                        if (checkBox.isChecked()) {
-                            List.addMemberToList(mCurrentList, user);
-                        } else {
-                            List.removeMemberFromList(mCurrentList, user);
-                        }
-                    } catch (CouchbaseLiteException e) {
-                        Log.e(Application.TAG, "Cannot update a member to a list", e);
-                    }
-                }
-            });
 
             return convertView;
         }
