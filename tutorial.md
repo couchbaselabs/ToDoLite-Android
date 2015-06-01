@@ -112,24 +112,37 @@ Launch the app and log the properties of the Profile document to LogCat:
 
 ### STEP 2: Working with HashMap\<String, Object\>
 
-This section you will learn how to save documents and consequently the document revisions as well.
+This section we will learn how to save documents and consequently the document revisions as well.
 
 In Couchbase Lite, a document’s body takes the form of a JSON object where the it is a collection a key/value pairs.   The values can be different types of data such as numbers, strings, arrays or even nested objects.
 
-Locate and open the `document/List.java` file over at:  ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/document/List.java  
+Locate and open the `document/List.java` file over at:  
+ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/document/List.java  
 ![][image-21]
 
-Add the necessary code in the `createNewList` method to persist a List document to a Couchbase Lite database. Instantiate a new HashMap and save a few properties:
-- `type` » the document type `list`.
+Add the necessary code within the `createNewList` method to persist a List document to a local Couchbase Lite database.  Instantiate a new HashMap variable by:
+```
+Map<String, Object> properties = new HashMap<String, Object>();
+```
+Now we can save a few properties by calling the put method on our HashMap object: 
+- `type` » the document type `list`
+```
+properties.put("type", "list");
+```
 - `title` » parameter that’s passed to the function.
+```
+properties.put("title", title);
+```
 - `created_at` » the `currentTimeString` variable.
 - `members` » an empty `ArrayList`.
 
 Create a new document using the `createDocument` method available on the [database][2] object.
+```
+Document document = database.createDocument();
+```
+With a new document created, use the [`putProperties` method][3] to pass in the HashMap. This method creates a new revision and persists the document to the local database on the device.
 
-With a new document, use the `putProperties` method passing in the HashMap. This method persists the document to the database.
-
-Don’t forget to return the saved document.
+Do not forget to return the saved document.
 
 Now let’s test this method is working as expected. Open `MainActivity.java` and navigate to the `createNewList` method, in the onClick listener call the `List.createNewList` method passing in the database, title and currentUserId.
 
@@ -347,7 +360,8 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 
 [1]:	https://github.com/couchbaselabs/ToDoLite-Android
 [2]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html
-[3]:	#
+[3]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/document/document/index.html#savedrevision-putpropertiesmapstring-object-properties
+[4]: 
 
 
 [image-1]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
