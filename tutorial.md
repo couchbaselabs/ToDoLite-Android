@@ -34,13 +34,13 @@ In the source code, you will find comments to help locate where the missing code
 
 ### Introduction
 
-The topics below are the fundamental aspects of Couchbase Mobile. If you understand all of them and their purposes, you’ll be in a very good spot after ready this tutorial.
+The topics below are the fundamental aspects of Couchbase Mobile. If you understand all of them and their purposes, you’ll be in a very good spot after reading this tutorial.
 
-- document: the primary entity stored in a database
-- revision: with every change to a document, we get a new revision
-- view: persistent index of documents in a database, which you then query to find data
-- query: the action of looking up results from a view’s index
-- attachment: stores data associated with a document, but are not part of the document’s JSON object
+- Document: the primary entity stored in a database
+- Revision: with every change to a document, we get a new revision
+- View: persistent index of documents in a database, which you then query to find data
+- Query: the action of looking up results from a view’s index
+- Attachment: stores data associated with a document, but are not part of the document’s JSON object
 
 Throughout this tutorial, we will refer to the logs in LogCat to check that things are working as expected. You can filter logs on the `ToDoLite` Tag name and `com.couchbase.todolite` package name. Create a new Filter Configuration.
 
@@ -60,13 +60,13 @@ You will learn how to save documents and consequently revisions as well.
 
 In Couchbase Lite a document’s body takes the form of a JSON object - a collection a key/value pairs where the values can be different types of data such as numbers, strings, arrays or even nested objects.
 
-Open `List.java` and add the necessary code in the `createNewList` method to persist a List document to a Couchbase Lite database. Instantiate a new HashMap and save a couple of properties:
+Open `document/List.java` and add the necessary code in the `createNewList` method to persist a List document to a Couchbase Lite database. Instantiate a new HashMap and save a few properties:
 - `type` » the document type `list`
 - `title` » parameter that’s passed to the function
 - `created_at` » the `currentTimeString` variable
 - `members` » an empty `ArrayList`
 
-Create a new document using the `createDocument` method available on the database object.
+Create a new document using the `createDocument` method available on the [database](http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html) object.
 
 With a new document, use the `putProperties` method passing in the HashMap. This method persists the document to the database.
 
@@ -90,7 +90,7 @@ The main component of a view is its **map function**. This function is written i
 
 You will find the `queryListsInDatabase` method in `List.java` and the objective is to add the missing code to index the List documents. The emit function will emit the List title as key and null as the value.
 
-In sudo code, the map function will look like:
+In pseudo code, the map function will look like:
 
 	var type = document.type;
 	if document.type == "list"
