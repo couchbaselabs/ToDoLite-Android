@@ -84,17 +84,6 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
-
-        Query query = List.queryListsInDatabase(application.getDatabase());
-        try {
-            QueryEnumerator qe = query.run();
-            Iterator<QueryRow> queryIterator = qe.iterator();
-            while (qe.hasNext()) {
-                Log.d(Application.TAG, qe.next().toString());
-            }
-        } catch (CouchbaseLiteException e) {
-            e.printStackTrace();
-        }
     }
 
     void setupDrawer() {
