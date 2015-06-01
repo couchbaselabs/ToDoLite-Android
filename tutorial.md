@@ -141,14 +141,25 @@ Create a new document using the `createDocument` method available on the [databa
 Document document = database.createDocument();
 ```
 With a new document created, use the [`putProperties` method][3] to pass in the HashMap. This method creates a new revision and persists the document to the local database on the device.
+```
+document.putProperties(properties);
+```
 
-Do not forget to return the saved document.
+Do not forget to return the saved document at the end of the `createNewList` method.
 
-Now let’s test this method is working as expected. Open `MainActivity.java` and navigate to the `createNewList` method, in the onClick listener call the `List.createNewList` method passing in the database, title and currentUserId.
+Now let us test if the `createNewList` method is working as expected. 
+Open `MainActivity.java` and navigate to the `createNewList` method. 
+![][image-22]
+
+Within the onClick listener, call the `List.createNewList` method and pass in the database, title and currentUserId:
+```
+Document document = List.createNewList(application.getDatabase(), title, currentUserId);
+```
 
 Finally, add a log statement to check that the document was saved.
 
-Run the app and create a couple lists. Nothing will display in the UI just yet but you see the Log statement you added above. In the next section, you will learn how to query those documents.
+Run the app and create a couple of lists. Nothing will display in the UI just yet but you see the Log statement you added above. 
+In the next section, we will learn how to query those documents.
 
 ![][image-5]
 
@@ -384,3 +395,4 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [image-19]: http://cl.ly/bRmh/Build%20ToDo-Lite.png
 [image-20]: http://cl.ly/bVhe/application-java%20file.png
 [image-21]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/document-list.png
+[image-22]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/list-createnewlist.png
