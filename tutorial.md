@@ -24,9 +24,9 @@ Clone the ToDoLite [repository][1] to your computer. Open the app in Android Stu
 
 ![][image-1]
 
-Every step of the tutorial are saved to a branch on the GitHub repository. If you find yourself in trouble and want to skip a step or catch up, you can just check out to the next branch. For example, to start at `step4`:
+Every step of the tutorial are saved to a branch on the GitHub repository. If you find yourself in trouble and want to skip a step or catch up, you can just check out to the next branch. For example, to start checkout on `workshop/starter`:
 
-	git checkout workshop/step4
+	git checkout workshop/starter
 
 In the source code, you will find comments to help locate where the missing code is meant to go. For example:
 
@@ -54,6 +54,20 @@ In ToDoLite, there are 3 types of documents: a profile, a list and a task. The t
 
 ### STEP 0: Create a database
 
+Open `Application.java`, notice there is a property called database of type CBLDatabase. We will use this property throughout the application to get access to our database.
+
+In `Application.java`:
+
+- set up a new instance of the manager
+- create a new database called name `todos`
+- set the user id to your name
+- use the Profile’s createNewProfile class method to create a new Profile document with the user you chose above
+- log the properties of the Profile document to the Console
+
+Launch the app and log the properties of the Profile document to LogCat:
+
+![]()
+
 ### STEP 1: Working with HashMap\<String, Object\>
 
 You will learn how to save documents and consequently revisions as well.
@@ -66,7 +80,7 @@ Open `document/List.java` and add the necessary code in the `createNewList` meth
 - `created_at` » the `currentTimeString` variable.
 - `members` » an empty `ArrayList`.
 
-Create a new document using the `createDocument` method available on the [database](http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html) object.
+Create a new document using the `createDocument` method available on the [database][2] object.
 
 With a new document, use the `putProperties` method passing in the HashMap. This method persists the document to the database.
 
@@ -78,7 +92,7 @@ Finally, add a log statement to check that the document was saved.
 
 Run the app and create a couple lists. Nothing will display in the UI just yet but you see the Log statement you added above. In the next section, you will learn how to query those documents.
 
-![][image-4]
+![][image-5]
 
 The solution is on the `workshop/saving_list_document` branch.
 
@@ -106,7 +120,7 @@ Now you have created the view to index List documents, you can query it. In `Mai
 
 Iterate on the result and print the title of every List document. If you saved List documents in Step 1, you should now see the titles in LogCat.
 
-![][image-5]
+![][image-6]
 
 The solution is on the `workshop/query_views` branch.
 
@@ -120,13 +134,13 @@ We will use the query to populate a Recycler View with those documents. To have 
 
 Open `LiveQueryRecyclerAdapter.java` and let’s discuss the methods in this file:
 
-![][image-6]
+![][image-7]
 
 There are a few things to note here that you will see over and over again when using View Queries with UI classes. The constructor takes a LiveQuery as the second parameter. We subsequently use the `addChangeListener` method to register a listener for changes to the view result (also called an `enumerator`). That’s great because it means the adapter will get notified when it needs to redraw the Recycler View.
 
 Next up, open `ListAdapter.java`:
 
-![][image-7]
+![][image-8]
 
 The responsibility of this class is to bind the data from the document to the `viewHolder`. In particular, the `onCreateViewHolder` creates the view holder.
 
@@ -143,7 +157,7 @@ Back in `setupTodoLists` of `MainActivity.java`, we will need to make slight cha
 
 Run the app on the simulator and start creating ToDo lists, you can see they are persisted and displayed in the Drawer.
 
-![][image-8]
+![][image-9]
 
 The solution is on the `workshop/persist_task_document` branch.
 
@@ -162,7 +176,7 @@ So far, we’ve added valid JSON types similarly to Step 1.
 
 	need steps on where to call it
 
-![][image-9]
+![][image-10]
 
 However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document api doesn’t allow to save an attachment. To do so, we’ll have to go one step further and use the underlying Revision api.
 
@@ -178,7 +192,7 @@ To create a Revision, we must first create a Document:
 
 Run the app and you should now be able to attach images to tasks:
 
-![][image-10]
+![][image-11]
 
 The solution is on the `workshop/attachments_and_revisions` branch.
 
@@ -186,7 +200,7 @@ The solution is on the `workshop/attachments_and_revisions` branch.
 
 The goal is to add the sync feature to our application. The speaker will go through the steps to install Sync Gateway and get it running with Couchbase Server.
 
-Then, we will all attempt to connect to the same instance of Sync Gateway running [here][2].
+Then, we will all attempt to connect to the same instance of Sync Gateway running [here][3].
 
 ## 30 minutes: Hands-on, Replications
 
@@ -260,7 +274,7 @@ That way, we can display all the user Profiles and let the user pick who to shar
 
 Similarly to the LiveQuery for the RecyclerView, the `LiveQueryAdapter.java` serves as the glue between the LiveQuery change events and the ListView api to redraw the results.
 
-![][image-11] 
+![][image-12] 
 
 The UserAdapter class inherits from this class. In the `onCreate` method of the ShareActivity:
 
@@ -302,17 +316,18 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 ### Optional: Working with the Sync Gateway REST API
 
 [1]:	https://github.com/couchbaselabs/ToDoLite-Android
-[2]:	#
+[2]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html
+[3]:	#
 
 
 [image-1]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
 [image-2]:	http://i.gyazo.com/daf65b5f80afe626877348635aefcead.gif
 [image-3]:	http://f.cl.ly/items/0r2I3p2C0I041G3P0C0C/Model.png
-[image-4]:	http://i.gyazo.com/332190d6d46fb059d7f0953bb938321f.gif
-[image-5]:	http://i.gyazo.com/71c39cfdc9ed1aa5c90b1521906a92ef.gif
-[image-6]:	http://cl.ly/image/3w0m352S0k0s/Screen%20Shot%202015-05-27%20at%2021.28.06.png
-[image-7]:	http://cl.ly/image/2b0S2E0v1F1L/Screen%20Shot%202015-05-27%20at%2021.35.30.png
-[image-8]:	http://i.gyazo.com/e7faa2e8a395a12bf4ce8315372f8a71.gif
-[image-9]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
-[image-10]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
-[image-11]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
+[image-5]:	http://i.gyazo.com/332190d6d46fb059d7f0953bb938321f.gif
+[image-6]:	http://i.gyazo.com/71c39cfdc9ed1aa5c90b1521906a92ef.gif
+[image-7]:	http://cl.ly/image/3w0m352S0k0s/Screen%20Shot%202015-05-27%20at%2021.28.06.png
+[image-8]:	http://cl.ly/image/2b0S2E0v1F1L/Screen%20Shot%202015-05-27%20at%2021.35.30.png
+[image-9]:	http://i.gyazo.com/e7faa2e8a395a12bf4ce8315372f8a71.gif
+[image-10]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
+[image-11]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
+[image-12]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
