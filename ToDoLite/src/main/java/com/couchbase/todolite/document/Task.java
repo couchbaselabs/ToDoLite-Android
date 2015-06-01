@@ -58,33 +58,10 @@ public class Task {
         return query;
     }
 
-    public static Document createTask(Database database, String title, Bitmap image, String listId) {
+    public static void createTask(Database database, String title, Bitmap image, String listId) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Calendar calendar = GregorianCalendar.getInstance();
         String currentTimeString = dateFormatter.format(calendar.getTime());
-
-        Map<String, Object> properties = new HashMap<String, Object>();
-        properties.put("type", DOC_TYPE);
-        properties.put("title", title);
-        properties.put("checked", Boolean.FALSE);
-        properties.put("created_at", currentTimeString);
-        properties.put("list_id", listId);
-
-        Document document = database.createDocument();
-
-        UnsavedRevision revision = document.createRevision();
-        revision.setUserProperties(properties);
-
-        try {
-            revision.save();
-        } catch (CouchbaseLiteException e) {
-            e.printStackTrace();
-            Log.e(Application.TAG, "Cannot create the revision", e);
-        }
-
-        Log.d(Application.TAG, "Created doc: %s", document.getId());
-
-        return document;
     }
 
     public static void updateCheckedStatus(Document task, boolean checked)
