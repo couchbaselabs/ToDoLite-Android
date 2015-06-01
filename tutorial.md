@@ -65,29 +65,31 @@ In the source code, you will find comments to help locate where the missing code
 
 ### Introduction
 
-The topics below are the fundamental aspects of Couchbase Mobile. If you understand all of them and their purposes, you’ll be in a very good spot after reading this tutorial.
+The topics below are fundamental aspects for Couchbase Mobile. If you understand all of them and their purposes, you will be in a very good position after reading this tutorial.
 
-- Document: the primary entity stored in a database.
-- Revision: with every change to a document, we get a new revision.
+- Document: the primary entity stored in a database for Couchbase.
+- Revision: with every change to a document, we get a new document revision.
 - View: persistent index of documents in a database, which you then query to find data.
-- Query: the action of looking up results from a view’s index.
+- Query: the action of looking up results from a View’s index.
 - Attachment: stores data associated with a document, but are not part of the document’s JSON object.
 
-Throughout this tutorial, we will refer to the logs in LogCat to check that things are working as expected. You can filter logs on the `ToDoLite` Tag name and `com.couchbase.todolite` package name. Create a new Filter Configuration.
+Throughout this tutorial, we will refer to the logs in LogCat to check everything is working as expected. You can filter logs on the `ToDoLite` Tag name and `com.couchbase.todolite` package name. We create a new Filter Configuration.
 
 ![][image-2]
 
 ### ToDoLite Data Model
 
-In ToDoLite, there are 3 types of documents: a profile, a list and a task. The task document holds a reference to the list it belongs to and a list has an owner and a members array.
+In ToDoLite, there are 3 types of documents: profile, list and task. 
+The task document holds a reference to the list it belongs to and a list has an owner and a members array.
 
 ![][image-3]
 
 ### STEP 1: Create a database
 
-Open `Application.java`, notice there is a property called database of type CBLDatabase. We will use this property throughout the application to get access to our database.
+Open `Application.java` under ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/Application.java
+![][image-20]
 
-In `Application.java`:
+Notice there is a property called database of type CBLDatabase. We will use this property throughout the application to get access to our database.
 
 - set up a new instance of the manager
 - create a new database called name `todos`
@@ -354,3 +356,4 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [image-17]: http://cl.ly/bU5d/ToLite%20App%20in%20Android.png
 [image-18]: http://cl.ly/bUZe/Run%20Android%20App.png
 [image-19]: http://cl.ly/bRmh/Build%20ToDo-Lite.png
+[image-20]: http://cl.ly/bVhe/application-java%20file.png
