@@ -76,27 +76,6 @@ public class Application extends android.app.Application {
         pushReplication.start();
     }
 
-    public void setupReplicationWithName(String name, String password) {
-        URL syncURL = null;
-        try {
-            syncURL = new URL(SYNC_URL);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
-        Authenticator authenticator = new BasicAuthenticator(name, password);
-        pullReplication = database.createPullReplication(syncURL);
-        pushReplication = database.createPushReplication(syncURL);
-
-        pullReplication.setAuthenticator(authenticator);
-        pushReplication.setAuthenticator(authenticator);
-
-        pullReplication.setContinuous(true);
-        pushReplication.setContinuous(true);
-
-        pullReplication.start();
-        pushReplication.start();
-    }
-
     private Replication.ChangeListener getReplicationChangeListener() {
         return new Replication.ChangeListener() {
 
@@ -135,7 +114,7 @@ public class Application extends android.app.Application {
             Log.d(Application.TAG, "conflict, user already exist.");
         }
 
-        setupReplicationWithName("oliver", "letmein");
+        setupReplication();
     }
 
     public Database getDatabase() {
