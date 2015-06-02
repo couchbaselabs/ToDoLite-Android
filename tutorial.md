@@ -269,7 +269,7 @@ So far, we have added valid JSON types similarly to Step 1.
 
 ![][image-10]
 
-However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document api doesn’t allow to save an attachment. To do so, we’ll have to go one step further and use the underlying Revision api.
+However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document API does not allow for saving an attachment. To do so, we will have to go one step further and use the underlying Revision API to do so.
 
 Solution is on branch `workshop/persist_task_document`.
 
