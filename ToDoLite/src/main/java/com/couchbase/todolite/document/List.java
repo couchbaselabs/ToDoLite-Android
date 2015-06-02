@@ -30,6 +30,8 @@ public class List {
         if (view.getMap() == null) {
             Mapper mapper = new Mapper() {
                 public void map(Map<String, Object> document, Emitter emitter) {
+                    //TODO WORKSHOP STEP 3: Implement the map function
+
                 }
             };
             view.setMap(mapper, "1");
