@@ -100,7 +100,6 @@ database = manager.getDatabase(DATABASE_NAME);
 
 Launch the app and log the properties of the Profile document to LogCat:
 
-![]()
 
 Solution is on branch `workshop/createDatabase`.
 
