@@ -24,36 +24,36 @@ Let us get the ToDoLite [repository][1] cloned to your computer.  First open up 
 
 ## Get the code
 
-```
+\`\`\`
 $ git clone https://github.com/couchbaselabs/ToDoLite-Android.git
 $ cd ToDoLite-Android
 $ git submodule init && git submodule update
-```
+\`\`\`
 
 We also added the submodules required for our project and now we are ready to begin.  You should now be at the step below and see something like:
-![][image-13]
+![][image-1]
 
 The ToDoLite-Android folder now will contain the files below:
-![][image-14]
+![][image-2]
 
-Within Android Studio, click:  File>New>Import Project 
-![][image-15]
+Within Android Studio, click:  File\>New\>Import Project 
+![][image-3]
 
 Locate the ToDoLite-Android folder and import the project:  
-![][image-16]
+![][image-4]
 
 Run the app now to see Couchbase Lite working within the ToDoLite Android app.  Click on the green button to build the app.  
-![][image-19]
+![][image-5]
 
 Choose to launch the app on the device or using the Android emulator:
-![][image-18]
+![][image-6]
 
 When complete, you will have a mobile app that looks like below:
-![][image-17]
+![][image-7]
 
 This application has three main screens, the drawer to display the List, the Main screen to display the Tasks in a particular screen and finally the Share screen to share a List with other users.
 
-![][image-1]
+![][image-8]
 
 Every step of the tutorial are saved to a branch on the GitHub repository. If you find yourself in trouble and want to skip a step or catch up, you can just check out to the next branch. For example, to start checkout on `workshop/starter`:
 
@@ -75,14 +75,14 @@ The topics below are fundamental aspects for Couchbase Mobile. If you understand
 
 Throughout this tutorial, we will refer to the logs in LogCat to check everything is working as expected. You can filter logs on the `ToDoLite` Tag name and `com.couchbase.todolite` package name. We create a new Filter Configuration.
 
-![][image-2]
+![][image-9]
 
 ### ToDoLite Data Model
 
 In ToDoLite, there are 3 types of documents: profile, list and task. 
 The task document holds a reference to the list it belongs to and a list has an owner and a members array.
 
-![][image-3]
+![][image-10]
 
 ### STEP 1: Create a database
 
@@ -161,7 +161,7 @@ Finally, add a log statement to check that the document was saved.
 Run the app and create a couple of lists. Nothing will display in the UI just yet but you see the Log statement you added above. 
 In the next section, we will learn how to query those documents.
 
-![][image-5]
+![][image-12]
 
 The solution is on the `workshop/saving_list_document` branch.
 
@@ -190,7 +190,7 @@ Now you have created the view to index List documents, you can query it. In `Mai
 
 Iterate on the result and print the title of every List document. If you saved List documents in Step 1, you should now see the titles in LogCat.
 
-![][image-6]
+![][image-13]
 
 The solution is on the `workshop/query_views` branch.
 
@@ -204,13 +204,13 @@ We will use the query to populate a Recycler View with those documents. To have 
 
 Open `LiveQueryRecyclerAdapter.java` and let’s discuss the methods in this file:
 
-![][image-7]
+![][image-14]
 
 There are a few things to note here that you will see over and over again when using View Queries with UI classes. The constructor takes a LiveQuery as the second parameter. We subsequently use the `addChangeListener` method to register a listener for changes to the view result (also called an `enumerator`). That’s great because it means the adapter will get notified when it needs to redraw the Recycler View.
 
 Next up, open `ListAdapter.java`:
 
-![][image-8]
+![][image-15]
 
 The responsibility of this class is to bind the data from the document to the `viewHolder`. In particular, the `onCreateViewHolder` creates the view holder.
 
@@ -227,7 +227,7 @@ Back in `setupTodoLists` of `MainActivity.java`, we will need to make slight cha
 
 Run the app on the simulator and start creating ToDo lists, you can see they are persisted and displayed in the Drawer.
 
-![][image-9]
+![][image-16]
 
 The solution is on the `workshop/persist_task_document` branch.
 
@@ -246,7 +246,7 @@ So far, we’ve added valid JSON types similarly to Step 1.
 
 	need steps on where to call it
 
-![][image-10]
+![][image-17]
 
 However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document api doesn’t allow to save an attachment. To do so, we’ll have to go one step further and use the underlying Revision api.
 
@@ -262,7 +262,7 @@ To create a Revision, we must first create a Document:
 
 Run the app and you should now be able to attach images to tasks:
 
-![][image-11]
+![][image-18]
 
 The solution is on the `workshop/attachments_and_revisions` branch.
 
@@ -296,16 +296,41 @@ In the next section, you will add user authentication with Sync Gateway. You can
 
 ### STEP 10: Sync Gateway Basic Authentication
 
-Currently, the functionality to create a user with a username/password is not implemented in ToDoLite-iOS or ToDoLite-Android. But you can create one using the ToDoLite-Web app, the demo app is available at `http://todolite-web.herokuapp.com` and is connecting to the same Sync Gateway instance.
+Currently, the functionality to create a user with a username/password is not implemented in ToDoLite-iOS or ToDoLite-Android. 
 
-Create a new user account on the [signup page](). 
+To register users on Sync Gateway, we can use the Admin REST API `_user` endpoint. The Admin REST API is available on post `4985` and can only be accessed on the internal network that Sync Gateway is running on. That’s a good use case for using an app server to proxy the request to Sync Gateway.
 
-Back in the iOS app in AppDelegate.m, refactor the `startReplications` method to provide a username and password:
+For this workshop, the endpoint is `/signup` on port `8080`:
 
-- Rename the `startReplications` method to take the login credentials as arguments `startReplicationsWithBasicAuth(String username, String password)`.
-- Refactor the method to use those credentials to instantiate a new `authenticator` of type Authenticator.
-- Wire up the authenticator to the replications using the `setAuthenticator` method.
-- Call the refactored method in the `onCreate` method.
+	curl -vX POST -H 'Content-Type: application/json' \
+		-d '{"name": "your username", "password": "your password"}' \
+		http://localhost:8080/signup
+
+You should get a 200 OK if the user was created successfully.
+
+	* Hostname was NOT found in DNS cache
+	*   Trying ::1...
+	* Connected to localhost (::1) port 8080 (#0)
+	> POST /signup HTTP/1.1
+	> User-Agent: curl/7.37.1
+	> Host: localhost:8080
+	> Accept: */*
+	> Content-Type: application/json
+	> Content-Length: 49
+	>
+	* upload completely sent off: 49 out of 49 bytes
+	< HTTP/1.1 200 OK
+	< Content-Type: application/json
+	< Date: Mon, 01 Jun 2015 21:57:32 GMT
+	< Content-Length: 0
+	<
+	* Connection #0 to host localhost left intact
+
+Back in the Android app in Application.java, create a new method `setupReplicationWithName` method to provide the username and password:
+
+- this time use the Authenticator class to create an authenticator of type basic auth passing in the name and password
+- wire up the authenticator to the replications using the `setAuthenticator` method
+- call the refactored method in `onCreate`
 
 Notice in LogCat that the documents are now syncing to Sync Gateway.
 
@@ -329,7 +354,7 @@ That way, we can display all the user Profiles and let the user pick who to shar
 
 Similarly to the LiveQuery for the RecyclerView, the `LiveQueryAdapter.java` serves as the glue between the LiveQuery change events and the ListView api to redraw the results.
 
-![][image-12] 
+![][image-19] 
 
 The UserAdapter class inherits from this class. In the `onCreate` method of the ShareActivity:
 
@@ -364,11 +389,17 @@ Next time a push replication (or immediately if it’s continuous) occurs, Sync 
 
 The solution is on the `workshop/final` branch.
 
+### Testing the final result
+
+Run the app, you can now see the different users from the `profiles` channel and share lists with other attendees.
+
+![][image-20]
+
+The result is on the `workshop/final` branch.
+
 ## The End
 
 Congratulations on building the main features of ToDoLite. Now you have a deeper understanding of Couchbase Lite and how to use the sync features with Sync Gateway you can start using the SDKs in your own apps.
-
-### Optional: Working with the Sync Gateway REST API
 
 [1]:	https://github.com/couchbaselabs/ToDoLite-Android
 [2]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html
