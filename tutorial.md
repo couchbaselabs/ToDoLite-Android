@@ -6,15 +6,7 @@ This paper will guide you through the steps to build the application and know al
 
 ## 30 minutes: Couchbase Mobile Presentation
 
-	paragraph + link to download the slide deck
-	what's the problem we're fixing
-	what if you had to code that from scratch
-
 ## 30 minutes: Couchbase Lite in-depth
-
-	paragraph + link to download the slide deck
-	show all the steps
-	explain what's a recycler view
 
 ## 90 minutes: Hands on Couchbase Lite
 
