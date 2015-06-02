@@ -44,6 +44,7 @@ public class List {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Calendar calendar = GregorianCalendar.getInstance();
         String currentTimeString = dateFormatter.format(calendar.getTime());
+        // WORKSHOP STEP 2: create and persist the List document
         return null;
     }
 
