@@ -75,6 +75,8 @@ public class Task {
         UnsavedRevision revision = document.createRevision();
         revision.setUserProperties(properties);
 
+        //TODO WORKSHOP STEP 8: Add attachment to the current revision
+
         try {
             revision.save();
         } catch (CouchbaseLiteException e) {
@@ -86,6 +88,8 @@ public class Task {
 
         return document;
     }
+
+    //TODO WORKSHOP STEP 8: Add a static method to attach an image to a Task
 
     public static void updateCheckedStatus(Document task, boolean checked)
             throws CouchbaseLiteException {

@@ -389,6 +389,8 @@ public class TasksFragment extends Fragment {
 
         if (mImageToBeAttached != null) {
             if (mCurrentTaskToAttachImage != null) {
+                //TODO WORKSHOP STEP 8: Use the static method to attach the image to the Task
+
             } else { // Attach an image for a new task
                 ImageView imageView = (ImageView) getActivity().findViewById(R.id.image);
                 imageView.setImageBitmap(thumbnail);
