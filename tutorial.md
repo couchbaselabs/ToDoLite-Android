@@ -186,7 +186,7 @@ The solution is on the `workshop/create_views` branch.
 
 ### STEP 4: Query Views
 
-A query is the action of looking up results from a view's index. In Couchbase Lite, queries are objects of the Query class. To perform a query you create one of these, customise its properties (such as the key range or the maximum number of rows) and then run it. 
+A query is the action of looking up results from a view's index. In Couchbase Lite, queries are objects of the Query class. To perform a query you create one of these, customize its properties (such as the key range or the maximum number of rows) and then run it. 
 The result is a ['QueryEnumerator'][5], which provides a list of QueryRow objects where each one describes one row from the view's index.
 
 Now that you have created the view to index List documents, you can query them accordinly. 
@@ -201,9 +201,7 @@ Iterate on the result and print the title of every List document. If you saved L
 The solution is on the `workshop/query_views` branch.
 
 At this point, we could pass the result enumerator to an ArrayAdapter or RecyclerViewAdapter to display the lists on screen. 
-```
-recyclerView.setAdapter(listAdapter);
-```
+
 However, we will jump slightly ahead of ourselves and use a ['LiveQuery'][6] to have Reactive UI capabilities.
 
 ### STEP 5: A Recycler View meets a Live Query
@@ -216,7 +214,7 @@ Open `LiveQueryRecyclerAdapter.java` and we will discuss the methods in this fil
 
 ![][image-7]
 
-There are a few things to note here that you will see over and over again when using View Queries with UI classes. The constructor takes a LiveQuery as the second parameter. We subsequently use the `addChangeListener` method to register a listener for changes to the view result (also called an `enumerator`). That’s great because it means the adapter will get notified when it needs to redraw the Recycler View.
+There are a few things to note here that you will see over and over again when using View Queries with UI classes. The constructor takes a LiveQuery as the second parameter. We subsequently use the `addChangeListener` method to register a listener for changes to the view result (also called an `enumerator`). That is great because it means the adapter will get notified when it needs to redraw the Recycler View.
 
 Next up, open `ListAdapter.java`:
 
@@ -224,18 +222,31 @@ Next up, open `ListAdapter.java`:
 
 The responsibility of this class is to bind the data from the document to the `viewHolder`. In particular, the `onCreateViewHolder` creates the view holder.
 
-Now we understand the mechanics from Query » LiveQueryRecyclerAdapter » ListAdapter, we can use it to display with the Query we wrote in Step 4.
+Now we understand the mechanics from Query » LiveQueryRecyclerAdapter » ListAdapter, we can use the technique to display the Query we wrote in Step 4.
 
 ### STEP 6: Using the ListsAdapter
 
-Back in `setupTodoLists` of `MainActivity.java`, we will need to make slight changes to accommodate for a live query instead of a simple query. There is a `liveQuery` property on the Main Activity class that we can use in `setupTodoLists`:
+Back in `setupTodoLists` method of `MainActivity.java`, we will need to make slight changes to accommodate for a live query instead of a simple query. There is a `liveQuery` property on the Main Activity class that we can use in `setupTodoLists`:
 
-- Initialise the liveQuery with the query from Step 4 (all queries have a `toLiveQuery` method we can use to convert the query into a Live Query).
+- Initialise the liveQuery with the query from Step 4 
+(all queries have a `toLiveQuery` method we can use to convert the query into a Live Query).
+```
+liveQuery = List.queryListsInDatabase(application.getDatabase()).toLiveQuery();
+```
 - Create a new `listAdapter` variable of type ListAdapter and pass in the liveQuery object.
+```
+ListAdapter listAdapter = new ListAdapter(this, liveQuery);
+```
 - Click events on a row are handled by this class, use the `setOnItemClickListener` method passing in `this` as the argument.
+```
+listAdapter.setOnItemClickListener(this);
+```
 - Use the `setAdapter` method on the `recyclerView` variable to wire up the adapter to the Recycler View.
+```
+recyclerView.setAdapter(listAdapter);
+```
 
-Run the app on the simulator and start creating ToDo lists, you can see they are persisted and displayed in the Drawer.
+Run the app on the emulator and start creating ToDo lists.  You can see the crated items are now persisted and displayed in the Drawer.
 
 ![][image-9]
 
