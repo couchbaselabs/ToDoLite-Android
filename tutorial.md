@@ -315,8 +315,8 @@ In `MainActivity.java`, create a new method called `startReplications` to create
 ```
 private static final String SYNC_URL = "Couchbase Cluster";
 ```
-- Initialize the pull replication with the `createPullReplication` method.
-- Initialize the push replication with the `createPushReplication  ` method.
+- Initialize the pull replication with the [`createPullReplication`][13] method.
+- Initialize the push replication with the [`createPushReplication`][14] method.
 - Set the continuous property to true on both replications.
 - Call the `start` method on each replication.
 
@@ -443,6 +443,8 @@ Congratulations on building the main features of Couchbase Mobile with the ToDoL
 [10]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/query/index.html
 [11]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/attachment/index.html
 [12]:   http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/revision/index.html
+[13]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/database/index.html#replication-createpullreplicationurl-url
+[14]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/database/index.html#replication-createpushreplicationurl-url
 
 
 [image-1]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
