@@ -85,6 +85,7 @@ public class List {
 
     public static void addMemberToList(Document list, Document user)
             throws CouchbaseLiteException {
+        //TODO WORKSHOP STEP 12: implement the method
 
     }
 

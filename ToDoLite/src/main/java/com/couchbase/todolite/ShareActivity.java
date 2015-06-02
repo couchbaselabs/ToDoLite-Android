@@ -113,7 +113,7 @@ public class ShareActivity extends BaseActivity {
             final CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checked);
             boolean checked = isMemberOfTheCurrentList(user);
             checkBox.setChecked(checked);
-
+            //TODO WORKSHOP STEP 12: add a click listener to add or remove a user to a list
             return convertView;
         }
     }
