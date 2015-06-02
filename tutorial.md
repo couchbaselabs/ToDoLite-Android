@@ -53,9 +53,9 @@ This application has three main screens, the drawer to display the List, the Mai
 
 ![][image-1]
 
-Every step of the tutorial are saved to a branch on the GitHub repository. If you find yourself in trouble and want to skip a step or catch up, you can just check out to the next branch. For example, to start checkout on `workshop/starter`:
+Every step of the tutorial are saved to a branch on the GitHub repository. If you find yourself in trouble and want to skip a step or catch up, you can just check out to the next branch. For example, to start checkout on `workshop/initial_state`:
 
-	git checkout workshop/starter
+	git checkout workshop/initial_state
 
 In the source code, you will find comments to help locate where the missing code is meant to go. For example:
 
@@ -84,6 +84,8 @@ The task document holds a reference to the list it belongs to and a list has an 
 
 ### STEP 1: Create a database
 
+Make sure you are on branch `initial_state`.
+
 Open `Application.java` under ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/Application.java
 ![][image-20]
 
@@ -107,6 +109,8 @@ database = manager.getDatabase(DATABASE_NAME);
 Launch the app and log the properties of the Profile document to LogCat:
 
 ![]()
+
+Solution is on branch `workshop/createDatabase`.
 
 ### STEP 2: Working with HashMap\<String, Object\>
 
@@ -227,7 +231,7 @@ Run the app on the simulator and start creating ToDo lists, you can see they are
 
 ![][image-9]
 
-The solution is on the `workshop/persist_task_document` branch.
+Solution is on branch `workshop/using_list_adapter`.
 
 ### STEP 7: Persist the Task document
 
@@ -247,6 +251,8 @@ So far, we’ve added valid JSON types similarly to Step 1.
 ![][image-10]
 
 However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document api doesn’t allow to save an attachment. To do so, we’ll have to go one step further and use the underlying Revision api.
+
+Solution is on branch `workshop/persist_task_document`.
 
 ### STEP 8: Working with Attachments and Revisions
 
