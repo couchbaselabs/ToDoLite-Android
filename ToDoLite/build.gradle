@@ -18,8 +18,8 @@ android {
     buildTypes {
 
         debug {
-            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://demo-mobile.couchbase.com/todolite/\""
-            buildConfigField 'String', 'SYNC_URL_HTTPS', "\"https://demo-mobile.couchbase.com/todolite/\""
+            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://demo.couchbasemobile.com:4984/todolite/\""
+            buildConfigField 'String', 'SYNC_URL_HTTPS', "\"\""
         }
 
         dev.initWith(buildTypes.debug)
@@ -31,8 +31,8 @@ android {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
 
-            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://demo-mobile.couchbase.com/todolite/\""
-            buildConfigField 'String', 'SYNC_URL_HTTPS', "\"https://demo-mobile.couchbase.com/todolite/\""
+            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://demo.couchbasemobile.com:4984/todolite/\""
+            buildConfigField 'String', 'SYNC_URL_HTTPS', "\"\""
         }
 
     }
