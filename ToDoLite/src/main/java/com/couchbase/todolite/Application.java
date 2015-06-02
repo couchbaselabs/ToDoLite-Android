@@ -76,6 +76,8 @@ public class Application extends android.app.Application {
         pushReplication.start();
     }
 
+    //TODO WORKSHOP STEP 10: add a setupReplicationWithName method
+
     private Replication.ChangeListener getReplicationChangeListener() {
         return new Replication.ChangeListener() {
 
@@ -113,7 +115,7 @@ public class Application extends android.app.Application {
         } catch (CouchbaseLiteException e) {
             Log.d(Application.TAG, "conflict, user already exist.");
         }
-
+        //TODO WORKSHOP STEP 10: call setupReplicationWithName instead
         setupReplication();
     }
 
