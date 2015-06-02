@@ -84,7 +84,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
-
+        // WORKSHOP STEP 6: Use a Live Query and List adapter instead
         Query query = List.queryListsInDatabase(application.getDatabase());
         try {
             QueryEnumerator qe = query.run();
