@@ -330,8 +330,6 @@ Finally, call the `startReplications` method in the `onCreate` method.
 
 If you run the app, nothing is saved to the Sync Gateway. That’s because we disabled the GUEST account in the configuration file.  You can see the 401 HTTP errors in the console:
 
-	GIF TBA
-
 The solution is on the `workshop/replication` branch.
 
 In the next section, you will add user authentication with Sync Gateway. You can choose to use Facebook Login or Basic Authentication for this workshop.
@@ -340,7 +338,7 @@ In the next section, you will add user authentication with Sync Gateway. You can
 
 Currently, the functionality to create a user with a username/password is not implemented in ToDoLite-iOS or ToDoLite-Android. 
 
-To register users on Sync Gateway, we can use the Admin REST API `_user` endpoint. The Admin REST API is available on post `4985` and can only be accessed on the internal network that Sync Gateway is running on. That’s a good use case for using an app server to proxy the request to Sync Gateway.
+To register users on Sync Gateway, we can use the Admin REST API `_user` endpoint. The Admin REST API is available on port `4985` and can only be accessed on the internal network that Sync Gateway is running on. That’s a good use case for using an app server to proxy the request to Sync Gateway.
 
 For this workshop, the endpoint is `/signup` on port `8080`:
 
@@ -376,13 +374,12 @@ Back in the Android app in Application.java, create a new method `setupReplicati
 
 Notice in LogCat that the documents are now syncing to Sync Gateway.
 
-	GIF TBA
 
 The solution is on the `workshop/replication_basic_auth` branch.
 
 ## 30 minutes: Data orchestration with Sync Gateway
 
-So far, you’ve learned how to use the Replication and Authenticator classes to authenticate as a user with Sync Gateway. The last component we will discuss is the Sync Function. It’s part of Sync Gateway’s configuration file and defines the access rules for users.
+So far, you have learned how to use the Replication and Authenticator classes to authenticate as a user with Sync Gateway. The last component we will discuss is the Sync Function. It’s part of Sync Gateway’s configuration file and defines the access rules for users.
 
 ## 30 minutes: Hands-on, Data orchestration
 
@@ -413,7 +410,6 @@ Where the code is missing add the following:
 
 The `mCurrentList` property of type document refers to the List Document that was selected, check if the user id is in the array. If it’s the case then set the checked property of `checkBox` to true.
 
-	GIF to show the checkmark displaying
 
 The solution is on the `populating_list_items` branch.
 
@@ -426,8 +422,6 @@ Setup the listener class inline and call the `List.addMemberToList` and `List.re
 Both methods update the List document according to wether it should add or remove the User from the members array property.
 
 Next time a push replication (or immediately if it’s continuous) occurs, Sync Gateway will update the access to this List channel to reflect the change in the data model.
-
-	Gif to show the properties updating
 
 The solution is on the `workshop/final` branch.
 
