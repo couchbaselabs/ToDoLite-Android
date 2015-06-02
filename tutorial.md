@@ -269,7 +269,7 @@ So far, we have added valid JSON types similarly to Step 1.
 
 ![][image-10]
 
-However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document API does not allow for saving an attachment. To do so, we will have to go one step further and use the underlying Revision API to do so.
+However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document API does not allow for saving an attachment. To do so, we will have to go one step further and use the underlying ['Revision' API][12] to do so.
 
 Solution is on branch `workshop/persist_task_document`.
 
@@ -311,7 +311,7 @@ Finally, call the `startReplications` method in the `onCreate` method.
 
 If you run the app, nothing is saved to the Sync Gateway. That’s because we disabled the GUEST account in the configuration file.  You can see the 401 HTTP errors in the console:
 
-	Gif TBA
+	GIF TBA
 
 The solution is on the `workshop/replication` branch.
 
@@ -357,7 +357,7 @@ Back in the Android app in Application.java, create a new method `setupReplicati
 
 Notice in LogCat that the documents are now syncing to Sync Gateway.
 
-	Gif TBA
+	GIF TBA
 
 The solution is on the `workshop/replication_basic_auth` branch.
 
@@ -394,7 +394,7 @@ Where the code is missing add the following:
 
 The `mCurrentList` property of type document refers to the List Document that was selected, check if the user id is in the array. If it’s the case then set the checked property of `checkBox` to true.
 
-	Gif to show the checkmark displaying
+	GIF to show the checkmark displaying
 
 The solution is on the `populating_list_items` branch.
 
@@ -435,6 +435,7 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [9]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/view/index.html
 [10]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/query/index.html
 [11]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/attachment/index.html
+[12]:   http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/revision/index.html
 
 
 [image-1]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
