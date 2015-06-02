@@ -312,7 +312,7 @@ Then, we will all attempt to connect to the same instance of Sync Gateway runnin
 
 In `MainActivity.java`, create a new method called `startReplications` to create the push/pull replications:
 
-- Initialize a new NSURL object. The string url for this tutorial is `http://todolite-syncgateway.cluster.com`.
+- Initialize a new NSURL object. The string URL for this tutorial is `http://todolite-syncgateway.cluster.com`
 - Initialize the pull replication with the `createPullReplication` method.
 - Initialize the push replication with the `createPushReplication  ` method.
 - Set the continuous property to true on both replications.
@@ -330,7 +330,7 @@ In the next section, you will add user authentication with Sync Gateway. You can
 
 Currently, the functionality to create a user with a username/password is not implemented in ToDoLite-iOS or ToDoLite-Android. 
 
-To register users on Sync Gateway, we can use the Admin REST API `_user` endpoint. The Admin REST API is available on port `4985` and can only be accessed on the internal network that Sync Gateway is running on. That’s a good use case for using an app server to proxy the request to Sync Gateway.
+To register users on Sync Gateway, we can use the Admin REST API `_user` endpoint. The Admin REST API is available on port `4985` and can only be accessed on the internal network that Sync Gateway is running on. That is a good use case for using an app server to proxy the request to Sync Gateway.
 
 For this workshop, the endpoint is `/signup` on port `8080`:
 
@@ -371,7 +371,7 @@ The solution is on the `workshop/replication_basic_auth` branch.
 
 ## 30 minutes: Data orchestration with Sync Gateway
 
-So far, you have learned how to use the Replication and Authenticator classes to authenticate as a user with Sync Gateway. The last component we will discuss is the Sync Function. It’s part of Sync Gateway’s configuration file and defines the access rules for users.
+So far, you have learned how to use the Replication and Authenticator classes to authenticate as a user with Sync Gateway. The last component we will discuss is the Sync Function. This is part of Sync Gateway’s configuration file and defines the access rules for users.
 
 ## 30 minutes: Hands-on, Data orchestration
 
@@ -383,7 +383,7 @@ All Profile documents are mapped to the `profiles` channel and all users have ac
 
 That way, we can display all the user Profiles and let the user pick who to share the List with. Remember earlier we used a Recycler View to display a Query result. This time, we will use the ListView api.
 
-Similarly to the LiveQuery for the RecyclerView, the `LiveQueryAdapter.java` serves as the glue between the LiveQuery change events and the ListView api to redraw the results.
+Similarly to the LiveQuery for the RecyclerView, the `LiveQueryAdapter.java` serves as the glue between the LiveQuery change events and the ListView API to redraw the results.
 
 ![][image-12] 
 
