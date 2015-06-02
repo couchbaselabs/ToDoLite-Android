@@ -167,11 +167,12 @@ The solution is on the `workshop/saving_list_document` branch.
 
 ### STEP 3: Creating Views
 
-Couchbase views enable indexing and querying of data.
+Couchbase ['Views'][4] enable indexing and querying of data within out document database.
 
-The main component of a view is its **map function**. This function is written in the same language as your app—most likely Objective-C or Java—so it’s very flexible. It takes a document's JSON as input, and emits (outputs) any number of key/value pairs to be indexed. The view generates a complete index by calling the map function on every document in the database, and adding each emitted key/value pair to the index, sorted by key.
+The main component of a view is its **map function**. This function is written in the same native language as your app which most likely Objective-C or Java therefore it is very flexible. The map function takes a document's JSON as input and emits (outputs) any number of key/value pairs to be indexed. The view generates a complete index by calling the map function on every document in the database and adding each emitted key/value pair to the index, sorted by the key.
 
 You will find the `queryListsInDatabase` method in `List.java` and the objective is to add the missing code to index the List documents. The emit function will emit the List title as key and null as the value.
+![][image-23]
 
 In pseudo code, the map function will look like:
 
@@ -372,7 +373,8 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [1]:	https://github.com/couchbaselabs/ToDoLite-Android
 [2]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html
 [3]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/document/document/index.html#savedrevision-putpropertiesmapstring-object-properties
-[4]: 
+[4]: 	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/view/index.html
+[5]: 
 
 
 [image-1]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
@@ -390,9 +392,11 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [image-14]: http://cl.ly/bUlx/To-Do-Lite%20Android%20folder%20content.png
 [image-15]: http://cl.ly/bSYg/file_import_project.png
 [image-16]: http://cl.ly/bTxP/import%20project.png
-[image-17]: http://cl.ly/bU5d/ToLite%20App%20in%20Android.png
+[image-x]: http://cl.ly/bU5d/ToLite%20App%20in%20Android.png
+[image-17]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/ToDoLite.png
 [image-18]: http://cl.ly/bUZe/Run%20Android%20App.png
 [image-19]: http://cl.ly/bRmh/Build%20ToDo-Lite.png
 [image-20]: http://cl.ly/bVhe/application-java%20file.png
 [image-21]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/document-list.png
 [image-22]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/list-createnewlist.png
+[image-23]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/QueryListinDatabase.png
