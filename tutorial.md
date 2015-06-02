@@ -256,16 +256,35 @@ Solution is on branch `workshop/using_list_adapter`.
 
 Open `Task.java` and find the `createTask` method. Similarly to Step 1 & 2, complete the body of the function to persist the HashMap of properties in a document.
 
-Instantiate a new HashMap and add the following properties:
+Instantiate a new HashMap variable:
+```
+Map<String, Object> properties = new HashMap<String, Object>();
+```
+Then add the following properties:
 - `type` » the type of document, in this case `task`.
+```
+properties.put("type", DOC_TYPE);
+```
 - `title` » the title parameter passed in.
+```
+properties.put("title", title);
+```
 - `checked` » a boolean to track if a task has been completed, the default is `Boolean.FALSE`.
+```
+properties.put("checked", Boolean.FALSE);
+```
 - `created_at` » the `currentTimeString` variable.
-- `list_id` » the listId parameter passed in .
+```
+properties.put("created_at", currentTimeString);
+```
+- `list_id` » the listId parameter passed in.
+```
+properties.put("list_id", listId);
+```
 
 So far, we have added valid JSON types similarly to Step 1. 
 
-	need steps on where to call it
+	//need steps on where to call it
 
 ![][image-10]
 
@@ -291,7 +310,7 @@ The solution is on the `workshop/attachments_and_revisions` branch.
 
 ## 30 minutes: Sync Gateway in-depth
 
-The goal is to add the sync feature to our application. The speaker will go through the steps to install Sync Gateway and get it running with Couchbase Server.
+The goal is to add the sync feature to our application. We will go through the steps to install Sync Gateway and get it running with Couchbase Server.
 
 Then, we will all attempt to connect to the same instance of Sync Gateway running [here][3].
 
