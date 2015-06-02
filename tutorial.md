@@ -311,7 +311,10 @@ Then, we will all attempt to connect to the same instance of Sync Gateway runnin
 
 In `MainActivity.java`, create a new method called `startReplications` to create the push/pull replications:
 
-- Initialize a new NSURL object. The string URL for this tutorial is `http://todolite-syncgateway.cluster.com`
+- Initialize a new 'SYNC_URL' object. The string URL for this tutorial is `http://todolite-syncgateway.cluster.com`
+```
+private static final String SYNC_URL = "Couchbase Cluster";
+```
 - Initialize the pull replication with the `createPullReplication` method.
 - Initialize the push replication with the `createPushReplication  ` method.
 - Set the continuous property to true on both replications.
