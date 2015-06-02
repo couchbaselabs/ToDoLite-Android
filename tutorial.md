@@ -325,7 +325,6 @@ private static final String SYNC_URL = "Couchbase Cluster";
 - Call the `start` method on each replication.
 
 Finally, call the `startReplications` method in the `onCreate` method in the 'Application.java' file:
-![][image-25]
 
 If you run the app, nothing is saved to the Sync Gateway. That’s because we disabled the GUEST account in the configuration file.  You can see the 401 HTTP errors in the console:
 
@@ -366,6 +365,7 @@ You should get a 200 OK if the user was created successfully.
 	* Connection #0 to host localhost left intact
 
 Back in the Android app in Application.java, create a new method `setupReplicationWithName` method to provide the username and password:
+![][image-25]
 
 - this time use the Authenticator class to create an authenticator of type basic auth passing in the name and password
 - wire up the authenticator to the replications using the `setAuthenticator` method
