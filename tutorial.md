@@ -318,6 +318,10 @@ private static final String SYNC_URL = "Couchbase Cluster";
 - Initialize the pull replication with the [`createPullReplication`][13] method.
 - Initialize the push replication with the [`createPushReplication`][14] method.
 - Set the continuous property to true on both replications.
+```       
+    pullReplication.setContinuous(true);
+    pushReplication.setContinuous(true);
+```
 - Call the `start` method on each replication.
 
 Finally, call the `startReplications` method in the `onCreate` method.
