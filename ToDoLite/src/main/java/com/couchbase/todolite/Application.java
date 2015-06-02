@@ -82,6 +82,8 @@ public class Application extends android.app.Application {
         };
     }
 
+    //TODO WORKSHOP STEP 9: add a setupReplication method
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -96,6 +98,7 @@ public class Application extends android.app.Application {
         } catch (CouchbaseLiteException e) {
             Log.d(Application.TAG, "conflict, user already exist.");
         }
+        //TODO WORKSHOP STEP 9: call the setupReplication method
     }
 
     public Database getDatabase() {
