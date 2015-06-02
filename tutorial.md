@@ -324,7 +324,8 @@ private static final String SYNC_URL = "Couchbase Cluster";
 ```
 - Call the `start` method on each replication.
 
-Finally, call the `startReplications` method in the `onCreate` method.
+Finally, call the `startReplications` method in the `onCreate` method in the 'Application.java' file:
+![][image-25]
 
 If you run the app, nothing is saved to the Sync Gateway. That’s because we disabled the GUEST account in the configuration file.  You can see the 401 HTTP errors in the console:
 
@@ -475,3 +476,4 @@ Congratulations on building the main features of Couchbase Mobile with the ToDoL
 [image-22]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/list-createnewlist.png
 [image-23]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/QueryListinDatabase.png
 [image-24]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/setuptodolists.png
+[image-25]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/StartreplicationwithName.png
