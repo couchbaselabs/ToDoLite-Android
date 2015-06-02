@@ -182,25 +182,33 @@ The solution is on the `workshop/create_views` branch.
 
 ### STEP 4: Query Views
 
-A query is the action of looking up results from a view's index. In Couchbase Lite, queries are objects of the Query class. To perform a query you create one of these, customise its properties (such as the key range or the maximum number of rows) and then run it. The result is a QueryEnumerator, which provides a list of QueryRow objects, each one describing one row from the view's index.
+A query is the action of looking up results from a view's index. In Couchbase Lite, queries are objects of the Query class. To perform a query you create one of these, customise its properties (such as the key range or the maximum number of rows) and then run it. 
+The result is a ['QueryEnumerator'][5], which provides a list of QueryRow objects where each one describes one row from the view's index.
 
-Now you have created the view to index List documents, you can query it. In `MainActivity.java`, add the missing code to the `setupTodoLists` method to run the query.
+Now that you have created the view to index List documents, you can query them accordinly. 
+In `MainActivity.java`, add the missing code to the `setupTodoLists` method to run the query.
+![][image-24]
 
-Iterate on the result and print the title of every List document. If you saved List documents in Step 1, you should now see the titles in LogCat.
+
+Iterate on the result and print the title of every List document. If you saved List documents in Step 1, you should now see the titles in the LogCat.
 
 ![][image-6]
 
 The solution is on the `workshop/query_views` branch.
 
-At this point, we could pass the result enumerator to a ArrayAdapter or RecyclerViewAdapter to display the lists on screen. However, we will jump slightly ahead of ourselves and use a Live Query to have Reactive UI capabilities.
+At this point, we could pass the result enumerator to an ArrayAdapter or RecyclerViewAdapter to display the lists on screen. 
+```
+recyclerView.setAdapter(listAdapter);
+```
+However, we will jump slightly ahead of ourselves and use a ['LiveQuery'][6] to have Reactive UI capabilities.
 
 ### STEP 5: A Recycler View meets a Live Query
 
-Couchbase Lite provides live queries. Once created, a live query remains active and monitors changes to the view's index, notifying observers whenever the query results change. Live queries are very useful for driving UI components like lists.
+Couchbase Lite provides live queries. Once created, a live query remains active and monitors for changes to the view's index thus notifying observers whenever the query results change. Live queries are very useful for driving UI components like lists.
 
 We will use the query to populate a Recycler View with those documents. To have the UI automatically update when new documents are indexed, we will use a Live Query.
 
-Open `LiveQueryRecyclerAdapter.java` and let’s discuss the methods in this file:
+Open `LiveQueryRecyclerAdapter.java` and we will discuss the methods in this file:
 
 ![][image-7]
 
@@ -403,7 +411,8 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [2]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html
 [3]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/document/document/index.html#savedrevision-putpropertiesmapstring-object-properties
 [4]: 	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/view/index.html
-
+[5]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/query/index.html
+[6]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/query/live-query/index.html
 
 [image-1]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
 [image-2]:	http://i.gyazo.com/daf65b5f80afe626877348635aefcead.gif
@@ -428,3 +437,4 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [image-21]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/document-list.png
 [image-22]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/list-createnewlist.png
 [image-23]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/QueryListinDatabase.png
+[image-24]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/setuptodolists.png
