@@ -228,7 +228,7 @@ Now we understand the mechanics from Query » LiveQueryRecyclerAdapter » ListAd
 
 Back in `setupTodoLists` method of `MainActivity.java`, we will need to make slight changes to accommodate for a live query instead of a simple query. There is a `liveQuery` property on the Main Activity class that we can use in `setupTodoLists`:
 
-- Initialise the liveQuery with the query from Step 4 
+- Initialize the liveQuery with the query from Step 4 
 (all queries have a `toLiveQuery` method we can use to convert the query into a Live Query).
 ```
 liveQuery = List.queryListsInDatabase(application.getDatabase()).toLiveQuery();
@@ -246,7 +246,7 @@ listAdapter.setOnItemClickListener(this);
 recyclerView.setAdapter(listAdapter);
 ```
 
-Run the app on the emulator and start creating ToDo lists.  You can see the crated items are now persisted and displayed in the Drawer.
+Run the app on the emulator and start creating ToDo lists.  You can see the created items are now persisted and displayed in the Drawer.
 
 ![][image-9]
 
@@ -263,7 +263,7 @@ Instantiate a new HashMap and add the following properties:
 - `created_at` » the `currentTimeString` variable.
 - `list_id` » the listId parameter passed in .
 
-So far, we’ve added valid JSON types similarly to Step 1. 
+So far, we have added valid JSON types similarly to Step 1. 
 
 	need steps on where to call it
 
@@ -301,9 +301,9 @@ Then, we will all attempt to connect to the same instance of Sync Gateway runnin
 
 In `MainActivity.java`, create a new method called `startReplications` to create the push/pull replications:
 
-- Initialise a new NSURL object. The string url for this tutorial is `http://todolite-syncgateway.cluster.com`.
-- Initialise the pull replication with the `createPullReplication` method.
-- Initialise the push replication with the `createPushReplication  ` method.
+- Initialize a new NSURL object. The string url for this tutorial is `http://todolite-syncgateway.cluster.com`.
+- Initialize the pull replication with the `createPullReplication` method.
+- Initialize the push replication with the `createPushReplication  ` method.
 - Set the continuous property to true on both replications.
 - Call the `start` method on each replication.
 
@@ -383,13 +383,13 @@ The UserAdapter class inherits from this class. In the `onCreate` method of the 
 
 - Create a new variable called `query` of type Query and the `getQuery`.
 - The `getQuery` takes the database and user id as parameters.
-- Initialise the `mAdapter` property passing in the live query.
+- Initialize the `mAdapter` property passing in the live query.
 - Wire up the adapter to the ListView.
 
 The `UserAdapter` is an inner class to serve as the adapter to populate the ListView. But the `getView` method is missing some code to bind the data to the item view.
 
 Where the code is missing add the following:
-- Initialise a new `user` variable of type `Document` using the `getItem` method.
+- Initialize a new `user` variable of type `Document` using the `getItem` method.
 - Set the text property on the `textView` to the `name` property of the document.
 
 The `mCurrentList` property of type document refers to the List Document that was selected, check if the user id is in the array. If it’s the case then set the checked property of `checkBox` to true.
