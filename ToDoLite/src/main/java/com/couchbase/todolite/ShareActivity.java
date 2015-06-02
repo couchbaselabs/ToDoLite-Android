@@ -52,6 +52,7 @@ public class ShareActivity extends BaseActivity {
         mCurrentList = application.getDatabase().getDocument(mCurrentListId);
 
         ListView listView = (ListView) findViewById(R.id.listView);
+        //TODO WORKSHOP STEP 11: Query the users, use the UserAdapter and assign it to the view
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -99,6 +100,7 @@ public class ShareActivity extends BaseActivity {
                         getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(R.layout.view_user, null);
             }
+            //TODO WORKSHOP STEP 11: Display the user element in the list
 
             return convertView;
         }
