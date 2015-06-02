@@ -35,6 +35,7 @@ public class Application extends android.app.Application {
     private ToDoLitePreferences preferences;
 
     private void initDatabase() {
+        //TODO WORKSHOP STEP 1: initialize the database
     }
 
     private Replication.ChangeListener getReplicationChangeListener() {
