@@ -65,11 +65,11 @@ In the source code, you will find comments to help locate where the missing code
 
 The topics below are fundamental aspects for Couchbase Mobile. If you understand all of them and their purposes, you will be in a very good position after reading this tutorial.
 
-- Document: the primary entity stored in a database for Couchbase.
-- Revision: with every change to a document, we get a new document revision.
-- View: persistent index of documents in a database, which you then query to find data.
-- Query: the action of looking up results from a View’s index.
-- Attachment: stores data associated with a document, but are not part of the document’s JSON object.
+- [Document][7]: the primary entity stored in a database for Couchbase.
+- [Revision][8]: with every change to a document, we get a new document revision.
+- [View][9]: persistent index of documents in a database, which you then query to find data.
+- [Query][10]: the action of looking up results from a View’s index.
+- [Attachment][11]: stores data associated with a document, but are not part of the document’s JSON object.
 
 Throughout this tutorial, we will refer to the logs in LogCat to check everything is working as expected. You can filter logs on the `ToDoLite` Tag name and `com.couchbase.todolite` package name. We create a new Filter Configuration.
 
@@ -430,6 +430,12 @@ Congratulations on building the main features of ToDoLite. Now you have a deeper
 [4]: 	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/view/index.html
 [5]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/query/index.html
 [6]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/query/live-query/index.html
+[7]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/document/index.html
+[8]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/revision/index.html
+[9]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/view/index.html
+[10]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/query/index.html
+[11]:	http://developer.couchbase.com/mobile/develop/guides/couchbase-lite/native-api/attachment/index.html
+
 
 [image-1]:	http://i.gyazo.com/a5d4774bdc4ed02afe77f3841be5db18.gif
 [image-2]:	http://i.gyazo.com/daf65b5f80afe626877348635aefcead.gif
