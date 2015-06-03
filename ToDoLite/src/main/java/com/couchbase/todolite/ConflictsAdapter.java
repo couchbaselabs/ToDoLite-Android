@@ -58,7 +58,7 @@ public class ConflictsAdapter extends ArrayAdapter<SavedRevision> {
 
         String userId = (String) task.getProperty("user_id");
         Application application = (Application) getContext().getApplicationContext();
-        Document profile = (Document) application.getDatabase().getDocument("profile:" + userId);
+        Document profile = (Document) application.getDatabase().getDocument("p:" + userId);
 
         tvUserId.setText("Edited by: " + ((String) profile.getProperty("name")));
 
