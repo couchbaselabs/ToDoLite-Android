@@ -4,9 +4,9 @@ In this workshop, you will learn how to use Couchbase Lite along with Sync Gatew
 
 This paper will guide you through the steps to build the application and know all the tips and tricks to building apps with a great look and feel using Couchbase Mobile.
 
-## 30 minutes: Couchbase Mobile Presentation
+## Couchbase Lite in-depth Presentation
 
-## 30 minutes: Couchbase Lite in-depth
+See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-workshop-couchbase-lite-indepth).
 
 ## 90 minutes: Hands on Couchbase Lite
 
@@ -299,11 +299,13 @@ Run the app and you should now be able to attach images to tasks:
 
 The solution is on the `workshop/attachments_and_revisions` branch.
 
-## 30 minutes: Sync Gateway in-depth
+## Sync Gateway in-depth Presentation
 
 The goal is to add the sync feature to our application. We will go through the steps to install Sync Gateway and get it running with Couchbase Server.
 
 Then, we will all attempt to connect to the same instance of Sync Gateway running [here][3].
+
+See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-workshop-sync-gateway-indepth-couchbase-connect-2015).
 
 ## 30 minutes: Hands-on, Replications
 
@@ -368,9 +370,11 @@ Notice in LogCat that the documents are now syncing to Sync Gateway.
 
 The solution is on the `workshop/replication_basic_auth` branch.
 
-## 30 minutes: Data orchestration with Sync Gateway
+## Data orchestration with Sync Gateway
 
 So far, you have learned how to use the Replication and Authenticator classes to authenticate as a user with Sync Gateway. The last component we will discuss is the Sync Function. This is part of Sync Gateway’s configuration file and defines the access rules for users.
+
+See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-workshop-data-orchestration).
 
 ## 30 minutes: Hands-on, Data orchestration
 
