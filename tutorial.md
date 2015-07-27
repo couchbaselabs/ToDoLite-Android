@@ -3,7 +3,7 @@
 In this workshop, you will learn how to use Couchbase Lite along with Sync Gateway to build a ToDos app with a guest account mode, offline-first capabilities and syncing different ToDo lists to Sync Gateway.
 
 This paper will guide you through the steps to build the application and know all the tips and tricks to building apps with a great look and feel using Couchbase Mobile for your Android project.
-![][image-25=240x240]
+![][image-25 =240x240]
 
 ## Couchbase Lite in-depth Presentation
 
