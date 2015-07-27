@@ -108,7 +108,7 @@ Solution is on branch `workshop/createDatabase`.
 
 This section we will learn how to save documents and consequently the document revisions as well.
 
-In Couchbase Lite, a document’s body takes the form of a JSON object where the it is a collection a key/value pairs.   The values can be different types of data such as numbers, strings, arrays or even nested objects.
+In Couchbase Lite, a Document’s body takes the form of a JSON object where the data is a collection of key/value pairs.   The values can be different types of data such as numbers, strings, arrays or even nested objects.
 
 Locate and open the `document/List.java` file over at:  
 ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/document/List.java  
