@@ -132,6 +132,9 @@ properties.put("title", title);
 - `created_at` » the `currentTimeString` variable.
 - `members` » an empty `ArrayList` data type.
 
+Add the owner key and value: 
+- `owner` » the `userId` variable.
+
 Create a new document using the `createDocument` method available on the [database][2] object.
 ```
 Document document = database.createDocument();
