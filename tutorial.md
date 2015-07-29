@@ -238,7 +238,7 @@ Next up, open `ListAdapter.java`:
 
 The responsibility of this class is to bind the data from the document to the `viewHolder`. In particular, the `onCreateViewHolder` creates the view holder.
 
-Now we understand the mechanics from Query » LiveQueryRecyclerAdapter » ListAdapter, we can use the technique to display the Query we wrote in Step 4.
+Now we understand the mechanics from Query » LiveQueryRecyclerAdapter » ListAdapter, we can use the technique to display the Query we wrote in Step 4 next.
 
 ### STEP 6: Using the ListsAdapter
 
