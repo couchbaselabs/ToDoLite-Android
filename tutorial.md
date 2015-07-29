@@ -178,6 +178,14 @@ In pseudo code, the map function will look like:
 	var type = document.type;
 	if document.type == "list"
 	    emit(document.title, null)
+	    
+- Create a 'Mapper' instance and emit the title of the document within the 'map' function of the instance:
+```
+        String type = (String)document.get("type");
+        if (DOC_TYPE.equals(type)) {
+        	emitter.emit(document.get("title"), document);
+        }
+```
 
 The solution is on the `workshop/create_views` branch.
 
