@@ -191,13 +191,23 @@ The solution is on the `workshop/create_views` branch.
 
 ### STEP 4: Query Views
 
-A query is the action of looking up results from a view's index. In Couchbase Lite, queries are objects of the Query class. To perform a query you create one of these, customize its properties (such as the key range or the maximum number of rows) and then run it. 
+A query is the action of looking up results from a view's index. In Couchbase Lite, queries are objects of the Query class. To perform a query you create a Query instance, customize its properties (such as the key range or the maximum number of rows) and then run it. 
 The result is a ['QueryEnumerator'][5], which provides a list of QueryRow objects where each one describes one row from the view's index.
 
-Now that you have created the view to index List documents, you can query them accordinly. 
-In `MainActivity.java`, add the missing code to the `setupTodoLists` method to run the query.
-![][image-24]
-
+Now that you have created the view to index List documents, you can query them accordingly. 
+In `MainActivity.java`, add the missing code to the `setupTodoLists` method to run the query:
+```
+        Query query = List.queryListsInDatabase(application.getDatabase());
+        try {
+            QueryEnumerator qe = query.run();
+            Iterator<QueryRow> queryIterator = qe.iterator();
+            while (qe.hasNext()) {
+                Log.d(Application.TAG, qe.next().toString());
+            }
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
+```
 
 Iterate on the result and print the title of every List document. If you saved List documents in Step 1, you should now see the titles in the LogCat.
 
@@ -208,6 +218,7 @@ The solution is on the `workshop/query_views` branch.
 At this point, we could pass the result enumerator to an ArrayAdapter or RecyclerViewAdapter to display the lists on screen. 
 
 However, we will jump slightly ahead of ourselves and use a ['LiveQuery'][6] to have Reactive UI capabilities.
+![][image-24]
 
 ### STEP 5: A Recycler View meets a Live Query
 
