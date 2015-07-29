@@ -99,7 +99,7 @@ database = manager.getDatabase(DATABASE_NAME);
 Within the 'onCreate()' method:
 
 - set the user id to your name in the 'setCurrentUserId()'
-- use the Profile’s createNewProfile class method to create a new Profile document with the user you chose above
+- use the Profile’s `createProfile` class method to create a new Profile document with the user you chose above
 - log the properties of the Profile document to the Console
 
 Launch the app and log the properties of the Profile document to LogCat:
