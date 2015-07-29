@@ -128,7 +128,7 @@ properties.put("type", "list");
 properties.put("title", title);
 ```
 - `created_at` » the `currentTimeString` variable.
-- `members` » an empty `ArrayList`.
+- `members` » an empty `ArrayList` data type.
 
 Create a new document using the `createDocument` method available on the [database][2] object.
 ```
