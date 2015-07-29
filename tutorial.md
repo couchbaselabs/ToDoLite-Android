@@ -226,7 +226,7 @@ Couchbase Lite provides live queries. Once created, a live query remains active 
 
 We will use the query to populate a Recycler View with those documents. To have the UI automatically update when new documents are indexed, we will use a Live Query.
 
-Open `LiveQueryRecyclerAdapter.java` and we will discuss the methods in this file:
+Open `LiveQueryRecyclerAdapter.java` from the 'java>com.couchbase.todolite>helper'and we will discuss the methods in this file:
 
 ![][image-7]
 
