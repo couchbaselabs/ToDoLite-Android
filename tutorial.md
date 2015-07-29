@@ -95,7 +95,9 @@ private static final String DATABASE_NAME = "todos";
 private Database database;
 database = manager.getDatabase(DATABASE_NAME);
 ```
-- set the user id to your name
+Within the 'onCreate()' method:
+
+- set the user id to your name in the 'setCurrentUserId()'
 - use the Profile’s createNewProfile class method to create a new Profile document with the user you chose above
 - log the properties of the Profile document to the Console
 
