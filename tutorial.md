@@ -302,7 +302,7 @@ So far, we have added valid JSON types similarly to Step 1.
 
 	//need steps on where to call it
 
-Return a document instance. 
+Change the function return type to be a Document type and return a document instance. 
 
 ![][image-10]
 
