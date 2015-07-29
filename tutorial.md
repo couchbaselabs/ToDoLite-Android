@@ -315,10 +315,11 @@ Solution is on branch `workshop/persist_task_document`.
 To create a Revision, we must first create a Document:
 
 - Create a new variable named `document` of type Document using the `createDocument` method.
-- In turn, create a new variable name revision of type Revision with the document’s `createRevision` method.
+- In turn, create a new variable named `revision` of type Revision with the document’s `createRevision` method.
 - Call the `setUserProperties` passing in the properties HashMap. In this context, user properties represent any property except the `_id` and `rev`, those two properties are important to save the revision as we’ll see in a bit. If we called the `setProperties`, the `_id` and `rev` would get deleted in the process.
 - If an image was passed in, use the `setAttachment` method on the revision to save it as attachment.
 - Call `revision.save()` and this will create the new revision with the image attachment.
+![][image-26]
 
 Run the app and you should now be able to attach images to tasks:
 
@@ -498,3 +499,4 @@ Congratulations on building the main features of Couchbase Mobile with the ToDoL
 [image-23]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/QueryListinDatabase.png
 [image-24]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/setuptodolists.png
 [image-25]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/Android/Screen%20Shot%202015-07-27%20at%203.45.16%20PM.png
+[image-26]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/Working%20with%20Attachments%20and%20Revisions.png
