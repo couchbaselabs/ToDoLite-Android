@@ -342,7 +342,7 @@ See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-worksh
 
 In `MainActivity.java`, create a new method called `startReplications` to create the push/pull replications:
 
-- Initialize a new NSURL object. The string URL for this tutorial is `http://todolite-syncgateway.cluster.com`
+- Initialize a new URL object. The string URL for this tutorial is `http://todolite-syncgateway.cluster.com`
 - Initialize the pull replication with the `createPullReplication` method.
 - Initialize the push replication with the `createPushReplication  ` method.
 - Set the continuous property to true on both replications.
