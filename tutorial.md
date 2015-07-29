@@ -77,7 +77,8 @@ The task document holds a reference to the list it belongs to and a list has an 
 
 ### STEP 1: Create a database
 
-Make sure you are on branch `workshop/initial_state`. Right now the App is not compiling. This is normal and you just need to initialize the Database.
+Make sure you are on branch `workshop/initial_state`. Within Terminal, type in: 'git checkout workshop/initial_state' 
+Right now the App is not compiling. This is normal and you just need to initialize the Database.
 
 Within Android Studio, open `Application.java` under ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/Application.java
 ![][image-20]
