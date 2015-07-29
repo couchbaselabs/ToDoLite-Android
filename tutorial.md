@@ -168,7 +168,7 @@ The solution is on the `workshop/saving_list_document` branch.
 
 Couchbase ['Views'][4] enable indexing and querying of data within our document database.
 
-The main component of a view is its **map function**. This function is written in the same native language as your app which most likely Objective-C or Java therefore it is very flexible. The map function takes a document's JSON as input and emits (outputs) any number of key/value pairs to be indexed. The view generates a complete index by calling the map function on every document in the database and adding each emitted key/value pair to the index, sorted by the key.
+The main component of a view is its **map function**. This function is written in the same native language as your mobile app which most likely in Objective-C or Java and therefore it is very flexible. The map function takes a document's JSON as input and emits (outputs) any number of key/value pairs to be indexed. The view generates a complete index by calling the map function on every document in the database and adding each emitted key/value pair to the index, sorted then by the key itself.
 
 You will find the `queryListsInDatabase` method in `List.java` and the objective is to add the missing code to index the List documents. The emit function will emit the List title as key and null as the value.
 ![][image-23]
