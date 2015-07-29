@@ -242,7 +242,7 @@ Now we understand the mechanics from Query » LiveQueryRecyclerAdapter » ListAd
 
 ### STEP 6: Using the ListsAdapter
 
-Back in `setupTodoLists` method of `MainActivity.java`, we will need to make slight changes to accommodate for a live query instead of a simple query. There is a `liveQuery` property on the Main Activity class that we can use in `setupTodoLists`:
+Back in `setupTodoLists` method of `MainActivity.java`, we will need to make slight changes to accommodate for a live query instead of a simple query. Remove the snippet added in Step 4 since we are now using another Query technique.  There is a `liveQuery` property on the Main Activity class that we can use in `setupTodoLists`:
 
 - Initialize the liveQuery with the query from Step 4 
 (all queries have a `toLiveQuery` method we can use to convert the query into a Live Query).
