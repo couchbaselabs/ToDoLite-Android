@@ -219,38 +219,33 @@ The result is a [QueryEnumerator](http://developer.couchbase.com/mobile/develop/
 
 Now that you have created the view to index List documents, you can query them accordingly. 
 In `MainActivity.java`, add the missing code to the `setupTodoLists` method to run the query:
-```
-        Query query = List.queryListsInDatabase(application.getDatabase());
-        try {
-            QueryEnumerator qe = query.run();
-            Iterator<QueryRow> queryIterator = qe.iterator();
-            while (qe.hasNext()) {
-                Log.d(Application.TAG, qe.next().toString());
-            }
-        } catch (CouchbaseLiteException e) {
-            e.printStackTrace();
-        }
+
+```java
+Query listQuery = List.queryListsInDatabase(application.getDatabase());
+try {
+    QueryEnumerator rowsEnumerator = listQuery.run();
+    for (QueryRow queryRow : rowsEnumerator) {
+        Document document = queryRow.getDocument();
+        Log.d(TAG, (String) document.getProperty("title"));
+    }
+} catch (CouchbaseLiteException e) {
+    e.printStackTrace();
+}
 ```
 
 Iterate on the result and print the title of every List document. If you saved List documents in Step 1, you should now see the titles in the LogCat.
 
 ![](http://i.gyazo.com/71c39cfdc9ed1aa5c90b1521906a92ef.gif)
 
-The solution is on the `workshop/query_views` branch.
-
 At this point, we could pass the result enumerator to an ArrayAdapter or RecyclerViewAdapter to display the lists on screen. 
 
 However, we will jump slightly ahead of ourselves and use a [LiveQuery](http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/query/live-query/index.html) to have Reactive UI capabilities.
-
-![](https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/setuptodolists.png)
 
 ### STEP 5: A Recycler View meets a Live Query
 
 Couchbase Lite provides live queries. Once created, a live query remains active and monitors for changes to the view's index thus notifying observers whenever the query results change. Live queries are very useful for driving UI components like lists.
 
-We will use the query to populate a Recycler View with those documents. To have the UI automatically update when new documents are indexed, we will use a Live Query.
-
-Open `LiveQueryRecyclerAdapter.java` from the 'java>com.couchbase.todolite>helper' and we will discuss the methods in this file:
+Open `LiveQueryRecyclerAdapter.java` in `java>com.couchbase.todolite>helper` and we will discuss the methods in this file:
 
 ![](http://cl.ly/image/3w0m352S0k0s/Screen%20Shot%202015-05-27%20at%2021.28.06.png)
 
@@ -266,97 +261,110 @@ Now we understand the mechanics from Query » LiveQueryRecyclerAdapter » ListAd
 
 ### STEP 6: Using the ListsAdapter
 
-Back in `setupTodoLists` method of `MainActivity.java`, we will need to make slight changes to accommodate for a live query instead of a simple query. Remove the snippet added in Step 4 since we are now using another Query technique.  There is a `liveQuery` property on the Main Activity class that we can use in `setupTodoLists`:
+Back in the `setupTodoLists` method of `MainActivity.java`, you will need to make slight changes to accommodate for a live query instead of a simple query. Remove the snippet added in Step 4 since we are now using another Query technique.  There is a `liveQuery` property on the Main Activity class that we can use in `setupTodoLists`:
 
 - Initialize the liveQuery with the query from Step 4 
 (all queries have a `toLiveQuery` method we can use to convert the query into a Live Query).
-```
+
+```java
 liveQuery = List.queryListsInDatabase(application.getDatabase()).toLiveQuery();
 ```
+
 - Create a new `listAdapter` variable of type ListAdapter and pass in the liveQuery object.
-```
+
+```java
 ListAdapter listAdapter = new ListAdapter(this, liveQuery);
 ```
+
 - Click events on a row are handled by this class, use the `setOnItemClickListener` method passing in `this` as the argument.
-```
+
+```java
 listAdapter.setOnItemClickListener(this);
 ```
+
 - Use the `setAdapter` method on the `recyclerView` variable to wire up the adapter to the Recycler View.
+
 ```
 recyclerView.setAdapter(listAdapter);
 ```
 
-Run the app on the emulator and start creating ToDo lists.  You can see the created items are now persisted and displayed in the Drawer.
+Run the app on the emulator and start creating ToDo lists. You can see the created items are now persisted and displayed in the Drawer.
 
 ![](http://i.gyazo.com/e7faa2e8a395a12bf4ce8315372f8a71.gif)
-
-Solution is on branch `workshop/using_list_adapter`.
 
 ### STEP 7: Persist the Task document
 
 Open `Task.java` and find the `createTask` method. Similarly to Step 1 & 2, complete the body of the function to persist the HashMap of properties in a document.
 
-Instantiate a new HashMap variable:
-```
+- Instantiate a new HashMap variable:
+
+```java
 Map<String, Object> properties = new HashMap<String, Object>();
 ```
+
 Then add the following properties:
+
 - `type` » the type of document, in this case `task`.
-```
+
+```java
 properties.put("type", DOC_TYPE);
 ```
+
 - `title` » the title parameter passed in.
-```
+
+```java
 properties.put("title", title);
 ```
+
 - `checked` » a boolean to track if a task has been completed, the default is `Boolean.FALSE`.
-```
+
+```java
 properties.put("checked", Boolean.FALSE);
 ```
+
 - `created_at` » the `currentTimeString` variable.
-```
+
+```java
 properties.put("created_at", currentTimeString);
 ```
+
 - `list_id` » the listId parameter passed in.
-```
+
+```java
 properties.put("list_id", listId);
 ```
 
-So far, we have added valid JSON types similarly to Step 1. 
-
-	//need steps on where to call it
-
-Change the function return type to be a Document type and return a document instance. 
-
-![](http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif)
+So far, you have added valid JSON types similarly to Step 1.
 
 However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document API does not allow for saving an attachment. To do so, we will have to go one step further and use the underlying ['Revision' API](http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/revision/index.html) to do so.
-
-Solution is on branch `workshop/persist_task_document`.
 
 ### STEP 8: Working with Attachments and Revisions
 
 To create a Revision, we must first create a Document:
 
-- Create a new variable named `document` of type Document using the `createDocument` method.
-- In turn, create a new variable named `revision` of type Revision with the document’s `createRevision` method.
+- Create a new variable named `document` of type `Document` using the `createDocument` method.
+- In turn, create a new variable named `revision` of type `Revision` with the document’s `createRevision` method.
 - Call the `setUserProperties` passing in the properties HashMap. In this context, user properties represent any property except the `_id` and `rev`, those two properties are important to save the revision as we’ll see in a bit. If we called the `setProperties`, the `_id` and `rev` would get deleted in the process.
-- If an image was passed in, use the `setAttachment` method on the revision to save it as attachment.
-- Call `revision.save()` and this will create the new revision with the image attachment.
+- If an image was passed, transform it into a `InputStream`.
 
-![](https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/Working%20with%20Attachments%20and%20Revisions.png)
+```java
+ByteArrayOutputStream out = new ByteArrayOutputStream();
+image.compress(Bitmap.CompressFormat.JPEG, 50, out);
+ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+```
+
+- Use the `setAttachment` method on the revision to save it as an attachment.
+- Call `revision.save()` and this will create the new revision with the image attachment.
 
 Run the app and you should now be able to attach images to tasks:
 
-![](http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif)
-
-The solution is on the `workshop/attachments_and_revisions` branch.
+![](https://i.gyazo.com/2aa53f81b4bc724eed43d9dbf1d14480.gif)
 
 ## Sync Gateway in-depth Presentation
 
-The goal is to add the sync feature to our application. We will go through the steps to install Sync Gateway and get it running with Couchbase Server.
+The goal is to add the sync feature to your application. You will go through the steps to install Sync Gateway and get it running with Couchbase Server.
 
-Then, we will all attempt to connect to the same instance of Sync Gateway running [here][3].
+Then, we will all attempt to connect to the same instance of Sync Gateway.
 
 See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-workshop-sync-gateway-indepth-couchbase-connect-2015).
 
@@ -376,9 +384,9 @@ Finally, call the `startReplications` method in the `onCreate` method.
 
 If you run the app, nothing is saved to the Sync Gateway. That’s because we disabled the GUEST account in the configuration file.  You can see the 401 HTTP errors in the console:
 
-The solution is on the `workshop/replication` branch.
+[missing gif]()
 
-In the next section, you will add user authentication with Sync Gateway. You can choose to use Facebook Login or Basic Authentication for this workshop.
+In the next section, you will add user authentication with Sync Gateway with Basic Authentication.
 
 ### STEP 10: Sync Gateway Basic Authentication
 

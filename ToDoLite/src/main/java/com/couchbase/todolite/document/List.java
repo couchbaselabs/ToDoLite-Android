@@ -30,6 +30,7 @@ public class List {
         if (view.getMap() == null) {
             Mapper mapper = new Mapper() {
                 public void map(Map<String, Object> document, Emitter emitter) {
+                    // TODO WORKSHOP STEP 3: Creating a view to index list documents.
                 }
             };
             view.setMap(mapper, "1");
@@ -44,6 +45,8 @@ public class List {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Calendar calendar = GregorianCalendar.getInstance();
         String currentTimeString = dateFormatter.format(calendar.getTime());
+
+        // TODO WORKSHOP STEP 2: Saving a List document.
         return null;
     }
 

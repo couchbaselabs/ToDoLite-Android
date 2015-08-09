@@ -84,6 +84,8 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setHasFixedSize(true);
+
+        // TODO WORKSHOP STEP 4: Querying a Couchbase Lite view.
     }
 
     void setupDrawer() {

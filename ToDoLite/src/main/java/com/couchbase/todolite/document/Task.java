@@ -62,6 +62,10 @@ public class Task {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         Calendar calendar = GregorianCalendar.getInstance();
         String currentTimeString = dateFormatter.format(calendar.getTime());
+
+        // TODO WORKSHOP STEP 7: Saving a Task document.
+
+        // TODO WORKSHOP STEP 8: Working with Attachments and Revisions
     }
 
     public static void updateCheckedStatus(Document task, boolean checked)

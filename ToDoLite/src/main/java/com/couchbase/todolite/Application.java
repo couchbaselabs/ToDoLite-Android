@@ -35,18 +35,9 @@ public class Application extends android.app.Application {
     private ToDoLitePreferences preferences;
 
     private void initDatabase() {
-        //TODO WORKSHOP STEP 1: initialize the database
-        try {
-            manager = new Manager(new AndroidContext(getApplicationContext()), Manager.DEFAULT_OPTIONS);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Manager.enableLogging(TAG, Log.VERBOSE);
 
-        try {
-            database = manager.getDatabase(DATABASE_NAME);
-        } catch (CouchbaseLiteException e) {
-            e.printStackTrace();
-        }
+        // TODO WORKSHOP STEP 1: Initialize the database.
     }
 
     private Replication.ChangeListener getReplicationChangeListener() {
@@ -80,7 +71,7 @@ public class Application extends android.app.Application {
         Log.d(Application.TAG, "Application State: onCreate()");
         initDatabase();
 
-        // TODO WORKSHOP CONTINUE STEP 1
+        // TODO WORKSHOP STEP 1: Save the profile document.
     }
 
     public Database getDatabase() {
