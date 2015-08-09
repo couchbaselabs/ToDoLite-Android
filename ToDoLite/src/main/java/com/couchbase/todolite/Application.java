@@ -36,6 +36,17 @@ public class Application extends android.app.Application {
 
     private void initDatabase() {
         //TODO WORKSHOP STEP 1: initialize the database
+        try {
+            manager = new Manager(new AndroidContext(getApplicationContext()), Manager.DEFAULT_OPTIONS);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            database = manager.getDatabase(DATABASE_NAME);
+        } catch (CouchbaseLiteException e) {
+            e.printStackTrace();
+        }
     }
 
     private Replication.ChangeListener getReplicationChangeListener() {
@@ -68,13 +79,8 @@ public class Application extends android.app.Application {
 
         Log.d(Application.TAG, "Application State: onCreate()");
         initDatabase();
-        preferences.setCurrentUserId("oliver");
 
-        try {
-            Profile.createProfile(database, "oliver", "Oliver Smith");
-        } catch (CouchbaseLiteException e) {
-            Log.d(Application.TAG, "conflict, user already exist.");
-        }
+        // TODO WORKSHOP CONTINUE STEP 1
     }
 
     public Database getDatabase() {
