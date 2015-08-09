@@ -21,10 +21,22 @@ import com.couchbase.lite.Document;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
+<<<<<<< Updated upstream
+=======
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.replicator.Replication;
+>>>>>>> Stashed changes
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.preferences.ToDoLitePreferences;
 
+<<<<<<< Updated upstream
+=======
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Iterator;
+
+>>>>>>> Stashed changes
 public class MainActivity extends BaseActivity implements ListAdapter.OnItemClickListener {
 
     private static final String TAG = Application.TAG;
@@ -74,6 +86,24 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
             displayListContent(currentListId);
         }
 
+        startReplications();
+    }
+
+    void startReplications() {
+        try {
+            URL url = new URL("http://127.0.0.1:4984/todolite");
+
+            Replication pull = application.getDatabase().createPullReplication(url);
+            Replication push = application.getDatabase().createPushReplication(url);
+
+            pull.setContinuous(true);
+            push.setContinuous(true);
+
+            pull.start();
+            push.start();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     void setupTodoLists() {
@@ -187,13 +217,19 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
             public void onClick(DialogInterface dialog, int whichButton) {
                 String title = input.getText().toString();
                 if (title.length() == 0) {
-                    // TODO: Show an error message.
                     return;
                 }
                 try {
                     String currentUserId = preferences.getCurrentUserId();
                     Document document = List.createNewList(application.getDatabase(), title, currentUserId);
+<<<<<<< Updated upstream
                     displayListContent(document.getId());
+=======
+                    Log.d(Application.TAG, "The list document was saved %s", document.getProperties().toString());
+                    if (document != null) {
+                        displayListContent(document.getId());
+                    }
+>>>>>>> Stashed changes
                     invalidateOptionsMenu();
                 } catch (CouchbaseLiteException e) {
                     Log.e(Application.TAG, "Cannot create a new list", e);

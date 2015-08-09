@@ -30,7 +30,7 @@ public class List {
         if (view.getMap() == null) {
             Mapper mapper = new Mapper() {
                 public void map(Map<String, Object> document, Emitter emitter) {
-                    String type = (String)document.get("type");
+                    String type = (String) document.get("type");
                     if (DOC_TYPE.equals(type)) {
                         emitter.emit(document.get("title"), document);
                     }
@@ -49,17 +49,17 @@ public class List {
         Calendar calendar = GregorianCalendar.getInstance();
         String currentTimeString = dateFormatter.format(calendar.getTime());
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        HashMap<String, Object> properties = new HashMap<String, Object>();
+
         properties.put("type", "list");
         properties.put("title", title);
         properties.put("created_at", currentTimeString);
         properties.put("members", new ArrayList<String>());
-        if (userId != null) {
-            properties.put("owner", "p:" + userId);
-        }
+        properties.put("owner", userId);
+
         Document document = database.createDocument();
         document.putProperties(properties);
-        Log.d(Application.TAG, "Creating List " + document.getProperty("title") + " with user " + document.getProperty("owner") + ".");
+
         return document;
     }
 
