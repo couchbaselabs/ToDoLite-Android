@@ -362,74 +362,103 @@ Run the app and you should now be able to attach images to tasks:
 
 ## Sync Gateway in-depth Presentation
 
-The goal is to add the sync feature to your application. You will go through the steps to install Sync Gateway and get it running with Couchbase Server.
-
-Then, we will all attempt to connect to the same instance of Sync Gateway.
+In this section of the workshop, the goal is to add the sync feature to your application. You will go through the steps to install Sync Gateway. If you are following the workshop with a group, then they may be a demo instance of Sync Gateway and Couchbase Server already running in the cloud for you to connect to.
 
 See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-workshop-sync-gateway-indepth-couchbase-connect-2015).
+
+### Installing Sync Gateway locally
+
+Download Sync Gateway and unzip the file:
+
+> http://www.couchbase.com/nosql-databases/downloads#Couchbase\_Mobile
+
+You can find the Sync Gateway binary in the **bin** folder and examples of configuration files in the **examples** folder. For this workshop, you will use the configuration file in the root of this repository called `sync-gateway-config.json`.
+
+Start Sync Gateway and provide the config file mentioned above:
+
+	$ ~/Downloads/couchbase-sync-gateway/bin/sync_gateway ./sync-gateway-config.json
+
+Open the Admin Dashboard to monitor the documents that were saved to Sync Gateway.
+
+	http://localhost:4985/_admin/
+
+In the next section, you will write the sync code to push and pull documents between the local database backing your application and Sync Gateway.
 
 ## 30 minutes: Hands-on, Replications
 
 ### STEP 9: Replications without authentication
 
-In `MainActivity.java`, create a new method called `startReplications` to create the push/pull replications:
+In `MainActivity.java`, create a new method called `setupReplications` to create the push/pull replications:
 
-- Initialize a new URL object. The string URL for this tutorial is `http://todolite-syncgateway.cluster.com`
+- Initialize a new URL object. The string URL of the Sync Gateway running is either the demo instance that the instructor will provide to you or the local instance running on your machine that is reachable on `http://localhost:4984/todos/` (**NOTE:** If you are running the app in the Android default emulator the hostname will be `10.0.2.2` and with Genymotion emulator `10.0.3.2`).
 - Initialize the pull replication with the `createPullReplication` method.
-- Initialize the push replication with the `createPushReplication  ` method.
+- Initialize the push replication with the `createPushReplication` method.
 - Set the continuous property to true on both replications.
 - Call the `start` method on each replication.
 
-Finally, call the `startReplications` method in the `onCreate` method.
+Finally, call the `setupReplications` method in the `onCreate` method.
 
-If you run the app, nothing is saved to the Sync Gateway. That’s because we disabled the GUEST account in the configuration file.  You can see the 401 HTTP errors in the console:
+Before running the app, you will add another LogCat filter to match the package named `com.couchbase.lite` and tag `Sync`. The `Sync` tag is to identify various events logged by the Couchbase Lite framework regarding the replication phase.
 
-[missing gif]()
+![](http://cl.ly/image/3w0f320i3Z0W/Screen%20Shot%202015-08-11%20at%2003.02.51.png)
+
+If you run the app, nothing is saved to the Sync Gateway. That’s because we disabled the GUEST account in the configuration file. You can see the 401 HTTP errors in the console:
+
+![](https://i.gyazo.com/c12de08a54472ed537d4c36f0da84fbc.gif)
 
 In the next section, you will add user authentication with Sync Gateway with Basic Authentication.
 
 ### STEP 10: Sync Gateway Basic Authentication
 
-Currently, the functionality to create a user with a username/password is not implemented in ToDoLite-iOS or ToDoLite-Android. 
+With the Sync Gateway API, you can authenticate on the client side as a specific user to replicate the data this user has access to. In the case of basic authentication, the user must already exist in the Sync Gateway database. There are two ways to create users:
 
-To register users on Sync Gateway, we can use the Admin REST API `_user` endpoint. The Admin REST API is available on port `4985` and can only be accessed on the internal network that Sync Gateway is running on. That is a good use case for using an app server to proxy the request to Sync Gateway.
+- In the configuration file under the `users` field.
+- On the Admin REST API.
 
-For this workshop, the endpoint is `/signup` on port `8080`:
+You can create a user with the same user id you chose in Step 1:
 
-	curl -vX POST -H 'Content-Type: application/json' \
-		-d '{"name": "your username", "password": "your password"}' \
-		http://localhost:8080/signup
+```bash
+curl -vX POST -H 'Content-Type: application/json' \
+		-d '{"name": "user id from step 1", "password": "your password"}' \
+		http://localhost:4985/todos/_user/
+```
 
-You should get a 200 OK if the user was created successfully.
+Notice here again that the request is sent on port `4985` (admin port) and is only accessible on the same internal network where Sync Gateway is running. If you're running your own instance of SG locally, this request should succeed and the response should be `201 Created`:
 
-	* Hostname was NOT found in DNS cache
-	*   Trying ::1...
-	* Connected to localhost (::1) port 8080 (#0)
-	> POST /signup HTTP/1.1
-	> User-Agent: curl/7.37.1
-	> Host: localhost:8080
-	> Accept: */*
-	> Content-Type: application/json
-	> Content-Length: 49
-	>
-	* upload completely sent off: 49 out of 49 bytes
-	< HTTP/1.1 200 OK
-	< Content-Type: application/json
-	< Date: Mon, 01 Jun 2015 21:57:32 GMT
-	< Content-Length: 0
-	<
-	* Connection #0 to host localhost left intact
+```
+* Connected to localhost (127.0.0.1) port 4985
+> POST /todos/_user/ HTTP/1.1
+> Host: localhost:4985
+> User-Agent: curl/7.43.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 40
+>
+* upload completely sent off: 40 out of 40 bytes
+< HTTP/1.1 201 Created
+< Server: Couchbase Sync Gateway/1.1.0
+< Date: Tue, 11 Aug 2015 00:27:55 GMT
+< Content-Length: 0
+< Content-Type: text/plain; charset=utf-8
+```
 
-Back in the Android app in Application.java, create a new method `setupReplicationWithName` method to provide the username and password:
+If you're connecting to an instance you don't have access to check with the instructor if an App Server was added to allow sign ups or to simply enter that curl request from the machine running Sync Gateway.
 
-- this time use the Authenticator class to create an authenticator of type basic auth passing in the name and password
-- wire up the authenticator to the replications using the `setAuthenticator` method
-- call the refactored method in `onCreate`
+Back in the Android app in `Application.java`, create a new method `setupReplicationsWithName` method to provide the username and password:
 
-Notice in LogCat that the documents are now syncing to Sync Gateway.
+- This time use the Authenticator class to create an authenticator of type basic auth passing in the name and password.
+- Wire up the authenticator to the replications using the `setAuthenticator` method.
+- Call this method in place of `setupReplications` in the `onCreate` method.
 
+Before running the app, make sure to have logging enabled for the `Sync` tag. You can do so in the `initDatabase` method in `Application.java` with the following line:
 
-The solution is on the `workshop/replication_basic_auth` branch.
+```java
+Manager.enableLogging("Sync", Log.VERBOSE);
+```
+
+Run the app and you should see all the output related to the replication in LogCat. Notice the different replication states: `START`, `RUNNING`, `WAITING_FOR_CHANGES`, `IDLE`. That means it's working as expected.
+
+If you're running Sync Gateway locally you should now see the documents in the Admin UI reachable at `http://localhost:4985/_admin/`.
 
 ## Data orchestration with Sync Gateway
 
@@ -443,35 +472,35 @@ See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-worksh
 
 As we saw in the presentation, a List document is mapped to a channel to which the Tasks are also added. The List document has a `members` property of type ArrayList holding the ids of the users to share the list with.
 
-All Profile documents are mapped to the `profiles` channel and all users have access to it.
+All `Profile` documents are mapped to the `profiles` channel and all users have access to it.
 
-That way, we can display all the user Profiles and let the user pick who to share the List with. Remember earlier we used a Recycler View to display a Query result. This time, we will use the ListView api.
+That way, we can display all the user profiles and let the user pick who to share the List with. Remember earlier we used a Recycler View to display a Query result. This time, we will use the ListView api.
 
 Similarly to the LiveQuery for the RecyclerView, the `LiveQueryAdapter.java` serves as the glue between the LiveQuery change events and the ListView API to redraw the results.
 
 ![](http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png)
 
-The UserAdapter class inherits from this class. In the `onCreate` method of the ShareActivity:
+The UserAdapter class inherits from this class. In the `onCreate` method of `ShareActivity`:
 
-- Create a new variable called `query` of type Query and the `getQuery`.
-- The `getQuery` takes the database and user id as parameters.
+- Create a new variable called `query` of type Query and call the `getQuery` class method on `Profile`.
+- The `getQuery` method takes the database and user id as parameters.
 - Initialize the `mAdapter` property passing in the live query.
 - Wire up the adapter to the ListView.
 
 The `UserAdapter` is an inner class to serve as the adapter to populate the ListView. But the `getView` method is missing some code to bind the data to the item view.
 
 Where the code is missing add the following:
+
 - Initialize a new `user` variable of type `Document` using the `getItem` method.
 - Set the text property on the `textView` to the `name` property of the document.
 
 The `mCurrentList` property of type document refers to the List Document that was selected, check if the user id is in the array. If it’s the case then set the checked property of `checkBox` to true.
 
-
-The solution is on the `populating_list_items` branch.
+![](https://i.gyazo.com/a183dc056044784e7ae7589470cd8212.gif)
 
 ### STEP 12: Sharing a List
 
-Now we will use a click listener on the `checkBox` object to toggle the data and update the UI.
+Now you will use a click listener on the `checkBox` object to toggle the data and update the UI.
 
 Setup the listener class inline and call the `List.addMemberToList` and `List.removeMemberFromList` accordingly.
 
@@ -479,16 +508,16 @@ Both methods update the List document according to wether it should add or remov
 
 Next time a push replication (or immediately if it’s continuous) occurs, Sync Gateway will update the access to this List channel to reflect the change in the data model.
 
-The solution is on the `workshop/final` branch.
-
 ### Testing the final result
 
-Run the app, you can now see the different users from the `profiles` channel and share lists with other attendees.
+Run the app, you can now see the different users from the `profiles` channel and share lists with other attendees. The name of the user logged in is displayed in the navigation drawer as shown below:
 
-![][image-20]
+![](http://cl.ly/image/2m0H0U36252I/Screen%20Shot%202015-08-11%20at%2002.57.59.png)
+
+![](https://i.gyazo.com/afed584972cd8ca002f7ceaa88f81c15.gif)
 
 The result is on the `workshop/final` branch.
 
 ## Congratulations!  Couchbase Mobile now complete
 
-Congratulations on building the main features of Couchbase Mobile with the ToDoLite app!  Now that you have a deeper understanding of Couchbase Lite and how to use the sync features with Sync Gateway, you can start using the SDKs in your own mobile apps.  Hope to see Couchbase Mobile with your apps on Google Play store soon!
+Congratulations on building the main features of Couchbase Mobile with the ToDoLite app! Now that you have a deeper understanding of Couchbase Lite and how to use the sync features with Sync Gateway, you can start using the SDKs in your own mobile apps. Hope to see Couchbase Mobile with your apps on Google Play store soon!
