@@ -408,7 +408,7 @@ If you run the app, nothing is saved to the Sync Gateway. That’s because we di
 
 In the next section, you will add user authentication with Sync Gateway with Basic Authentication.
 
-### STEP 10: Sync Gateway Basic Authentication
+### STEP 10: Sync Gateway basic authentication
 
 With the Sync Gateway API, you can authenticate on the client side as a specific user to replicate the data this user has access to. In the case of basic authentication, the user must already exist in the Sync Gateway database. There are two ways to create users:
 
@@ -468,7 +468,7 @@ See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-worksh
 
 ## 30 minutes: Hands-on, Data orchestration
 
-### STEP 11: The Share View
+### STEP 11: The Share view
 
 As we saw in the presentation, a List document is mapped to a channel to which the Tasks are also added. The List document has a `members` property of type ArrayList holding the ids of the users to share the list with.
 
@@ -498,7 +498,7 @@ The `mCurrentList` property of type document refers to the List Document that wa
 
 ![](https://i.gyazo.com/a183dc056044784e7ae7589470cd8212.gif)
 
-### STEP 12: Sharing a List
+### STEP 12: Sharing a list
 
 Now you will use a click listener on the `checkBox` object to toggle the data and update the UI.
 

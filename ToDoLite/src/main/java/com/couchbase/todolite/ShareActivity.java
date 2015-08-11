@@ -52,6 +52,8 @@ public class ShareActivity extends BaseActivity {
         mCurrentList = application.getDatabase().getDocument(mCurrentListId);
 
         ListView listView = (ListView) findViewById(R.id.listView);
+
+        // TODO WORKSHOP STEP 11: The Share View
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -99,6 +101,8 @@ public class ShareActivity extends BaseActivity {
                         getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(R.layout.view_user, null);
             }
+
+            // TODO WORKSHOP STEP 12: Sharing a List
 
             return convertView;
         }

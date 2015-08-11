@@ -74,6 +74,10 @@ public class Application extends android.app.Application {
         // TODO WORKSHOP STEP 1: Save the profile document.
     }
 
+    // TODO WORKSHOP STEP 9: Replications without authentication
+
+    // TODO WORKSHOP STEP 10: Sync Gateway basic authentication
+
     public Database getDatabase() {
         return this.database;
     }
