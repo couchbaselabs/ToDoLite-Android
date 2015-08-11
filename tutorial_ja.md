@@ -361,135 +361,164 @@ ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
 
 ![](https://i.gyazo.com/2aa53f81b4bc724eed43d9dbf1d14480.gif)
 
-## Sync Gateway in-depth Presentation
+## Sync Gatewayの詳細なプレゼンテーション
 
-The goal is to add the sync feature to your application. You will go through the steps to install Sync Gateway and get it running with Couchbase Server.
+このセクションのゴールは、アプリケーションに同期機能を追加することです。Sync Gatewayのインストールを行います。ワークショップをグループで実施している場合、Sync GatewayとCouchbase Serverのデモインスタンスがすでにクラウド上で稼働していて、接続できる場合もあります。
 
-Then, we will all attempt to connect to the same instance of Sync Gateway.
+プレゼンテーションスライドは[こちら](http://www.slideshare.net/Couchbase/mobile-workshop-sync-gateway-indepth-couchbase-connect-2015)にあります。
 
-See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-workshop-sync-gateway-indepth-couchbase-connect-2015).
+### ローカル環境にSync Gatewayをインストールする
 
-## 30 minutes: Hands-on, Replications
+Sync Gatewayをダウンロードし、ファイルをunzipします:
 
-### STEP 9: Replications without authentication
+> http://www.couchbase.com/nosql-databases/downloads#Couchbase\_Mobile
 
-In `MainActivity.java`, create a new method called `startReplications` to create the push/pull replications:
+Sync Gatwayのバイナリは**bin**フォルダにあり、サンプルの設定ファイルは**examples**フォルダにあります。このワークショップでは、このリポジトリのルートディレクトリにある、`sync-gateway-config.json`という設定ファイルを使用します。
 
-- Initialize a new URL object. The string URL for this tutorial is `http://todolite-syncgateway.cluster.com`
-- Initialize the pull replication with the `createPullReplication` method.
-- Initialize the push replication with the `createPushReplication  ` method.
-- Set the continuous property to true on both replications.
-- Call the `start` method on each replication.
+上記の設定ファイルを指定して、Sync Gatewayを起動します:
 
-Finally, call the `startReplications` method in the `onCreate` method.
+        $ ~/Downloads/couchbase-sync-gateway/bin/sync_gateway ./sync-gateway-config.json
 
-If you run the app, nothing is saved to the Sync Gateway. That’s because we disabled the GUEST account in the configuration file.  You can see the 401 HTTP errors in the console:
+管理用ダッシュボードを開き、Sync Gatewayに保存されたドキュメントをモニタリングします。
 
-[missing gif]()
+        http://localhost:4985/_admin/
 
-In the next section, you will add user authentication with Sync Gateway with Basic Authentication.
+次のセクションでは、アプリケーション内部のローカルデータベースと、Sync Gateway間でドキュメントのpushおよびpullを行う同期のコードを記述します。
 
-### STEP 10: Sync Gateway Basic Authentication
+## 30分: ハンズオン、レプリケーション
 
-Currently, the functionality to create a user with a username/password is not implemented in ToDoLite-iOS or ToDoLite-Android.
+### ステップ 9: 認証なしのレプリケーション
 
-To register users on Sync Gateway, we can use the Admin REST API `_user` endpoint. The Admin REST API is available on port `4985` and can only be accessed on the internal network that Sync Gateway is running on. That is a good use case for using an app server to proxy the request to Sync Gateway.
+`MainActivity.java`内で、`setupReplications`という新規メソッドを作成し、push/pullレプリケーションを作成します:
 
-For this workshop, the endpoint is `/signup` on port `8080`:
+- 新規のURLオブジェクトを作成します。稼働しているSync GatewayのURL文字列は、インストラクタから提供されたデモインスタンスか、お使いのマシン上で稼働している、`http://localhost:4984/todos/`で接続可能なローカルインスタンスとします (**注:** Androidのデフォルトエミュレータでアプリを起動している場合、ホスト名は`10.0.2.2`となり、Genymotionエミュレータの場合は`10.0.3.2`となります)。
+- `createPullReplication`メソッドを利用し、pullレプリケーションを作成します。
+- `createPushReplication`メソッドを利用し、pushレプリケーションを作成します。
+- 両レプリケーションのcontinuousプロパティにtrueを設定します。
+- 各レプリケーションの`start`メソッドを実行します。
 
-        curl -vX POST -H 'Content-Type: application/json' \
-                -d '{"name": "your username", "password": "your password"}' \
-                http://localhost:8080/signup
+最後に、`onCreate`メソッドから、`setupReplications`メソッドを呼び出します。
 
-You should get a 200 OK if the user was created successfully.
+アプリを起動する前に、`com.couchbase.lite`パッケージと`Sync`タグにマッチするLogCatフィルタを追加しましょう。`Sync`タグはCouchbase Liteフレームワークがログに出力する、レプリケーションのフェーズに関連する様々なイベントを特定できます。
 
-        * Hostname was NOT found in DNS cache
-        *   Trying ::1...
-        * Connected to localhost (::1) port 8080 (#0)
-        > POST /signup HTTP/1.1
-        > User-Agent: curl/7.37.1
-        > Host: localhost:8080
-        > Accept: */*
-        > Content-Type: application/json
-        > Content-Length: 49
-        >
-        * upload completely sent off: 49 out of 49 bytes
-        < HTTP/1.1 200 OK
-        < Content-Type: application/json
-        < Date: Mon, 01 Jun 2015 21:57:32 GMT
-        < Content-Length: 0
-        <
-        * Connection #0 to host localhost left intact
+![](http://cl.ly/image/3w0f320i3Z0W/Screen%20Shot%202015-08-11%20at%2003.02.51.png)
 
-Back in the Android app in Application.java, create a new method `setupReplicationWithName` method to provide the username and password:
+アプリを起動しても、何もSync Gatewayには保存されません。なぜなら、GUESTアカウントを設定ファイルで無効にしているからです。コンソールには401 HTTPエラーが表示されます:
 
-- this time use the Authenticator class to create an authenticator of type basic auth passing in the name and password
-- wire up the authenticator to the replications using the `setAuthenticator` method
-- call the refactored method in `onCreate`
+![](https://i.gyazo.com/c12de08a54472ed537d4c36f0da84fbc.gif)
 
-Notice in LogCat that the documents are now syncing to Sync Gateway.
+次のセクションでは、Sync GatewayでのBasic認証を利用したユーザ認証を追加します。
 
+### ステップ 10: Sync Gatewayのベーシック認証
 
-The solution is on the `workshop/replication_basic_auth` branch.
+Sync Gateway APIを利用すると、ユーザがアクセス可能なデータをレプリケートできるように、クライアント側でユーザの認証が可能です。ベーシック認証を利用する場合、そのユーザは事前にSync Gatewayデータベースに存在する必要があります。ユーザを作成するには二つの方法があります:
 
-## Data orchestration with Sync Gateway
+- 設定ファイル内の`users`フィールド配下。
+- Admin REST APIの利用。
 
-So far, you have learned how to use the Replication and Authenticator classes to authenticate as a user with Sync Gateway. The last component we will discuss is the Sync Function. This is part of Sync Gateway’s configuration file and defines the access rules for users.
+ステップ 1で選択したものと同じユーザIDでユーザを作成しましょう:
 
-See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-workshop-data-orchestration).
+```bash
+curl -vX POST -H 'Content-Type: application/json' \
+                -d '{"name": "user id from step 1", "password": "your password"}' \
+                http://localhost:4985/todos/_user/
+```
 
-## 30 minutes: Hands-on, Data orchestration
+ここで、リクエストが`4985` (管理用ポート)に送信されていることに注意しましょう、このポートはSync Gatewayが稼働している場所と同一の内部ネットワークからしかアクセスできません。ローカルで独自のSGインスタンスを起動しているなら、このリクエストは成功し、レスポンスは`201 Created`となるはずです:
 
-### STEP 11: The Share View
+```
+* Connected to localhost (127.0.0.1) port 4985
+> POST /todos/_user/ HTTP/1.1
+> Host: localhost:4985
+> User-Agent: curl/7.43.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 40
+>
+* upload completely sent off: 40 out of 40 bytes
+< HTTP/1.1 201 Created
+< Server: Couchbase Sync Gateway/1.1.0
+< Date: Tue, 11 Aug 2015 00:27:55 GMT
+< Content-Length: 0
+< Content-Type: text/plain; charset=utf-8
+```
 
-As we saw in the presentation, a List document is mapped to a channel to which the Tasks are also added. The List document has a `members` property of type ArrayList holding the ids of the users to share the list with.
+もしアクセスできないインスタンスに接続している場合、インストラクタにアプリのサーバが接続できるように追加されていることを確認してください、あるいはこのcurlリクエストをSync Gatewayを起動しているマシンから実行してください。
 
-All Profile documents are mapped to the `profiles` channel and all users have access to it.
+Androidアプリに戻り、`Application.java`に新規メソッド、`setupReplicationsWithName`を作成し、ユーザ名とパスワードを指定します。
 
-That way, we can display all the user Profiles and let the user pick who to share the List with. Remember earlier we used a Recycler View to display a Query result. This time, we will use the ListView api.
+- 今度はAuthenticatorクラスを利用します、ユーザ名とパスワードを渡して、ベーシック認証のauthenticatorを作成しましょう。
+- `setAuthenticator`メソッドを利用してレプリケーションにauthenticatorを設定します。
+- `onCreate`メソッドから、`setupReplications`の代わりにこのメソッドを実行します。
 
-Similarly to the LiveQuery for the RecyclerView, the `LiveQueryAdapter.java` serves as the glue between the LiveQuery change events and the ListView API to redraw the results.
+アプリを起動する前に、`Sync`タグでログが有効になっているか確認してください。`Application.java`の`initDatabase`メソッドで、次の行が記述されていればログを有効にできます:
+
+```java
+Manager.enableLogging("Sync", Log.VERBOSE);
+```
+
+アプリを起動すると、LogCatにレプリケーション関連の出力が表示されるはずです。`START`、`RUNNING`、 `WAITING_FOR_CHANGES`、 `IDLE`といった様々なレプリケーションステータスが表示されます。期待通り動作している証拠です。
+
+ローカルでSync Gatewayを稼働させている場合、`http://localhost:4985/_admin/`でアクセスできる管理UIから、ドキュメントを確認できるでしょう。
+
+## Sync Gateway でのデータオーケストレーション
+
+ここまでで、ReplicationとAuthenticatorクラスを利用してSync Gatewayでユーザを認証する方法を学んできました。最後に扱うコンポーネントはSync Functionです。これはSync Gatewayの設定ファイルの一部であり、ユーザのアクセスルールを定義します。
+
+プレゼンテーションスライドは[こちら](http://www.slideshare.net/Couchbase/mobile-workshop-data-orchestration)にあります。
+
+## 30分: データオーケストレーションのハンズオン
+
+### ステップ 11: Share画面
+
+プレゼンテーションで説明したように、Listドキュメントはチャネルにマッピングされ、ここにはTaskも追加されます。ListドキュメントはArrayList型の`members`プロパティを持っていて、Listを共有するユーザのIDを保持しています。
+
+すべての`Profile`ドキュメントは`profiles`チャネルにマッピングされ、すべてのユーザがアクセスできます。
+
+こうすることで、すべてのユーザプロファイルを表示し、ユーザがListを共有するユーザを選択できるようにしています。以前Recycler Viewを利用してQueryの結果を表示したことを思い出してください。今回は、ListView APIを利用します。
+
+RecyclerViewでのLiveQueryと同様に、`LiveQueryAdapter.java`はLiveQueryの変更イベントとListView APIが結果を再描画するための接着剤として動作します。
 
 ![](http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png)
 
-The UserAdapter class inherits from this class. In the `onCreate` method of the ShareActivity:
+UserAdapterクラスはこのクラスを継承しています。`ShareActivity`の`onCreate`メソッド内で:
 
-- Create a new variable called `query` of type Query and the `getQuery`.
-- The `getQuery` takes the database and user id as parameters.
-- Initialize the `mAdapter` property passing in the live query.
-- Wire up the adapter to the ListView.
+- `query`という名の新規変数をQuery型で作成し、`Profile`の`getQuery`クラスメソッドを実行します。
+- `getQuery`メソッドではdatabaseとユーザIDを引数に指定します。
+- `mAdapter`プロパティにLive Queryを設定します。
+- atapterをListViewに設定します。
 
-The `UserAdapter` is an inner class to serve as the adapter to populate the ListView. But the `getView` method is missing some code to bind the data to the item view.
+`UserAdapter`はListViewを生成するためのアダプタとして動作する内部クラスです。しかし、`getView`メソッドにはitemビューにデータをバインドするためのコードが足りません。
 
-Where the code is missing add the following:
-- Initialize a new `user` variable of type `Document` using the `getItem` method.
-- Set the text property on the `textView` to the `name` property of the document.
+以下のように不足しているコードを追加します:
 
-The `mCurrentList` property of type document refers to the List Document that was selected, check if the user id is in the array. If it’s the case then set the checked property of `checkBox` to true.
+- `getItem`メソッドを利用して、新規の変数、`user`を`Document`型で作成します。
+- `textView`のtextプロパティにこのドキュメントの`name`プロパティを設定します。
 
+Document型の`mCurrentList`プロパティは選択されたList Documentへの参照です、ユーザIDが配列内に存在するかチェックしましょう。存在する場合、`checkBox`のcheckedプロパティをtrueに設定しましょう。
 
-The solution is on the `populating_list_items` branch.
+![](https://i.gyazo.com/a183dc056044784e7ae7589470cd8212.gif)
 
-### STEP 12: Sharing a List
+### ステップ 12: Listを共有する
 
-Now we will use a click listener on the `checkBox` object to toggle the data and update the UI.
+`checkBox`オブジェクトのクリックリスナーを利用して、データをトグルし、UIを更新します。
 
-Setup the listener class inline and call the `List.addMemberToList` and `List.removeMemberFromList` accordingly.
+インラインでリスナークラスをセットアップし、`List.addMemberToList`と`List.removeMemberFromList`を適切に呼び出してください。
 
-Both methods update the List document according to wether it should add or remove the User from the members array property.
+どちらのメソッドもmembers配列プロパティへユーザを追加したり、削除するかに応じて、Listドキュメントを更新します。
 
-Next time a push replication (or immediately if it’s continuous) occurs, Sync Gateway will update the access to this List channel to reflect the change in the data model.
+次回pushレプリケーションが実行された際(もしくはcontinuousの場合直ちに)、Sync GatewayはこのListチャネルへのアクセスを更新し、データモデル内の変更を反映します。
 
-The solution is on the `workshop/final` branch.
+### 最終結果のテスト
 
-### Testing the final result
+アプリを起動すると、`profiles`チャネルから他のユーザが参照でき、他の参加者とリストを共有できるようになります。以下のイメージの様に、ログインしているユーザの名前がナビゲーションドロワーに表示されます:
 
-Run the app, you can now see the different users from the `profiles` channel and share lists with other attendees.
+![](http://cl.ly/image/2m0H0U36252I/Screen%20Shot%202015-08-11%20at%2002.57.59.png)
 
-![][image-20]
+![](https://i.gyazo.com/afed584972cd8ca002f7ceaa88f81c15.gif)
 
-The result is on the `workshop/final` branch.
+最終結果は`workshop/final`ブランチにあります。
 
-## Congratulations!  Couchbase Mobile now complete
+## おめでとうございます、Couchbase Mobileが完了しました!
 
-Congratulations on building the main features of Couchbase Mobile with the ToDoLite app!  Now that you have a deeper understanding of Couchbase Lite and how to use the sync features with Sync Gateway, you can start using the SDKs in your own mobile apps.  Hope to see Couchbase Mobile with your apps on Google Play store soon!
+おめでとうございます、これでToDoLiteのメイン機能が実装できました! Couchbase Liteと、Sync Gatewayのsync機能の利用方法への理解が深まったと思います、是非、アプリ開発にSDKをご利用ください。Google Playストア上でCouchbase Mobileを利用したあなたのアプリがリリースされる日を楽しみにしています!
