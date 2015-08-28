@@ -11,6 +11,7 @@ This paper will guide you through the steps to build the application and know al
 See presentation slides [here](http://www.slideshare.net/Couchbase/mobile-workshop-couchbase-lite-indepth).
 
 ## 90 minutes: Hands on Couchbase Lite
+![Application Architecture](https://raw.githubusercontent.com/couchbaselabs/mini-hacks/master/kitchen-sync/topology.png "Typical Couchbase Mobile Architecture")
 
 ### Getting started
 
