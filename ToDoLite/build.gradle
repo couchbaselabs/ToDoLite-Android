@@ -3,6 +3,7 @@ apply plugin: 'android'
 android {
     Properties properties = new Properties()
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    def appServerHttp = properties.getProperty('app_server_http')
     def syncUrlHttp = properties.getProperty('sync_url_http')
     def syncUrlHttps = properties.getProperty('sync_url_https')
 
@@ -18,13 +19,15 @@ android {
     buildTypes {
 
         debug {
-            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://9cec7a6e-jamiltz.node.tutum.io:8000\""
+            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://9cec7a6e-jamiltz.node.tutum.io:4984\""
+            buildConfigField 'String', 'APP_SERVER_HTTP', "\"http://9cec7a6e-jamiltz.node.tutum.io:8000\""
             buildConfigField 'String', 'SYNC_URL_HTTPS', "\"\""
         }
 
         dev.initWith(buildTypes.debug)
         dev {
             buildConfigField 'String', 'SYNC_URL_HTTP', "\"$syncUrlHttp\""
+            buildConfigField 'String', 'APP_SERVER_HTTP', "\"$appServerHttp\""
             buildConfigField 'String', 'SYNC_URL_HTTPS', "\"$syncUrlHttps\""
         }
 

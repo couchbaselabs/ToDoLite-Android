@@ -40,7 +40,7 @@ public class Application extends android.app.Application {
     public static final String TAG = "ToDoLite";
     private static final String DATABASE_NAME = "todos";
     private static final String GUEST_DATABASE_NAME = "guest";
-    public static final String SYNC_HOSTNAME = BuildConfig.SYNC_URL_HTTP;
+    public static final String SYNC_HOSTNAME = BuildConfig.APP_SERVER_HTTP;
     private static final String SYNC_URL_HTTP = BuildConfig.SYNC_URL_HTTP + "/todos";
     private static final String SYNC_URL_HTTPS = BuildConfig.SYNC_URL_HTTPS;
     private static final String SYNC_URL = SYNC_URL_HTTP;
