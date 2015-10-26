@@ -20,7 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.couchbase.lite.CouchbaseLiteException;
-import com.couchbase.lite.Database;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.QueryEnumerator;
@@ -29,7 +28,7 @@ import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.document.Profile;
 import com.couchbase.todolite.preferences.ToDoLitePreferences;
-import com.couchbase.todolite.ui.login.LoginActivity;
+import com.couchbase.todolite.ui.login.WelcomeActivity;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
@@ -84,7 +83,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
         } else if (preferences.getGuestBoolean()) {
             application.setDatabaseForGuest();
         } else {
-            Intent i = new Intent(MainActivity.this, LoginActivity.class);
+            Intent i = new Intent(MainActivity.this, WelcomeActivity.class);
             startActivityForResult(i, 0);
             finish();
         }
@@ -137,7 +136,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
                         preferences.setCurrentUserPassword(null);
                         invalidateOptionsMenu();
 
-                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
                         finish();
@@ -341,9 +340,13 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
                         Application application = (Application) getApplication();
+                        java.util.List<Replication> replications = application.getDatabase().getAllReplications();
                         application.logoutUser();
+                        for (Replication replication : replications) {
+                            application.getDatabase().forgetReplication(replication);
+                        }
                         invalidateOptionsMenu();
-                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        Intent intent = new Intent(MainActivity.this, WelcomeActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
                         finish();
@@ -356,7 +359,7 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
                 loginMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem menuItem) {
-                        Intent i = new Intent(MainActivity.this, LoginActivity.class);
+                        Intent i = new Intent(MainActivity.this, WelcomeActivity.class);
                         startActivityForResult(i, 0);
                         return true;
                     }

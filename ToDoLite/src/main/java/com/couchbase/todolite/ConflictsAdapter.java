@@ -10,15 +10,10 @@ import android.widget.TextView;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.SavedRevision;
 import com.couchbase.lite.util.Log;
-import com.couchbase.todolite.R;
 
-import org.w3c.dom.Text;
-
-import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 
 public class ConflictsAdapter extends ArrayAdapter<SavedRevision> {
@@ -58,6 +53,7 @@ public class ConflictsAdapter extends ArrayAdapter<SavedRevision> {
 
         String userId = (String) task.getProperty("user_id");
         Application application = (Application) getContext().getApplicationContext();
+
         Document profile = (Document) application.getDatabase().getDocument("p:" + userId);
 
         tvUserId.setText("Edited by: " + ((String) profile.getProperty("name")));

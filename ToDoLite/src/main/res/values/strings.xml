@@ -17,4 +17,9 @@
     <string name="title_dialog_new_list">Create new list</string>
     <string name="title_dialog_update">Update task</string>
     <string name="title_activity_image_view">ImageViewActivity</string>
+    <string name="title_activity_login">LoginActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_sign_up">SignUpActivity</string>
 </resources>

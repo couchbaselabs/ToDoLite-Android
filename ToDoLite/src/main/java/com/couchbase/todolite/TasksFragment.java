@@ -496,7 +496,7 @@ public class TasksFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     try {
-                        Task.updateCheckedStatus(task, checkBox.isChecked());
+                        Task.updateCheckedStatus(task, checkBox.isChecked(), preferences.getCurrentUserId());
                     } catch (CouchbaseLiteException e) {
                         Log.e(Application.TAG, "Cannot update checked status", e);
                     }

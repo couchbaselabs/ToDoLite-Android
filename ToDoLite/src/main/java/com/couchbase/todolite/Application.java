@@ -9,9 +9,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.preference.PreferenceManager;
 
 import com.couchbase.lite.Attachment;
 import com.couchbase.lite.CouchbaseLiteException;
@@ -42,7 +40,8 @@ public class Application extends android.app.Application {
     public static final String TAG = "ToDoLite";
     private static final String DATABASE_NAME = "todos";
     private static final String GUEST_DATABASE_NAME = "guest";
-    private static final String SYNC_URL_HTTP = BuildConfig.SYNC_URL_HTTP;
+    public static final String SYNC_HOSTNAME = BuildConfig.SYNC_URL_HTTP;
+    private static final String SYNC_URL_HTTP = BuildConfig.SYNC_URL_HTTP + "/todos";
     private static final String SYNC_URL_HTTPS = BuildConfig.SYNC_URL_HTTPS;
     private static final String SYNC_URL = SYNC_URL_HTTP;
 
@@ -60,7 +59,7 @@ public class Application extends android.app.Application {
     // By default, this should be set to FACEBOOK.  To test "custom cookie" auth,
     // or basic auth change it to ALL. And run the app against your local sync gateway
     // you have control over to create custom cookies and users via the admin port.
-    public static AuthenticationType authenticationType = AuthenticationType.FACEBOOK;
+    public static AuthenticationType authenticationType = AuthenticationType.ALL;
 
     private ToDoLitePreferences preferences;
 

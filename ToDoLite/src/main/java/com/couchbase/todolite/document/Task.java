@@ -105,11 +105,24 @@ public class Task {
         revision.save();
     }
 
-    public static void updateCheckedStatus(Document task, boolean checked)
+    public static void updateCheckedStatus(Document task, boolean checked, String userId)
             throws CouchbaseLiteException {
         Map<String, Object> properties = new HashMap<String, Object>();
         properties.putAll(task.getProperties());
         properties.put("checked", checked);
+
+        /*
+        Get the current time to update the update_at property with the
+        latest time. This property is displayed on the conflict resolution
+        screen.
+         */
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        Calendar calendar = GregorianCalendar.getInstance();
+        String currentTimeString = dateFormatter.format(calendar.getTime());
+
+        properties.put("updated_at", currentTimeString);
+        properties.put("user_id", userId);
+
         task.putProperties(properties);
     }
 
