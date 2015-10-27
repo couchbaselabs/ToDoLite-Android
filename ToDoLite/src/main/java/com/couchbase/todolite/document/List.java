@@ -11,10 +11,6 @@ import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
-import com.couchbase.lite.QueryRow;
-import com.couchbase.lite.Revision;
-import com.couchbase.lite.UnsavedRevision;
-import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.Application;
 
 import java.text.SimpleDateFormat;
@@ -58,7 +54,7 @@ public class List {
         properties.put("created_at", currentTimeString);
         properties.put("members", new ArrayList<String>());
         if (userId != null)
-            properties.put("owner", "profile:" + userId);
+            properties.put("owner", "p:" + userId);
 
         Document document = database.createDocument();
         document.putProperties(properties);
