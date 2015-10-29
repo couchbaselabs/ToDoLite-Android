@@ -2,7 +2,7 @@
   "log": ["CRUD", "REST+", "Access"],
   "facebook": {"register": true},
   "databases": {
-    "todos": {
+    "todolite": {
       "server": "walrus:",
       "users": {
         "GUEST": {"disabled": true}
