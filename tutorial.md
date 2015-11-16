@@ -1,4 +1,4 @@
-# Couchbase Mobile Day Workshop iOS
+# Couchbase Mobile Day Workshop Android
 
 In this workshop, you will learn how to use Couchbase Lite along with Sync Gateway to build a ToDos app with a guest account mode, offline-first capabilities and syncing different ToDo lists to Sync Gateway.
 
