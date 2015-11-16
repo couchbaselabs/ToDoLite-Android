@@ -21,22 +21,13 @@ import com.couchbase.lite.Document;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.Query;
 import com.couchbase.lite.QueryEnumerator;
-<<<<<<< Updated upstream
-=======
-import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.replicator.Replication;
->>>>>>> Stashed changes
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.document.List;
 import com.couchbase.todolite.preferences.ToDoLitePreferences;
-
-<<<<<<< Updated upstream
-=======
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Iterator;
 
->>>>>>> Stashed changes
 public class MainActivity extends BaseActivity implements ListAdapter.OnItemClickListener {
 
     private static final String TAG = Application.TAG;
@@ -222,14 +213,10 @@ public class MainActivity extends BaseActivity implements ListAdapter.OnItemClic
                 try {
                     String currentUserId = preferences.getCurrentUserId();
                     Document document = List.createNewList(application.getDatabase(), title, currentUserId);
-<<<<<<< Updated upstream
-                    displayListContent(document.getId());
-=======
                     Log.d(Application.TAG, "The list document was saved %s", document.getProperties().toString());
                     if (document != null) {
                         displayListContent(document.getId());
                     }
->>>>>>> Stashed changes
                     invalidateOptionsMenu();
                 } catch (CouchbaseLiteException e) {
                     Log.e(Application.TAG, "Cannot create a new list", e);
