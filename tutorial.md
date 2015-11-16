@@ -1,8 +1,8 @@
-# Couchbase Connect Mobile Workshop Android
+# Couchbase Mobile Day Workshop iOS
 
 In this workshop, you will learn how to use Couchbase Lite along with Sync Gateway to build a ToDos app with a guest account mode, offline-first capabilities and syncing different ToDo lists to Sync Gateway.
 
-This paper will guide you through the steps to build the application and know all the tips and tricks to building apps with a great look and feel using Couchbase Mobile.
+This document will guide you through the steps to build the application using Couchbase Mobile.
 
 ## 30 minutes: Couchbase Mobile Presentation
 
@@ -10,26 +10,44 @@ This paper will guide you through the steps to build the application and know al
 
 ## 90 minutes: Hands on Couchbase Lite
 
+### What is Included
+
+This tutorial is based on a demo application, ToDo Lite, designed to show the
+features of Couchbase Lite.  The full demo application is on the
+master branch and is updated from time to time as new features are
+added to Couchbase Lite.
+
+You may be viewing this tutorial from a browser on github or on your
+local system after cloning the repository or openining a zipfile.  in
+Any case, you should find the following layout in the tutorial:
+
+	CONTRIBUTING.md		
+        finished/		
+        tutorial.md
+	README.md		
+        initial/
+
+The CONTRIBUTING.md and README.md are a simple copy of the master
+branch overview and contribution instructions.  The tutorial.md is the
+file containing these instructions.  The initial/ directory contains
+the basic scaffolding of ToDo Lite which you will edit to add
+functionality to.  The finished/ directory contains a completed
+version of the application.  You will use the completed version in a
+later portion of the lab with Couchbase Sync Gateway and you may want
+to refer to it if you get stuck when going through the lab steps.
+
 ### Getting started
 
-Let us get the ToDoLite [repository][1] cloned to your computer.  First open up the Terminal and run the commands below:  
+If needed, clone the application from the ToDoLite-iOS repository:
 
-## Get the code
-
-    $ git clone https://github.com/couchbaselabs/ToDoLite-Android.git
-    $ cd ToDoLite-Android
-    $ git submodule init && git submodule update
-
-We also added the submodules required for our project and now we are ready to begin.  You should now be at the step below and see something like:
-![][image-13]
-
-The ToDoLite-Android folder now will contain the files below:
-![][image-14]
+	git clone https://github.com/couchbaselabs/ToDoLite-Android
+        git checkout workshop/CouchbaseDay
 
 Within Android Studio, click:  File\>New\>Import Project 
 ![][image-15]
 
-Locate the ToDoLite-Android folder and import the project:  
+Locate the ToDoLite-Android/initial folder and import the project:
+TODO: update this
 ![][image-16]
 
 Run the app now to see Couchbase Lite working within the ToDoLite Android app.  Click on the green button to build the app.  
