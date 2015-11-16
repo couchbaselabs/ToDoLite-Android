@@ -38,7 +38,12 @@ to refer to it if you get stuck when going through the lab steps.
 
 ### Getting started
 
-If needed, clone the application from the ToDoLite-iOS repository:
+In the getting started, you will get the project set up locally,
+verify it by running the `finished` project, then switch to the
+`initial` project to follow the steps which will have you learn the
+Couchbase Lite API basics.
+
+If needed, clone the application from the ToDoLite-Android repository:
 
 	git clone https://github.com/couchbaselabs/ToDoLite-Android
         git checkout workshop/CouchbaseDay
@@ -46,7 +51,7 @@ If needed, clone the application from the ToDoLite-iOS repository:
 Within Android Studio, click:  File\>New\>Import Project 
 ![][image-15]
 
-Locate the ToDoLite-Android/initial folder and import the project:
+Locate the ToDoLite-Android/final folder and import the project:
 TODO: update this
 ![][image-16]
 
@@ -63,9 +68,11 @@ This application has three main screens, the drawer to display the List, the Mai
 
 ![][image-1]
 
-Every step of the tutorial are saved to a branch on the GitHub repository. If you find yourself in trouble and want to skip a step or catch up, you can just check out to the next branch. For example, to start checkout on `workshop/initial_state`:
-
-	git checkout workshop/initial_state
+We have tried to avoid having this workshop be just a series of
+cut-n-paste sections of code so you will find below a series of steps
+that will help you build the application.  If you find yourself in
+trouble and want to skip a step or catch up, you can look at the
+completed code in the `finished/` directory.
 
 In the source code, you will find comments to help locate where the missing code is meant to go. For example:
 
@@ -73,7 +80,9 @@ In the source code, you will find comments to help locate where the missing code
 
 ### Introduction
 
-The topics below are fundamental aspects for Couchbase Mobile. If you understand all of them and their purposes, you will be in a very good position after reading this tutorial.
+The topics below are the fundamental aspects of Couchbase Mobile. If
+you understand all of them and their purposes, you’ll be in a very
+good spot after walking through this tutorial.
 
 - [Document][7]: the primary entity stored in a database for Couchbase.
 - [Revision][8]: with every change to a document, we get a new document revision.
@@ -94,7 +103,7 @@ The task document holds a reference to the list it belongs to and a list has an 
 
 ### STEP 1: Create a database
 
-Make sure you are on branch `workshop/initial_state`. Right now the App is not compiling. This is normal, you just need to initialize the Database.
+Make sure you have imported the project from the `initial` directory. Right now the App is not compiling. This is normal, you just need to initialize the Database.
 
 Open `Application.java` under ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/Application.java
 ![][image-20]
