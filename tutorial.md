@@ -114,17 +114,18 @@ Open `Application.java` under ToDoLite-Android/ToDoLite/src/main/java/com/couchb
 
 Notice there is a property called database of type Database. We will use this property throughout the application to get access to our database.
 
-- set up a new instance of the manager
+- set up a new instance of the manager in the `initDatabase()` method
 ```
-private Manager manager;
 manager = new Manager(new AndroidContext(getApplicationContext()), Manager.DEFAULT_OPTIONS);
 ```
 - create a new database called name `todos`
 ```
-private static final String DATABASE_NAME = "todos";
-private Database database;
 database = manager.getDatabase(DATABASE_NAME);
 ```
+
+Then, in the `onCreate()` method, you'll want to do a few things with
+the profile that is being instantiated:
+
 - set the user id to your name
 - use the Profile’s createNewProfile class method to create a new Profile document with the user you chose above
 - log the properties of the Profile document to the Console
