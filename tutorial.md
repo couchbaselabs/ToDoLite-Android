@@ -21,11 +21,11 @@ You may be viewing this tutorial from a browser on github or on your
 local system after cloning the repository or openining a zipfile.  in
 Any case, you should find the following layout in the tutorial:
 
-	CONTRIBUTING.md		
-        finished/		
-        tutorial.md
-	README.md		
-        initial/
+	CONTRIBUTING.md
+	finished/
+	tutorial.md
+	README.md
+	initial/
 
 The CONTRIBUTING.md and README.md are a simple copy of the master
 branch overview and contribution instructions.  The tutorial.md is the
@@ -46,13 +46,12 @@ Couchbase Lite API basics.
 If needed, clone the application from the ToDoLite-Android repository:
 
 	git clone https://github.com/couchbaselabs/ToDoLite-Android
-        git checkout workshop/CouchbaseDay
+	git checkout workshop/CouchbaseDay
 
 Within Android Studio, click:  File\>New\>Import Project 
 ![][image-15]
 
 Locate the ToDoLite-Android/final folder and import the project:
-TODO: update this
 ![][image-16]
 
 Run the app now to see Couchbase Lite working within the ToDoLite Android app.  Click on the green button to build the app.  
@@ -483,7 +482,7 @@ Congratulations on building the main features of Couchbase Mobile with the ToDoL
 [image-13]: http://cl.ly/bTt7/git%20submodule%20git%20init.png
 [image-14]: http://cl.ly/bUlx/To-Do-Lite%20Android%20folder%20content.png
 [image-15]: http://cl.ly/bSYg/file_import_project.png
-[image-16]: http://cl.ly/bTxP/import%20project.png
+[image-16]: https://i.gyazo.com/1ef1ccc2249de175530a8b19fcd11846.png
 [image-x]: http://cl.ly/bU5d/ToLite%20App%20in%20Android.png
 [image-17]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/ToDoLite.png
 [image-18]: http://cl.ly/bUZe/Run%20Android%20App.png
