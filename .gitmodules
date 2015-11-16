@@ -1,6 +1,0 @@
-[submodule "libraries/couchbase-lite-java-core"]
-	path = libraries/couchbase-lite-java-core
-	url = https://github.com/couchbase/couchbase-lite-java-core.git
-[submodule "libraries/couchbase-lite-android"]
-	path = libraries/couchbase-lite-android
-	url = https://github.com/couchbase/couchbase-lite-android.git
