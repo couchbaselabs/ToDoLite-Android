@@ -51,7 +51,7 @@ If needed, clone the application from the ToDoLite-Android repository:
 Within Android Studio, click:  File\>New\>Import Project 
 ![][image-15]
 
-Locate the ToDoLite-Android/final folder and import the project:
+Locate the ToDoLite-Android/finished folder and import the project:
 ![][image-16]
 
 Run the app now to see Couchbase Lite working within the ToDoLite Android app.  Click on the green button to build the app.  
@@ -102,7 +102,12 @@ The task document holds a reference to the list it belongs to and a list has an 
 
 ### STEP 1: Create a database
 
-Make sure you have imported the project from the `initial` directory. Right now the App is not compiling. This is normal, you just need to initialize the Database.
+Make sure you have imported the project from the `initial`
+directory. Right now the App is not compiling. This is normal, you
+just need to initialize the Database.  You'll do this over the course
+of the following steps.  We have described what code needs to be
+written, occasionally including some code snippets.  Some details and
+exception handling are left to you as an exercise.
 
 Open `Application.java` under ToDoLite-Android/ToDoLite/src/main/java/com/couchbase/todolite/Application.java
 ![][image-20]
@@ -126,8 +131,7 @@ database = manager.getDatabase(DATABASE_NAME);
 
 Launch the app and log the properties of the Profile document to LogCat:
 
-
-Solution is on branch `workshop/createDatabase`.
+You'll see the complete solution in the equivalent files in the `finished` directory.
 
 ### STEP 2: Working with HashMap\<String, Object\>
 
@@ -182,7 +186,7 @@ In the next section, we will learn how to query those documents.
 
 ![][image-5]
 
-The solution is on the `workshop/saving_list_document` branch.
+You'll see the complete solution in the equivalent files in the `finished` directory.
 
 ### STEP 3: Creating Views
 
@@ -199,7 +203,7 @@ In pseudo code, the map function will look like:
 	if document.type == "list"
 	    emit(document.title, null)
 
-The solution is on the `workshop/create_views` branch.
+You'll see the complete solution in the equivalent files in the `finished` directory.
 
 ### STEP 4: Query Views
 
@@ -215,7 +219,7 @@ Iterate on the result and print the title of every List document. If you saved L
 
 ![][image-6]
 
-The solution is on the `workshop/query_views` branch.
+You'll see the complete solution in the equivalent files in the `finished` directory.
 
 At this point, we could pass the result enumerator to an ArrayAdapter or RecyclerViewAdapter to display the lists on screen. 
 
@@ -267,7 +271,7 @@ Run the app on the emulator and start creating ToDo lists.  You can see the crea
 
 ![][image-9]
 
-Solution is on branch `workshop/using_list_adapter`.
+You'll see the complete solution in the equivalent files in the `finished` directory.
 
 ### STEP 7: Persist the Task document
 
@@ -307,7 +311,7 @@ So far, we have added valid JSON types similarly to Step 1.
 
 However, a Task document can have an image. In Couchbase Lite, all binary properties of documents are called attachments. The Document API does not allow for saving an attachment. To do so, we will have to go one step further and use the underlying ['Revision' API][12] to do so.
 
-Solution is on branch `workshop/persist_task_document`.
+You'll see the complete solution in the equivalent files in the `finished` directory.
 
 ### STEP 8: Working with Attachments and Revisions
 
@@ -323,7 +327,7 @@ Run the app and you should now be able to attach images to tasks:
 
 ![][image-11]
 
-The solution is on the `workshop/attachments_and_revisions` branch.
+You'll see the complete solution in the equivalent files in the `finished` directory.
 
 ## 30 minutes: Sync Gateway in-depth
 
