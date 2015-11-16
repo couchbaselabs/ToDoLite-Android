@@ -1,0 +1,52 @@
+{
+  "log": ["CRUD", "REST+", "Access"],
+  "facebook": {"register": true},
+  "databases": {
+    "todos": {
+      "server": "walrus:",
+      "users": {
+        "GUEST": {"disabled": true}
+      },
+      "sync": 
+  	`
+      function(doc, oldDoc) {
+        // NOTE this function is the same across the iOS, Android, and PhoneGap versions.
+        if (doc.type == "task") {
+          if (!doc.list_id) {
+            throw({forbidden : "Items must have a list_id"})
+          }
+          channel("list-"+doc.list_id);
+        } else if (doc.type == "list") {
+          channel("list-"+doc._id);
+          if (!doc.owner) {
+            throw({forbidden : "List must have an owner"})
+          }
+          if (oldDoc) {
+            var oldOwnerName = oldDoc.owner.substring(oldDoc.owner.indexOf(":")+1);
+            requireUser(oldOwnerName)
+          }
+          var ownerName = doc.owner.substring(doc.owner.indexOf(":")+1);
+          access(ownerName, "list-"+doc._id);
+          if (Array.isArray(doc.members)) {
+            var memberNames = [];
+            for (var i = doc.members.length - 1; i >= 0; i--) {
+              memberNames.push(doc.members[i].substring(doc.members[i].indexOf(":")+1))
+            };
+            access(memberNames, "list-"+doc._id);
+          }
+        } else if (doc.type == "profile") {
+          channel("profiles");
+          var user = doc._id.substring(doc._id.indexOf(":")+1);
+
+          if (user !== doc.user_id) {
+            throw({forbidden : "Profile user_id must match docid : " + user + " : " + doc.user_id})
+          }
+          requireUser(user);
+          access(user, "profiles"); // TODO this should use roles
+        }
+      }
+    `
+    }
+  }
+}
+

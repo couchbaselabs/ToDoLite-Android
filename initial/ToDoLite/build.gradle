@@ -1,0 +1,61 @@
+apply plugin: 'android'
+
+android {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    def syncUrlHttp = properties.getProperty('sync_url_http')
+    def syncUrlHttps = properties.getProperty('sync_url_https')
+
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 21
+        versionCode 104
+        versionName "1.0.3"
+    }
+    buildTypes {
+
+        debug {
+            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://demo-mobile.couchbase.com/todolite/\""
+            buildConfigField 'String', 'SYNC_URL_HTTPS', "\"https://demo-mobile.couchbase.com/todolite/\""
+        }
+
+        dev.initWith(buildTypes.debug)
+        dev {
+            buildConfigField 'String', 'SYNC_URL_HTTP', "\"$syncUrlHttp\""
+            buildConfigField 'String', 'SYNC_URL_HTTPS', "\"$syncUrlHttps\""
+        }
+
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+
+            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://demo-mobile.couchbase.com/todolite/\""
+            buildConfigField 'String', 'SYNC_URL_HTTPS', "\"https://demo-mobile.couchbase.com/todolite/\""
+        }
+
+    }
+
+    // workaround for "duplicate files during packaging of APK" issue
+    // see https://groups.google.com/d/msg/adt-dev/bl5Rc4Szpzg/wC8cylTWuIEJ
+    packagingOptions {
+        exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
+}
+
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:21.+'
+    compile 'de.hdodenhof:circleimageview:1.2.1'
+    compile 'com.android.support:recyclerview-v7:21.0.+'
+    compile 'com.google.android.gms:play-services:3.1.+'
+    compile 'com.jakewharton:butterknife:6.0.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.1.0'
+
+    compile 'com.couchbase.lite:couchbase-lite-android:1.1.0'
+
+}
