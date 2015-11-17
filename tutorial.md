@@ -544,7 +544,8 @@ The completed configuration is in the `finished/` directory.
 Once again, go back to the completed ToDo Lite Application and start
 it.  This time, as you interact with the app, you should see data
 being automatically synchronized to and from the server:
-```2015-11-17T15:00:06.884Z HTTP:  #002: GET /todos/_session  (as oliver)
+```
+2015-11-17T15:00:06.884Z HTTP:  #002: GET /todos/_session  (as oliver)
 2015-11-17T15:00:06.900Z HTTP:  #003: GET /todos/_session  (as oliver)
 2015-11-17T15:00:06.925Z HTTP:  #004: GET /todos/_local/417e79ad1e103bb533eb9083f975c0f8523f7c83  (as oliver)
 2015-11-17T15:00:06.925Z HTTP: #004:     --> 404 missing  (1.5 ms)
