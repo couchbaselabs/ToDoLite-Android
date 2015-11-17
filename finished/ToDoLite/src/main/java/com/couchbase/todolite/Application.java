@@ -26,7 +26,7 @@ public class Application extends android.app.Application {
 
     public static final String TAG = "ToDoLite";
     private static final String DATABASE_NAME = "todos";
-    private static final String SYNC_URL = "http://10.17.3.228:4984/todos";
+    private static final String SYNC_URL = "http://10.111.72.101:4984/todos";
 
     private Manager manager;
     private Database database;
