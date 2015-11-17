@@ -362,10 +362,10 @@ username is "Administrator" and the password is "password".
 
 To set up Couchbase Sync Gateway on your own system, get Couchbase
 Server and Sync Gateway binaries from the
-[Couchbase download page][http://www.couchbase.com/nosql-databases/downloads].
+[Couchbase download page](http://www.couchbase.com/nosql-databases/downloads).
 Follow the setup wizard from Couchbase Server to set it up and install
 the Sync Gateway binary for your platform per the
-[installation instructions][http://developer.couchbase.com/documentation/mobile/1.1.0/develop/guides/sync-gateway/running-sync-gateway/installing-sync-gateway/index.html].
+[installation instructions](http://developer.couchbase.com/documentation/mobile/1.1.0/develop/guides/sync-gateway/running-sync-gateway/installing-sync-gateway/index.html).
 
 #### STEP B: Configure Sync Gateway
 
