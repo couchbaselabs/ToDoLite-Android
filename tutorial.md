@@ -4,11 +4,7 @@ In this workshop, you will learn how to use Couchbase Lite along with Sync Gatew
 
 This document will guide you through the steps to build the application using Couchbase Mobile.
 
-## 30 minutes: Couchbase Mobile Presentation
-
-## 30 minutes: Couchbase Lite in-depth
-
-## 90 minutes: Hands on Couchbase Lite
+## Hands on Couchbase Lite
 
 ### What is Included
 
@@ -330,134 +326,244 @@ Run the app and you should now be able to attach images to tasks:
 
 You'll see the complete solution in the equivalent files in the `finished` directory.
 
-## 30 minutes: Sync Gateway in-depth
+## Hands On Sync Gateway
 
-The goal is to add the sync feature to our application. We will go through the steps to install Sync Gateway and get it running with Couchbase Server.
+In this section, our goal is to pick up a completed version of the
+ToDo Lite demonstration code and configure a Sync Gateway backed by
+Couchbase Server to store the documents.  Optionally, you can run
+multiple instances of ToDo Lite to see your demo application
+synchronize between multipled devices.
 
-Then, we will all attempt to connect to the same instance of Sync Gateway running [here][3].
+Note: this section of the workshop is separated by letters instead of
+numbers.
 
-## 30 minutes: Hands-on, Replications
+### STEP A: Install Sync Gateway and Couchbase Server
 
-### STEP 9: Replications without authentication
-
-In `MainActivity.java`, create a new method called `startReplications` to create the push/pull replications:
-
-- Initialize a new NSURL object. The string URL for this tutorial is `http://todolite-syncgateway.cluster.com`
-- Initialize the pull replication with the `createPullReplication` method.
-- Initialize the push replication with the `createPushReplication  ` method.
-- Set the continuous property to true on both replications.
-- Call the `start` method on each replication.
-
-Finally, call the `startReplications` method in the `onCreate` method.
-
-If you run the app, nothing is saved to the Sync Gateway. That’s because we disabled the GUEST account in the configuration file.  You can see the 401 HTTP errors in the console:
-
-The solution is on the `workshop/replication` branch.
-
-In the next section, you will add user authentication with Sync Gateway. You can choose to use Facebook Login or Basic Authentication for this workshop.
-
-### STEP 10: Sync Gateway Basic Authentication
-
-Currently, the functionality to create a user with a username/password is not implemented in ToDoLite-iOS or ToDoLite-Android. 
-
-To register users on Sync Gateway, we can use the Admin REST API `_user` endpoint. The Admin REST API is available on port `4985` and can only be accessed on the internal network that Sync Gateway is running on. That is a good use case for using an app server to proxy the request to Sync Gateway.
-
-For this workshop, the endpoint is `/signup` on port `8080`:
-
-	curl -vX POST -H 'Content-Type: application/json' \
-		-d '{"name": "your username", "password": "your password"}' \
-		http://localhost:8080/signup
-
-You should get a 200 OK if the user was created successfully.
-
-	* Hostname was NOT found in DNS cache
-	*   Trying ::1...
-	* Connected to localhost (::1) port 8080 (#0)
-	> POST /signup HTTP/1.1
-	> User-Agent: curl/7.37.1
-	> Host: localhost:8080
-	> Accept: */*
-	> Content-Type: application/json
-	> Content-Length: 49
-	>
-	* upload completely sent off: 49 out of 49 bytes
-	< HTTP/1.1 200 OK
-	< Content-Type: application/json
-	< Date: Mon, 01 Jun 2015 21:57:32 GMT
-	< Content-Length: 0
-	<
-	* Connection #0 to host localhost left intact
-
-Back in the Android app in Application.java, create a new method `setupReplicationWithName` method to provide the username and password:
-
-- this time use the Authenticator class to create an authenticator of type basic auth passing in the name and password
-- wire up the authenticator to the replications using the `setAuthenticator` method
-- call the refactored method in `onCreate`
-
-Notice in LogCat that the documents are now syncing to Sync Gateway.
+(Side note: if you are constrained in resources, it is possible to use
+Sync Gateway alone with memory backed storage.  This is known as
+"wallace" and the Sync Gateway documentation covers the details.)
 
 
-The solution is on the `workshop/replication_basic_auth` branch.
+#### Install from Vagrant
 
-## 30 minutes: Data orchestration with Sync Gateway
+If you are attending a workshop in person, you may obtain a software
+distribution of a Vagrant configuration and an associated `.box`
+file.  With Vagrant and VirtualBox installed locally, set up Sync
+Gateway by running `vagrant up` from a shell prompt in the directory
+with the `Vagrantfile` and the `Couchbase-Sync_Gateway.box` files.
 
-So far, you have learned how to use the Replication and Authenticator classes to authenticate as a user with Sync Gateway. The last component we will discuss is the Sync Function. This is part of Sync Gateway’s configuration file and defines the access rules for users.
+After running `vagrant up`, you should be able to `vagrant ssh` to
+connect to the VM.  Also, you should be able to reach your
+[Couchbase Web UI][couchbase-web-ui] via the browser 
+at [http://10.111.72.101:8091/index.html][couchbase-web-ui].  The
+username is "Administrator" and the password is "password".
 
-## 30 minutes: Hands-on, Data orchestration
+#### Install from Download
 
-### STEP 11: The Share View
+To set up Couchbase Sync Gateway on your own system, get Couchbase
+Server and Sync Gateway binaries from the
+[Couchbase download page][http://www.couchbase.com/nosql-databases/downloads].
+Follow the setup wizard from Couchbase Server to set it up and install
+the Sync Gateway binary for your platform per the
+[installation instructions][http://developer.couchbase.com/documentation/mobile/1.1.0/develop/guides/sync-gateway/running-sync-gateway/installing-sync-gateway/index.html].
 
-As we saw in the presentation, a List document is mapped to a channel to which the Tasks are also added. The List document has a `members` property of type ArrayList holding the ids of the users to share the list with.
+#### STEP B: Configure Sync Gateway
 
-All Profile documents are mapped to the `profiles` channel and all users have access to it.
+In this step, we will start with a minimal Sync Gateway configuration
+for our environment and run the "finished" ToDo LIte application
+against it.  It will not yet actually be syncing files.
 
-That way, we can display all the user Profiles and let the user pick who to share the List with. Remember earlier we used a Recycler View to display a Query result. This time, we will use the ListView api.
+As before, there is both an 'initial' and 'finished' configuration.
+You will find a file named `sync-gateway-config.json` in both the VM
+and in this repository.
 
-Similarly to the LiveQuery for the RecyclerView, the `LiveQueryAdapter.java` serves as the glue between the LiveQuery change events and the ListView API to redraw the results.
+First, copy the initial `sync-gateway-config.json` into your local
+working directory.  Then, start Sync Gateway with either the provided shell
+script (VM environment) or by running the `sync_gateway` executable
+with the `sync-gateway-config.json` file as an argument.
 
-![][image-12] 
+When Sync Gateway starts, you should see some basic logging output.
 
-The UserAdapter class inherits from this class. In the `onCreate` method of the ShareActivity:
+```
+2015-11-17T07:58:01.571Z Enabling logging: [CRUD REST+ Access]
+2015-11-17T07:58:01.571Z ==== Couchbase Sync Gateway/1.1.1(10;2fff9eb) ====
+2015-11-17T07:58:01.571Z Configured process to allow 4096 open file descriptors
+2015-11-17T07:58:01.572Z Opening db /todos as bucket "todos", pool "default", server <walrus:>
+2015-11-17T07:58:01.573Z Opening Walrus database todos on <walrus:>
+2015-11-17T07:58:01.573Z Using default sync function 'channel(doc.channels)' for database "todos"
+2015-11-17T07:58:01.646Z WARNING: No users have been defined in the 'todos' database, which means that you will not be able to get useful data out of the sync gateway over the standard port.  FIX: define users in the configuration json or via the REST API on the admin port, and grant users to channels via the admin_channels parameter. -- rest.emitAccessRelatedWarnings() at server_context.go:576
+2015-11-17T07:58:01.646Z Starting admin server on 127.0.0.1:4985
+2015-11-17T07:58:01.650Z Starting server on :4984 ...
+```
 
-- Create a new variable called `query` of type Query and the `getQuery`.
-- The `getQuery` takes the database and user id as parameters.
-- Initialize the `mAdapter` property passing in the live query.
-- Wire up the adapter to the ListView.
+You will notice that it may not be listening on the IP address we want
+it to.  Also, you may notice that it is currently using the "walrus:"
+memory backend, but it is otherwise configured for our ToDo Lite
+application.  Next, we'll want to set up the Sync Gatway REST API to
+listen on all IPs on the host.
 
-The `UserAdapter` is an inner class to serve as the adapter to populate the ListView. But the `getView` method is missing some code to bind the data to the item view.
+Entering `ctrl-c` will stop the process.
 
-Where the code is missing add the following:
-- Initialize a new `user` variable of type `Document` using the `getItem` method.
-- Set the text property on the `textView` to the `name` property of the document.
+Then edit the JSON file.  Add a new value for _interface_ set up to
+listen on `0.0.0.0`, which indicates all IPs on the system.  You will
+add  `"interface": "0.0.0.0:4984",` to the JSON.
 
-The `mCurrentList` property of type document refers to the List Document that was selected, check if the user id is in the array. If it’s the case then set the checked property of `checkBox` to true.
+Start Sync Gateway again and you should see:
+```2015-11-17T08:06:49.206Z Starting server on 0.0.0.0:4984 ...```
 
+### STEP C: Run the Completed ToDo Lite
 
-The solution is on the `populating_list_items` branch.
+From Android Studio, close any projects you may currently have open.
+Select "Import project" from the quick start dialog and navigate to
+the `finished/` directory.  Import the project there.
 
-### STEP 12: Sharing a List
+After import, open `Application.java` and verify that the IP address
+is correct for the Sync Gateway you will connect to (_note_: the one on the
+preconfigured VM is 10.111.72.101).  
 
-Now we will use a click listener on the `checkBox` object to toggle the data and update the UI.
+When ToDo Lite runs, you will see some logged traffic on the Sync
+Gateway node:
+```
+2015-11-17T14:17:13.177Z HTTP auth failed for username="oliver"
+2015-11-17T14:17:13.177Z HTTP:  #001: GET /todos/_session
+2015-11-17T14:17:13.177Z HTTP: #001:     --> 401 Invalid login  (0.1 ms)
+2015-11-17T14:17:13.178Z HTTP auth failed for username="oliver"
+2015-11-17T14:17:13.178Z HTTP:  #002: GET /todos/_session
+2015-11-17T14:17:13.178Z HTTP: #002:     --> 401 Invalid login  (0.1 ms)
+```
 
-Setup the listener class inline and call the `List.addMemberToList` and `List.removeMemberFromList` accordingly.
+Since ToDo LIte is configured for authentication but Sync Gateway
+does not have the "oliver" user built in to the app, it cannot
+authenticate.  Add that user using the
+[Sync Gateway REST API][sg-rest-useradd].  You will have to use the
+admin port to access this REST API.  For security reasons, Sync
+Gateway listens on two ports.  One is intended for administrative
+access and should *only* be open to trusted networks.  By default, it
+will be localhost only.
 
-Both methods update the List document according to wether it should add or remove the User from the members array property.
+Adding the user should generate these log messages:
+```
+2015-11-17T14:23:11.474Z HTTP:  #003: POST /todos/_user/  (ADMIN)
+> POST /todos/_user/ HTTP/1.1
+> User-Agent: curl/7.19.7 (x86_64-redhat-linux-gnu) libcurl/7.19.7 NSS/3.16.2.3 Basic ECC zlib/1.2.3 libidn/1.18 libssh2/1.4.2
+> Host: localhost:4985
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 41
+```
 
-Next time a push replication (or immediately if it’s continuous) occurs, Sync Gateway will update the access to this List channel to reflect the change in the data model.
+Once the user is added, if you run the application again, you will
+note that "oliver" authenticates successfully.
 
-The solution is on the `workshop/final` branch.
+However, we are not done yet.  We still need to configure Sync Gateway
+to connect to the Couchbase Server bucket and store and retrieve
+documents based on the user with a sync function.
 
-### Testing the final result
+The solution to adding the user is in a shell script in the
+`finished/` directory.  
 
-Run the app, you can now see the different users from the `profiles` channel and share lists with other attendees.
+### STEP D: Complete the Sync Gateway Configuration
 
-![][image-20]
+Verify your [Couchbase Web UI][couchbase-web-ui]] has a bucket named
+"todos".  If does not exist, create it.  
 
-The result is on the `workshop/final` branch.
+Now, referring to the [documentation on config.json][sg-config-json]
+edit the `sync-gateway-config.json` to change the server to
+"http://localhost:8091" or wherever your Couchbase Server is.  Also
+change it so user 'GUEST' access is disabled.  Finally, add a sync
+function:
+```
+function(doc, oldDoc) {
+  // NOTE this function is the same across the iOS, Android, and PhoneGap versions.
+  if (doc.type == "task") {
+    if (!doc.list_id) {
+      throw({forbidden : "items must have a list_id"})
+    }
+    channel("list-"+doc.list_id);
+  } else if (doc.type == "list") {
+    channel("list-"+doc._id);
+    if (!doc.owner) {
+      throw({forbidden : "list must have an owner"})
+    }
+    if (oldDoc) {
+      var oldOwnerName = oldDoc.owner.substring(oldDoc.owner.indexOf(":")+1);
+      requireUser(oldOwnerName)
+    }
+    var ownerName = doc.owner.substring(doc.owner.indexOf(":")+1);
+    access(ownerName, "list-"+doc._id);
+    if (Array.isArray(doc.members)) {
+      var memberNames = [];
+      for (var i = doc.members.length - 1; i >= 0; i--) {
+        memberNames.push(doc.members[i].substring(doc.members[i].indexOf(":")+1))
+      };
+      access(memberNames, "list-"+doc._id);
+    }
+  } else if (doc.type == "profile") {
+    channel("profiles");
+    var user = doc._id.substring(doc._id.indexOf(":")+1);
+    if (user !== doc.user_id) {
+      throw({forbidden : "profile user_id must match docid"})
+    }
+    requireUser(user);
+    access(user, "profiles"); // TODO this should use roles
+  }
+}
+```
 
-## Congratulations!  Couchbase Mobile now complete
+Read through that sync function.  You'll notice that it handles
+documents differently based on the type.  For instance "task"
+documents must have an owner and a list_id and the "profile" user\_id
+is required to match the docid.  
 
-Congratulations on building the main features of Couchbase Mobile with the ToDoLite app!  Now that you have a deeper understanding of Couchbase Lite and how to use the sync features with Sync Gateway, you can start using the SDKs in your own mobile apps.  Hope to see Couchbase Mobile with your apps on Google Play store soon!
+Start Sync Gateway with this new configuration file.
+
+Before we can synchronize, the user "oliver" with the password
+"letmein" needs to be added as you did earlier via the Admin REST
+API:
+```
+2015-11-17T14:56:22.145Z Access: Computed channels for "oliver": !:1
+2015-11-17T14:56:22.161Z Access: Computed roles for "oliver": 
+< HTTP/1.1 201 Created
+< Server: Couchbase Sync Gateway/1.1.1
+< Date: Tue, 17 Nov 2015 14:56:22 GMT
+< Content-Length: 0
+< Content-Type: text/plain; charset=utf-8
+< 
+* Connection #0 to host localhost left intact
+* Closing connection #0
+```
+
+You will also note in the [Couchbase Server Web UI][couchbase-web-ui]
+that the "todos" bucket now has some documents in it related to Sync
+Gateway's own management of data.
+
+The completed configuration is in the `finished/` directory.
+
+### STEP E:  Run the Completed ToDo Lite Against the Server
+
+Once again, go back to the completed ToDo Lite Application and start
+it.  This time, as you interact with the app, you should see data
+being automatically synchronized to and from the server:
+```2015-11-17T15:00:06.884Z HTTP:  #002: GET /todos/_session  (as oliver)
+2015-11-17T15:00:06.900Z HTTP:  #003: GET /todos/_session  (as oliver)
+2015-11-17T15:00:06.925Z HTTP:  #004: GET /todos/_local/417e79ad1e103bb533eb9083f975c0f8523f7c83  (as oliver)
+2015-11-17T15:00:06.925Z HTTP: #004:     --> 404 missing  (1.5 ms)
+2015-11-17T15:00:06.959Z HTTP:  #005: GET /todos/_local/2d306925261478d9482423011c6dbfd168fc74d1  (as oliver)
+2015-11-17T15:00:06.959Z HTTP: #005:     --> 404 missing  (0.5 ms)
+2015-11-17T15:00:06.990Z HTTP:  #006: POST /todos/_changes  (as oliver)
+2015-11-17T15:00:07.016Z HTTP:  #007: POST /todos/_changes  (as oliver)
+2015-11-17T15:00:07.462Z HTTP:  #008: POST /todos/_revs_diff  (as oliver)
+2015-11-17T15:00:07.504Z HTTP:  #009: PUT /todos/56a4997f-2b85-419e-a10d-1c3712748415?new_edits=false  (as oliver)
+2015-11-17T15:00:07.539Z HTTP:  #010: POST /todos/_bulk_docs  (as oliver)
+2015-11-17T15:00:07.633Z CRUD: 	Doc "p:oliver" in channels "{profiles}"
+```
+
+Congratulations on building the main features of Couchbase Mobile with
+the ToDoLite app!  Now that you have a deeper understanding of
+Couchbase Lite and how to use the sync features with Sync Gateway, you
+can start using the SDKs in your own mobile apps.  We hope to see
+Couchbase Mobile with your apps on the Google Play store soon!
+
 
 [1]:	https://github.com/couchbaselabs/ToDoLite-Android
 [2]:	http://developer.couchbase.com/mobile/develop/references/couchbase-lite/couchbase-lite/database/index.html
@@ -483,7 +589,6 @@ Congratulations on building the main features of Couchbase Mobile with the ToDoL
 [image-9]:	http://i.gyazo.com/e7faa2e8a395a12bf4ce8315372f8a71.gif
 [image-10]:	http://i.gyazo.com/68dfc680dc38813aa0c6ff144697ef4c.gif
 [image-11]:	http://i.gyazo.com/4b35a4bcf99bc57d3c47553b3ca973d4.gif
-[image-12]:	http://cl.ly/image/2W3F001H2C3Q/Screen%20Shot%202015-05-27%20at%2023.29.26.png
 [image-13]: http://cl.ly/bTt7/git%20submodule%20git%20init.png
 [image-14]: http://cl.ly/bUlx/To-Do-Lite%20Android%20folder%20content.png
 [image-15]: http://cl.ly/bSYg/file_import_project.png
@@ -492,8 +597,11 @@ Congratulations on building the main features of Couchbase Mobile with the ToDoL
 [image-17]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/ToDoLite.png
 [image-18]: http://cl.ly/bUZe/Run%20Android%20App.png
 [image-19]: http://cl.ly/bRmh/Build%20ToDo-Lite.png
-[image-20]: http://cl.ly/bVhe/application-java%20file.png
 [image-21]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/document-list.png
 [image-22]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/list-createnewlist.png
 [image-23]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/QueryListinDatabase.png
 [image-24]: https://dl.dropboxusercontent.com/u/5618818/Couchbase/workshop/mobile/images/setuptodolists.png
+[couchbase-web-ui]: http://10.111.72.101:8091/index.html
+[couchbase-sg]: http://10.111.72.101:4984/index.html
+[sg-rest-useradd]: http://developer.couchbase.com/documentation/mobile/current/develop/references/sync-gateway/admin-rest-api/user/post-user/index.html
+[sg-config-json]: http://developer.couchbase.com/documentation/mobile/1.1.0/develop/guides/sync-gateway/configuring-sync-gateway/config-properties/index.html
