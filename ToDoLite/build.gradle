@@ -56,13 +56,13 @@ dependencies {
     compile 'com.jakewharton:butterknife:6.0.0'
     compile 'com.facebook.android:facebook-android-sdk:4.1.0'
 
-    compile project(':libraries:couchbase-lite-android')
-    compile project(':libraries:couchbase-lite-java-core')
-    compile project(':libraries:couchbase-lite-java-native:sqlite-default')
+//    compile project(':libraries:couchbase-lite-android')
+//    compile project(':libraries:couchbase-lite-java-core')
+//    compile project(':libraries:couchbase-lite-java-native:sqlite-default')
 
     // To depend on couchbase lite via the maven artifact, comment above lines:
     // :libraries:couchbase-lite-android and :libraries:couchbase-lite-java-core
     // And uncomment line below:
-    // compile 'com.couchbase.lite:couchbase-lite-android:1.1.0'
+    compile 'com.couchbase.lite:couchbase-lite-android:1.1.0'
 
 }
