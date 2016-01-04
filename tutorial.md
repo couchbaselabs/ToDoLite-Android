@@ -14,8 +14,8 @@ master branch and is updated from time to time as new features are
 added to Couchbase Lite.
 
 You may be viewing this tutorial from a browser on github or on your
-local system after cloning the repository or opening a zipfile.  in
-Any case, you should find the following layout in the tutorial:
+local system after cloning the repository or opening a zipfile.  In
+any case, you should find the following layout in the tutorial:
 
 	CONTRIBUTING.md
 	finished/
