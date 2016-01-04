@@ -402,7 +402,7 @@ memory backend, but it is otherwise configured for our ToDo Lite
 application.  Next, we'll want to set up the Sync Gatway REST API to
 listen on all IPs on the host.
 
-Entering `ctrl-c` will stop the process.
+From within the Terminal, enter `ctrl-c` will stop the Sync Gateway process.
 
 Then edit the JSON file.  Add a new value for _interface_ set up to
 listen on `0.0.0.0`, which indicates all IPs on the system.  You will
@@ -510,7 +510,7 @@ function(doc, oldDoc) {
 }
 ```
 
-Read through that sync function.  You'll notice that it handles
+Read through that sync function.  You will notice that it handles
 documents differently based on the type.  For instance "task"
 documents must have an owner and a list_id and the "profile" user\_id
 is required to match the docid.  
