@@ -9,9 +9,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.preference.PreferenceManager;
 
 import com.couchbase.lite.Attachment;
 import com.couchbase.lite.CouchbaseLiteException;
@@ -82,6 +80,8 @@ public class Application extends android.app.Application {
         }
 
         try {
+            // use forestdb
+            manager.setStorageType(Manager.FORESTDB_STORAGE);
             database = manager.getDatabase(DATABASE_NAME);
         } catch (CouchbaseLiteException e) {
             Log.e(TAG, "Cannot get Database", e);
