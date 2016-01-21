@@ -38,7 +38,7 @@ import java.util.Observable;
 
 public class Application extends android.app.Application {
 
-    public static final String TAG = "ToDoLite";
+    public  static final String TAG = "ToDoLite";
     private static final String DATABASE_NAME = "todos";
     private static final String GUEST_DATABASE_NAME = "guest";
     private static final String SYNC_URL_HTTP = BuildConfig.SYNC_URL_HTTP;
@@ -358,7 +358,11 @@ public class Application extends android.app.Application {
         try {
             byte[] inputBytes = name.getBytes();
             byte[] hashBytes = digest.digest(inputBytes);
-            database = manager.getDatabase("db" + byteArrayToHex(hashBytes));
+            //database = manager.getDatabase("db" + byteArrayToHex(hashBytes));
+            DatabaseOptions options = new DatabaseOptions();
+            options.setCreate(true);
+            options.setEncryptionKey(KEY_4_DATABASE);
+            database = manager.openDatabase("db-" + byteArrayToHex(hashBytes), options);
         } catch (CouchbaseLiteException e) {
             Log.e(TAG, "Cannot get Database", e);
         }
@@ -367,7 +371,11 @@ public class Application extends android.app.Application {
 
     public void setDatabaseForGuest() {
         try {
-            database = manager.getDatabase(GUEST_DATABASE_NAME);
+            DatabaseOptions options = new DatabaseOptions();
+            options.setCreate(true);
+            options.setEncryptionKey(KEY_4_DATABASE);
+            database = manager.openDatabase(GUEST_DATABASE_NAME, options);
+            //database = manager.getDatabase(GUEST_DATABASE_NAME);
         } catch (CouchbaseLiteException e) {
             e.printStackTrace();
         }
@@ -376,7 +384,11 @@ public class Application extends android.app.Application {
     public Database getDatabaseForGuest() {
         Database db = null;
         try {
-            db = manager.getDatabase(GUEST_DATABASE_NAME);
+            DatabaseOptions options = new DatabaseOptions();
+            options.setCreate(true);
+            options.setEncryptionKey(KEY_4_DATABASE);
+            db = manager.openDatabase(GUEST_DATABASE_NAME, options);
+            //db = manager.getDatabase(GUEST_DATABASE_NAME);
         } catch (CouchbaseLiteException e) {
             e.printStackTrace();
         }
