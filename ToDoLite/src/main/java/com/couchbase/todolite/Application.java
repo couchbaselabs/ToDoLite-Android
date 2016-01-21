@@ -9,13 +9,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.preference.PreferenceManager;
 
 import com.couchbase.lite.Attachment;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
+import com.couchbase.lite.DatabaseOptions;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.Manager;
 import com.couchbase.lite.QueryEnumerator;
@@ -45,6 +44,8 @@ public class Application extends android.app.Application {
     private static final String SYNC_URL_HTTP = BuildConfig.SYNC_URL_HTTP;
     private static final String SYNC_URL_HTTPS = BuildConfig.SYNC_URL_HTTPS;
     private static final String SYNC_URL = SYNC_URL_HTTP;
+
+    private static final String KEY_4_DATABASE = "Passw0rd";
 
     private Manager manager;
     private Database database;
@@ -82,7 +83,11 @@ public class Application extends android.app.Application {
         }
 
         try {
-            database = manager.getDatabase(DATABASE_NAME);
+            //database = manager.getDatabase(DATABASE_NAME);
+            DatabaseOptions options = new DatabaseOptions();
+            options.setCreate(true);
+            options.setEncryptionKey(KEY_4_DATABASE);
+            database = manager.openDatabase(DATABASE_NAME, options);
         } catch (CouchbaseLiteException e) {
             Log.e(TAG, "Cannot get Database", e);
             return;
