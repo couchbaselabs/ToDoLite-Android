@@ -83,7 +83,6 @@ public class Application extends android.app.Application {
         }
 
         try {
-            //database = manager.getDatabase(DATABASE_NAME);
             DatabaseOptions options = new DatabaseOptions();
             options.setCreate(true);
             options.setEncryptionKey(KEY_4_DATABASE);
