@@ -87,6 +87,7 @@ public class Application extends android.app.Application {
             DatabaseOptions options = new DatabaseOptions();
             options.setCreate(true);
             options.setEncryptionKey(KEY_4_DATABASE);
+            options.setStorageType(Manager.FORESTDB_STORAGE);
             database = manager.openDatabase(DATABASE_NAME, options);
         } catch (CouchbaseLiteException e) {
             Log.e(TAG, "Cannot get Database", e);
@@ -362,6 +363,7 @@ public class Application extends android.app.Application {
             DatabaseOptions options = new DatabaseOptions();
             options.setCreate(true);
             options.setEncryptionKey(KEY_4_DATABASE);
+            options.setStorageType(Manager.FORESTDB_STORAGE);
             database = manager.openDatabase("db-" + byteArrayToHex(hashBytes), options);
         } catch (CouchbaseLiteException e) {
             Log.e(TAG, "Cannot get Database", e);
@@ -374,6 +376,7 @@ public class Application extends android.app.Application {
             DatabaseOptions options = new DatabaseOptions();
             options.setCreate(true);
             options.setEncryptionKey(KEY_4_DATABASE);
+            options.setStorageType(Manager.FORESTDB_STORAGE);
             database = manager.openDatabase(GUEST_DATABASE_NAME, options);
             //database = manager.getDatabase(GUEST_DATABASE_NAME);
         } catch (CouchbaseLiteException e) {
@@ -387,6 +390,7 @@ public class Application extends android.app.Application {
             DatabaseOptions options = new DatabaseOptions();
             options.setCreate(true);
             options.setEncryptionKey(KEY_4_DATABASE);
+            options.setStorageType(Manager.FORESTDB_STORAGE);
             db = manager.openDatabase(GUEST_DATABASE_NAME, options);
             //db = manager.getDatabase(GUEST_DATABASE_NAME);
         } catch (CouchbaseLiteException e) {

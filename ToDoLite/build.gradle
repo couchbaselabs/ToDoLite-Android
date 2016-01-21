@@ -57,5 +57,5 @@ dependencies {
     compile 'com.facebook.android:facebook-android-sdk:4.1.0'
 
     compile 'com.couchbase.lite:couchbase-lite-android:1.2.0-10'
-    compile 'com.couchbase.lite:couchbase-lite-android-sqlcipher:1.2.0-10'
+    compile 'com.couchbase.lite:couchbase-lite-android-forestdb:1.2.0-10'
 }
