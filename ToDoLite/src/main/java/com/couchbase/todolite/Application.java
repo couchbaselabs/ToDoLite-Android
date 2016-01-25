@@ -357,7 +357,6 @@ public class Application extends android.app.Application {
         try {
             byte[] inputBytes = name.getBytes();
             byte[] hashBytes = digest.digest(inputBytes);
-            //database = manager.getDatabase("db" + byteArrayToHex(hashBytes));
             DatabaseOptions options = new DatabaseOptions();
             options.setCreate(true);
             options.setEncryptionKey(KEY_4_DATABASE);
@@ -374,7 +373,6 @@ public class Application extends android.app.Application {
             options.setCreate(true);
             options.setEncryptionKey(KEY_4_DATABASE);
             database = manager.openDatabase(GUEST_DATABASE_NAME, options);
-            //database = manager.getDatabase(GUEST_DATABASE_NAME);
         } catch (CouchbaseLiteException e) {
             e.printStackTrace();
         }
@@ -387,7 +385,6 @@ public class Application extends android.app.Application {
             options.setCreate(true);
             options.setEncryptionKey(KEY_4_DATABASE);
             db = manager.openDatabase(GUEST_DATABASE_NAME, options);
-            //db = manager.getDatabase(GUEST_DATABASE_NAME);
         } catch (CouchbaseLiteException e) {
             e.printStackTrace();
         }
