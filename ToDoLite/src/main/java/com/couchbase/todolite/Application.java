@@ -9,13 +9,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.preference.PreferenceManager;
 
 import com.couchbase.lite.Attachment;
 import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
+import com.couchbase.lite.DatabaseOptions;
 import com.couchbase.lite.Document;
 import com.couchbase.lite.Manager;
 import com.couchbase.lite.QueryEnumerator;
@@ -82,7 +81,9 @@ public class Application extends android.app.Application {
         }
 
         try {
-            database = manager.getDatabase(DATABASE_NAME);
+            DatabaseOptions options = new DatabaseOptions();
+            options.setCreate(true);
+            database = manager.openDatabase(DATABASE_NAME, options);
         } catch (CouchbaseLiteException e) {
             Log.e(TAG, "Cannot get Database", e);
             return;
@@ -353,7 +354,9 @@ public class Application extends android.app.Application {
         try {
             byte[] inputBytes = name.getBytes();
             byte[] hashBytes = digest.digest(inputBytes);
-            database = manager.getDatabase("db" + byteArrayToHex(hashBytes));
+            DatabaseOptions options = new DatabaseOptions();
+            options.setCreate(true);
+            database = manager.openDatabase("db-" + byteArrayToHex(hashBytes), options);
         } catch (CouchbaseLiteException e) {
             Log.e(TAG, "Cannot get Database", e);
         }
@@ -362,7 +365,9 @@ public class Application extends android.app.Application {
 
     public void setDatabaseForGuest() {
         try {
-            database = manager.getDatabase(GUEST_DATABASE_NAME);
+            DatabaseOptions options = new DatabaseOptions();
+            options.setCreate(true);
+            database = manager.openDatabase(GUEST_DATABASE_NAME, options);
         } catch (CouchbaseLiteException e) {
             e.printStackTrace();
         }
@@ -371,7 +376,9 @@ public class Application extends android.app.Application {
     public Database getDatabaseForGuest() {
         Database db = null;
         try {
-            db = manager.getDatabase(GUEST_DATABASE_NAME);
+            DatabaseOptions options = new DatabaseOptions();
+            options.setCreate(true);
+            db = manager.openDatabase(GUEST_DATABASE_NAME, options);
         } catch (CouchbaseLiteException e) {
             e.printStackTrace();
         }
