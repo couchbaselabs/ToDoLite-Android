@@ -9,9 +9,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.preference.PreferenceManager;
 
 import com.couchbase.lite.Attachment;
 import com.couchbase.lite.CouchbaseLiteException;
@@ -353,7 +351,7 @@ public class Application extends android.app.Application {
         try {
             byte[] inputBytes = name.getBytes();
             byte[] hashBytes = digest.digest(inputBytes);
-            database = manager.getDatabase("db" + byteArrayToHex(hashBytes));
+            database = manager.getDatabase("db-" + byteArrayToHex(hashBytes));
         } catch (CouchbaseLiteException e) {
             Log.e(TAG, "Cannot get Database", e);
         }
