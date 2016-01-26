@@ -42,6 +42,7 @@ Couchbase Lite API basics.
 If needed, clone the application from the ToDoLite-Android repository:
 
 	git clone https://github.com/couchbaselabs/ToDoLite-Android
+	cd ToDoLite-Android/
 	git checkout workshop/CouchbaseDay
 
 Within Android Studio, click:  File\>New\>Import Project 
