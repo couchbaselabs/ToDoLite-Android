@@ -54,6 +54,6 @@ dependencies {
     compile 'com.jakewharton:butterknife:6.0.0'
     compile 'com.facebook.android:facebook-android-sdk:4.1.0'
 
-    compile 'com.couchbase.lite:couchbase-lite-android:0.0.0-753'
-    compile 'com.couchbase.lite:couchbase-lite-android-sqlcipher:0.0.0-753'
+    compile 'com.couchbase.lite:couchbase-lite-android:0.0.0-756'
+    compile 'com.couchbase.lite:couchbase-lite-android-sqlcipher:0.0.0-756'
 }
