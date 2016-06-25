@@ -18,9 +18,7 @@ android {
     buildTypes {
 
         debug {
-            //buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://demo.couchbasemobile.com:4984/todolite/\""
-            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://ec2-54-145-244-2.compute-1.amazonaws.com:4984/todolite-cc/\""
-            //buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://ec2-54-145-244-2.compute-1.amazonaws.com:4984/todolite-di/\""
+            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://us-east.testfest.couchbasemobile.com:4984/db/\""
             buildConfigField 'String', 'SYNC_URL_HTTPS', "\"\""
         }
 
@@ -33,7 +31,7 @@ android {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
 
-            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://demo.couchbasemobile.com:4984/todolite/\""
+            buildConfigField 'String', 'SYNC_URL_HTTP', "\"http://us-east.testfest.couchbasemobile.com:4984/db/\""
             buildConfigField 'String', 'SYNC_URL_HTTPS', "\"\""
         }
     }
@@ -56,6 +54,6 @@ dependencies {
     compile 'com.jakewharton:butterknife:6.0.0'
     compile 'com.facebook.android:facebook-android-sdk:4.1.0'
 
-    compile 'com.couchbase.lite:couchbase-lite-android:1.2.0'
-    compile 'com.couchbase.lite:couchbase-lite-android-forestdb:1.2.0'
+    compile 'com.couchbase.lite:couchbase-lite-android:0.0.0-753'
+    compile 'com.couchbase.lite:couchbase-lite-android-forestdb:0.0.0-753'
 }
