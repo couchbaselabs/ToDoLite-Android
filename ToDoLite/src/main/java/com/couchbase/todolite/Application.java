@@ -22,13 +22,13 @@ import com.couchbase.lite.QueryRow;
 import com.couchbase.lite.SavedRevision;
 import com.couchbase.lite.UnsavedRevision;
 import com.couchbase.lite.android.AndroidContext;
+import com.couchbase.lite.replicator.RemoteRequestResponseException;
 import com.couchbase.lite.replicator.Replication;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.preferences.ToDoLitePreferences;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 
-import org.apache.http.client.HttpResponseException;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -260,10 +260,11 @@ public class Application extends android.app.Application {
         //use the flag FLAG_UPDATE_CURRENT to override any notification already there
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Notification notification = new Notification(R.drawable.ic_launcher, notificationText, System.currentTimeMillis());
-        notification.flags = Notification.FLAG_AUTO_CANCEL | Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND;
-
-        notification.setLatestEventInfo(this, title, notificationText, contentIntent);
+        Notification notification = new Notification.Builder(this.getApplicationContext()).
+                setContentTitle(title).
+                setContentText(notificationText).
+                setContentIntent(contentIntent).
+                build();
 
         //10 is a random number I chose to act as the id for this notification
         notificationManager.notify(10, notification);
@@ -272,7 +273,6 @@ public class Application extends android.app.Application {
 
     private Replication.ChangeListener getReplicationChangeListener() {
         return new Replication.ChangeListener() {
-
             @Override
             public void changed(Replication.ChangeEvent event) {
                 Replication replication = event.getSource();
@@ -281,11 +281,11 @@ public class Application extends android.app.Application {
                     if (lastError.getMessage().contains("existing change tracker")) {
                         pushLocalNotification("Replication Event", String.format("Sync error: %s:", lastError.getMessage()));
                     }
-                    if (lastError instanceof HttpResponseException) {
-                        HttpResponseException responseException = (HttpResponseException) lastError;
-                        if (responseException.getStatusCode() == 401) {
+
+                    if (lastError instanceof RemoteRequestResponseException) {
+                        RemoteRequestResponseException exception = (RemoteRequestResponseException) lastError;
+                        if (exception.getCode() == 401)
                             onSyncUnauthorizedObservable.notifyChanges();
-                        }
                     }
                 }
                 Log.d(TAG, event.toString());
