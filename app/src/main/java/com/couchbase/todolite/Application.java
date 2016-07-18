@@ -26,18 +26,20 @@ import java.util.Map;
 public class Application extends android.app.Application implements Replication.ChangeListener {
     public static final String TAG = "ToDoLite";
 
-    private static final String SYNC_URL_HTTP = "http://10.0.1.14:4984/todolite";
-    private static final String GUEST_DATABASE_NAME = "guest";
+    private static final String SYNC_URL_HTTP = "http://us-east.testfest.couchbasemobile.com:4984/todolite";
 
     // Storage Type: .SQLITE_STORAGE or .FORESTDB_STORAGE
     private static final String STORAGE_TYPE = Manager.SQLITE_STORAGE;
 
-    // Encryption:
-    // Note: This is just a sample showing how to set an encryption key.
+    // Encryption (Don't store encryption key in the source code. We are doing it here just as an example):
     private static final boolean ENCRYPTION_ENABLED = false;
     private static final String ENCRYPTION_KEY = "seekrit";
-
+    
+    // Logging:
     private static final boolean LOGGING_ENABLED = true;
+
+    // Guest database:
+    private static final String GUEST_DATABASE_NAME = "guest";
 
     private Manager mManager;
     private Database mDatabase;

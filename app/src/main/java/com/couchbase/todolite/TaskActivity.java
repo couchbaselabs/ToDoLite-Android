@@ -12,6 +12,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -49,6 +50,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -68,8 +70,10 @@ public class TaskActivity extends AppCompatActivity {
     private Database mDatabase;
     private TaskAdapter mAdapter;
     private String mImagePathToBeAttached;
-    private Bitmap mImageToBeAttached;
     private Document mCurrentTaskToAttachImage;
+
+    private File mImageFile;
+    private Bitmap mImageToBeAttached;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -336,8 +340,9 @@ public class TaskActivity extends AppCompatActivity {
     }
 
     private File createImageFile() throws IOException {
-        String fileName = "TODO_LITE_" + System.currentTimeMillis();
-        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String fileName = "TODO_LITE-" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(fileName, ".jpg", storageDir);
         mImagePathToBeAttached = image.getAbsolutePath();
         return image;
@@ -354,11 +359,15 @@ public class TaskActivity extends AppCompatActivity {
         if (mImageToBeAttached != null) {
             mImageToBeAttached.recycle();
             mImageToBeAttached = null;
-
-            ViewGroup view = (ViewGroup) findViewById(R.id.create_task);
-            ImageView imageView = (ImageView) view.findViewById(R.id.image);
-            imageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
         }
+
+        if (mImageFile != null) {
+            mImageFile = null;
+        }
+
+        ViewGroup view = (ViewGroup) findViewById(R.id.create_task);
+        ImageView imageView = (ImageView) view.findViewById(R.id.image);
+        imageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
     }
 
     private void displayAttachImageDialog(final Document task) {
@@ -387,18 +396,6 @@ public class TaskActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void dispatchImageViewIntent(Bitmap image) {
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        image.compress(Bitmap.CompressFormat.JPEG, 50, stream);
-        byte[] byteArray = stream.toByteArray();
-
-        long l = byteArray.length;
-
-        Intent intent = new Intent(this, ImageActivity.class);
-        intent.putExtra(ImageActivity.INTENT_IMAGE, byteArray);
-        startActivity(intent);
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -412,13 +409,20 @@ public class TaskActivity extends AppCompatActivity {
         final int size = THUMBNAIL_SIZE;
         Bitmap thumbnail = null;
         if (requestCode == REQUEST_TAKE_PHOTO) {
-            mImageToBeAttached = BitmapFactory.decodeFile(mImagePathToBeAttached);
-            if (mCurrentTaskToAttachImage == null)
-                thumbnail = ImageUtil.thumbnailFromFile(mImagePathToBeAttached, size, size);
-
-            // Delete the temporary image file
             File file = new File(mImagePathToBeAttached);
-            file.delete();
+            if (file.exists()) {
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(mImagePathToBeAttached, options);
+                options.inJustDecodeBounds = false;
+                mImageToBeAttached = BitmapFactory.decodeFile(mImagePathToBeAttached, options);
+                if (mCurrentTaskToAttachImage == null) {
+                    thumbnail = ThumbnailUtils.extractThumbnail(mImageToBeAttached, size, size);
+                }
+
+                // Delete the temporary image file
+                file.delete();
+            }
             mImagePathToBeAttached = null;
         } else if (requestCode == REQUEST_CHOOSE_PHOTO) {
             try {
@@ -438,10 +442,12 @@ public class TaskActivity extends AppCompatActivity {
             if (mCurrentTaskToAttachImage != null) {
                 attachImage(mCurrentTaskToAttachImage, mImageToBeAttached);
                 mImageToBeAttached = null;
-            } else { // Attach an image for a new task
-                ImageView imageView = (ImageView) findViewById(R.id.image);
-                imageView.setImageBitmap(thumbnail);
             }
+        }
+
+        if (thumbnail != null) {
+            ImageView imageView = (ImageView) findViewById(R.id.image);
+            imageView.setImageBitmap(thumbnail);
         }
 
         // Ensure resetting the task to attach an image
@@ -474,25 +480,16 @@ public class TaskActivity extends AppCompatActivity {
                 imageView.setImageBitmap(thumbnail);
             else
                 imageView.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera_light));
+
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    List<Attachment> attachments = task.getCurrentRevision().getAttachments();
-                    if (attachments != null && attachments.size() > 0) {
-                        Attachment attachment = attachments.get(0);
-                        InputStream is = null;
-                        try {
-                            is = attachment.getContent();
-                            Bitmap displayImage = BitmapFactory.decodeStream(is);
-                            dispatchImageViewIntent(displayImage);
-                        } catch (Exception e) {
-                            Log.e(Application.TAG, "Cannot decode the attached image", e);
-                        } finally {
-                            try { if (is != null) is.close(); } catch (IOException e) { }
-                        }
-                    } else {
+                    if (task.getCurrentRevision().getAttachment("image") != null) {
+                        Intent intent = new Intent(TaskActivity.this, ImageActivity.class);
+                        intent.putExtra(ImageActivity.INTENT_TASK_DOC_ID, task.getId());
+                        startActivity(intent);
+                    } else
                         displayAttachImageDialog(task);
-                    }
                 }
             });
 
