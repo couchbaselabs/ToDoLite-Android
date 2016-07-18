@@ -34,7 +34,7 @@ public class Application extends android.app.Application implements Replication.
     // Encryption (Don't store encryption key in the source code. We are doing it here just as an example):
     private static final boolean ENCRYPTION_ENABLED = false;
     private static final String ENCRYPTION_KEY = "seekrit";
-    
+
     // Logging:
     private static final boolean LOGGING_ENABLED = true;
 
