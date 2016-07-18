@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.couchbase.lite.CouchbaseLiteException;
@@ -55,6 +56,30 @@ public class ListActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Document list = (Document) mAdapter.getItem(i);
                 showTasks(list);
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int pos, long id) {
+                PopupMenu popup = new PopupMenu(ListActivity.this, view);
+                popup.inflate(R.menu.list_item);
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        Document list = (Document) mAdapter.getItem(pos);
+                        String owner = (String) list.getProperties().get("owner");
+                        Application application = (Application) getApplication();
+                        boolean isListOwner = owner.equals("p:" + application.getCurrentUserId());
+                        if (isListOwner)
+                            deleteList(list);
+                        else
+                            application.showErrorMessage("Only owner can delete the list", null);
+                        return true;
+                    }
+                });
+                popup.show();
+                return true;
             }
         });
     }
@@ -147,12 +172,20 @@ public class ListActivity extends AppCompatActivity {
         Application application = (Application) getApplication();
         String userId = application.getCurrentUserId();
         if (userId != null)
-            properties.put("owner", "profile:" + userId);
+            properties.put("owner", "p:" + userId);
 
         Document document = mDatabase.createDocument();
         document.putProperties(properties);
 
         return document;
+    }
+
+    private void deleteList(Document list) {
+        try {
+            list.delete();
+        } catch (CouchbaseLiteException e) {
+            Log.e(Application.TAG, "Cannot delete list", e);
+        }
     }
 
     private void showTasks(Document list) {

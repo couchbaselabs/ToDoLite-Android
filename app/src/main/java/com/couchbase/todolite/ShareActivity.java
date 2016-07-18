@@ -131,9 +131,16 @@ public class ShareActivity extends AppCompatActivity {
             super(context, query);
         }
 
+        private boolean isListOwner(Document user) {
+            Application application = (Application) getApplication();
+            return user.getId().equals("p:" + application.getCurrentUserId());
+        }
+
         private boolean isMemberOfTheCurrentList(Document user) {
-            java.util.List<String> members =
-                    (java.util.List<String>) mList.getProperty("members");
+            if (isListOwner(user))
+                return true;
+
+            List<String> members = (List<String>) mList.getProperty("members");
             return members != null ? members.contains(user.getId()) : false;
         }
 
@@ -154,16 +161,18 @@ public class ShareActivity extends AppCompatActivity {
             final CheckBox checkBox = (CheckBox) convertView.findViewById(R.id.checked);
             boolean checked = isMemberOfTheCurrentList(user);
             checkBox.setChecked(checked);
+            checkBox.setEnabled(!isListOwner(user));
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Application application = (Application) getApplication();
+
                     if (checkBox.isChecked())
                         addMember(user);
                     else
                         removeMember(user);
                 }
             });
-
             return convertView;
         }
     }

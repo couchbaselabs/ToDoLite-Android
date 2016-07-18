@@ -71,8 +71,6 @@ public class TaskActivity extends AppCompatActivity {
     private TaskAdapter mAdapter;
     private String mImagePathToBeAttached;
     private Document mCurrentTaskToAttachImage;
-
-    private File mImageFile;
     private Bitmap mImageToBeAttached;
 
     @Override
@@ -106,6 +104,15 @@ public class TaskActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.task, menu);
+
+        // Hide share menu if the current user is not the owner of the list:
+        Application application = (Application) getApplication();
+        String owner = (String) application.getDatabase().
+                getDocument(mListId).getProperties().get("owner");
+
+        boolean isListOwner = owner.equals("p:" + application.getCurrentUserId());
+        menu.findItem(R.id.share).setVisible(isListOwner);
+
         return true;
     }
 
@@ -359,10 +366,6 @@ public class TaskActivity extends AppCompatActivity {
         if (mImageToBeAttached != null) {
             mImageToBeAttached.recycle();
             mImageToBeAttached = null;
-        }
-
-        if (mImageFile != null) {
-            mImageFile = null;
         }
 
         ViewGroup view = (ViewGroup) findViewById(R.id.create_task);
