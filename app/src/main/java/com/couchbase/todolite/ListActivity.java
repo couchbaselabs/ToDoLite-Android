@@ -70,8 +70,7 @@ public class ListActivity extends AppCompatActivity {
                         Document list = (Document) mAdapter.getItem(pos);
                         String owner = (String) list.getProperties().get("owner");
                         Application application = (Application) getApplication();
-                        boolean isListOwner = owner.equals("p:" + application.getCurrentUserId());
-                        if (isListOwner)
+                        if (owner == null || owner.equals("p:" + application.getCurrentUserId()))
                             deleteList(list);
                         else
                             application.showErrorMessage("Only owner can delete the list", null);

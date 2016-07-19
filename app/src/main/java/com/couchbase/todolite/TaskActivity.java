@@ -110,8 +110,8 @@ public class TaskActivity extends AppCompatActivity {
         String owner = (String) application.getDatabase().
                 getDocument(mListId).getProperties().get("owner");
 
-        boolean isListOwner = owner.equals("p:" + application.getCurrentUserId());
-        menu.findItem(R.id.share).setVisible(isListOwner);
+        boolean sharable = owner != null && owner.equals("p:" + application.getCurrentUserId());
+        menu.findItem(R.id.share).setVisible(sharable);
 
         return true;
     }
