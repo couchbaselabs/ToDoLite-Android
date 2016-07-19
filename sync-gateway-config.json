@@ -23,7 +23,7 @@ function(doc, oldDoc) {
     }
 
     // Make sure that only the owner of the list can update the list:
-    if (owner != doc.owner) {
+    if (doc.owner && owner != doc.owner) {
       throw({forbidden : "Cannot change owner for lists."});
     }
 
