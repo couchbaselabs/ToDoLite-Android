@@ -210,7 +210,7 @@ public class TaskActivity extends AppCompatActivity {
                         List<Object> keys = new ArrayList<Object>();
                         keys.add(document.get("list_id"));
                         keys.add(document.get("created_at"));
-                        emitter.emit(keys, null);
+                        emitter.emit(keys, document);
                     }
                 }
             };
