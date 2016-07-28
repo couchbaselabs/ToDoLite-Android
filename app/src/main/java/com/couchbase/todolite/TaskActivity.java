@@ -55,6 +55,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class TaskActivity extends AppCompatActivity {
     public static final String INTENT_LIST_ID = "list_id";
@@ -94,6 +95,8 @@ public class TaskActivity extends AppCompatActivity {
         listView.setAdapter(mAdapter);
         setListHeader(listView);
         setListItemLongClick(listView);
+
+        mDateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -234,8 +237,8 @@ public class TaskActivity extends AppCompatActivity {
     }
 
     private void createTask(String title, Bitmap image, String listId) {
-        Calendar calendar = GregorianCalendar.getInstance();
-        String currentTimeString = mDateFormatter.format(calendar.getTime());
+        Date date = new Date();
+        String currentTimeString = mDateFormatter.format(date);
 
         Map<String, Object> properties = new HashMap<String, Object>();
         properties.put("type", "task");
