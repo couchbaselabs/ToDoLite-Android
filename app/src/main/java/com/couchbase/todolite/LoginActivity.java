@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.couchbase.todolite.util.FacebookResults;
+import com.couchbase.todolite.util.FbUtility;
 import com.facebook.*;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
@@ -17,7 +19,7 @@ import com.facebook.login.widget.LoginButton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements FacebookResults {
     public static final String ACTION_LOGOUT = "logout";
 
     private CallbackManager mCallbackManager;
@@ -34,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             AccessToken accessToken = AccessToken.getCurrentAccessToken();
             if (accessToken != null && !accessToken.isExpired()) {
-                loginAsFacebookUser(accessToken.getToken(), accessToken.getUserId(), null);
+                onFbLoginSuccess(accessToken.getToken(), accessToken.getUserId(), null);
                 return;
             }
 
@@ -48,20 +50,7 @@ public class LoginActivity extends AppCompatActivity {
         facebookLoginButton.setReadPermissions("public_profile");
 
         mCallbackManager = CallbackManager.Factory.create();
-        facebookLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                continueFacebookLogin(loginResult);
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                Log.e(Application.TAG, "Facebook login error", error);
-            }
-
-            @Override
-            public void onCancel() { }
-        });
+        new FbUtility().fbCallback(facebookLoginButton, mCallbackManager, this);
 
         Button guestLoginButton = (Button) findViewById(R.id.guest_login_button);
         guestLoginButton.setOnClickListener(new View.OnClickListener() {
@@ -78,37 +67,8 @@ public class LoginActivity extends AppCompatActivity {
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void continueFacebookLogin(final LoginResult loginResult) {
-        GraphRequest request = GraphRequest.newMeRequest(
-            loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
-                @Override
-                public void onCompleted(JSONObject object, GraphResponse response) {
-                    if (object == null) {
-                        Log.e(Application.TAG, "Cannot get facebook user info after login");
-                        return;
-                    }
-
-                    try {
-                        AccessToken accessToken = loginResult.getAccessToken();
-                        String token = accessToken.getToken();
-                        String userId = accessToken.getUserId();
-                        String name = object.getString("name");
-                        loginAsFacebookUser(token, userId, name);
-                    } catch (JSONException e) {
-                        Log.e(Application.TAG, "Cannot get facebook user info after login", e);
-                        return;
-                    }
-                }
-            }
-        );
-
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "name");
-        request.setParameters(parameters);
-        request.executeAsync();
-    }
-
-    private void loginAsFacebookUser(String token, String userId, String name) {
+    @Override
+    public void onFbLoginSuccess(String token, String userId, String name) {
         Application application = (Application) getApplication();
         application.loginAsFacebookUser(this, token, userId, name);
     }
