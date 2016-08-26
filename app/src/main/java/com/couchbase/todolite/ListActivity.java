@@ -29,14 +29,17 @@ import com.couchbase.todolite.util.LiveQueryAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class ListActivity extends AppCompatActivity {
     private Database mDatabase = null;
     private ListAdapter mAdapter = null;
+
+    private static SimpleDateFormat mDateFormatter =
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +84,8 @@ public class ListActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        mDateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     @Override
@@ -158,9 +163,7 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private Document create(String title) throws CouchbaseLiteException {
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        Calendar calendar = GregorianCalendar.getInstance();
-        String currentTimeString = dateFormatter.format(calendar.getTime());
+        String currentTimeString = mDateFormatter.format(new Date());
 
         Map<String, Object> properties = new HashMap<String, Object>();
         properties.put("type", "list");

@@ -12,7 +12,6 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -49,12 +48,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class TaskActivity extends AppCompatActivity {
     public static final String INTENT_LIST_ID = "list_id";
@@ -94,6 +92,8 @@ public class TaskActivity extends AppCompatActivity {
         listView.setAdapter(mAdapter);
         setListHeader(listView);
         setListItemLongClick(listView);
+
+        mDateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -234,8 +234,7 @@ public class TaskActivity extends AppCompatActivity {
     }
 
     private void createTask(String title, Bitmap image, String listId) {
-        Calendar calendar = GregorianCalendar.getInstance();
-        String currentTimeString = mDateFormatter.format(calendar.getTime());
+        String currentTimeString = mDateFormatter.format(new Date());
 
         Map<String, Object> properties = new HashMap<String, Object>();
         properties.put("type", "task");
@@ -275,8 +274,7 @@ public class TaskActivity extends AppCompatActivity {
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                Calendar calendar = GregorianCalendar.getInstance();
-                String currentTimeString = mDateFormatter.format(calendar.getTime());
+                String currentTimeString = mDateFormatter.format(new Date());
 
                 Map<String, Object> updatedProperties = new HashMap<String, Object>();
                 updatedProperties.putAll(task.getProperties());
