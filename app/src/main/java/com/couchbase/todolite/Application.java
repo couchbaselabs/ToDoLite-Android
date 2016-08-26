@@ -32,7 +32,7 @@ public class Application extends android.app.Application implements Replication.
     private static final String STORAGE_TYPE = Manager.SQLITE_STORAGE;
 
     // Encryption (Don't store encryption key in the source code. We are doing it here just as an example):
-    private static final boolean ENCRYPTION_ENABLED = true;
+    private static final boolean ENCRYPTION_ENABLED = false;
     private static final String ENCRYPTION_KEY = "seekrit";
 
     // Logging:
