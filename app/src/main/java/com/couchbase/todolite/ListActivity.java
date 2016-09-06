@@ -24,6 +24,9 @@ import com.couchbase.lite.Emitter;
 import com.couchbase.lite.LiveQuery;
 import com.couchbase.lite.Mapper;
 import com.couchbase.lite.Query;
+import com.couchbase.lite.QueryEnumerator;
+import com.couchbase.lite.QueryRow;
+import com.couchbase.lite.TransactionalTask;
 import com.couchbase.lite.util.Log;
 import com.couchbase.todolite.util.LiveQueryAdapter;
 
@@ -31,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -146,20 +150,8 @@ public class ListActivity extends AppCompatActivity {
     }
 
     private Query getQuery() {
-        com.couchbase.lite.View view = mDatabase.getView("list");
-        if (view.getMap() == null) {
-            Mapper mapper = new Mapper() {
-                public void map(Map<String, Object> document, Emitter emitter) {
-                    String type = (String)document.get("type");
-                    if ("list".equals(type))
-                        emitter.emit(document.get("title"), null);
-                }
-            };
-            view.setMap(mapper, "1.0");
-        }
-
-        Query query = view.createQuery();
-        return query;
+        Application application = (Application) getApplication();
+        return application.getListsView().createQuery();
     }
 
     private Document create(String title) throws CouchbaseLiteException {
@@ -182,12 +174,38 @@ public class ListActivity extends AppCompatActivity {
         return document;
     }
 
-    private void deleteList(Document list) {
-        try {
-            list.delete();
-        } catch (CouchbaseLiteException e) {
-            Log.e(Application.TAG, "Cannot delete list", e);
-        }
+    private void deleteList(final Document list) {
+        Application application = (Application) getApplication();
+        final Query query = application.getTasksView().createQuery();
+        query.setDescending(true);
+
+        List<Object> startKeys = new ArrayList<Object>();
+        startKeys.add(list.getId());
+        startKeys.add(new HashMap<String, Object>());
+
+        List<Object> endKeys = new ArrayList<Object>();
+        endKeys.add(list.getId());
+
+        query.setStartKey(startKeys);
+        query.setEndKey(endKeys);
+
+        mDatabase.runInTransaction(new TransactionalTask() {
+            @Override
+            public boolean run() {
+                try {
+                    QueryEnumerator tasks = query.run();
+                    while(tasks.hasNext()) {
+                        QueryRow task = tasks.next();
+                        task.getDocument().getCurrentRevision().deleteDocument();
+                    }
+                    list.delete();
+                } catch (CouchbaseLiteException e) {
+                    Log.e(Application.TAG, "Cannot delete list", e);
+                    return false;
+                }
+                return true;
+            }
+        });
     }
 
     private void showTasks(Document list) {

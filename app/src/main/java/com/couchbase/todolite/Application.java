@@ -10,7 +10,10 @@ import com.couchbase.lite.CouchbaseLiteException;
 import com.couchbase.lite.Database;
 import com.couchbase.lite.DatabaseOptions;
 import com.couchbase.lite.Document;
+import com.couchbase.lite.Emitter;
 import com.couchbase.lite.Manager;
+import com.couchbase.lite.Mapper;
+import com.couchbase.lite.View;
 import com.couchbase.lite.android.AndroidContext;
 import com.couchbase.lite.auth.Authenticator;
 import com.couchbase.lite.auth.AuthenticatorFactory;
@@ -20,7 +23,9 @@ import com.couchbase.todolite.util.StringUtil;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Application extends android.app.Application implements Replication.ChangeListener {
@@ -222,6 +227,56 @@ public class Application extends android.app.Application implements Replication.
             mReplError = error;
             showErrorMessage(mReplError.getMessage(), null);
         }
+    }
+
+    /** Database View */
+    public View getListsView() {
+        View view = mDatabase.getView("lists");
+        if (view.getMap() == null) {
+            Mapper mapper = new Mapper() {
+                public void map(Map<String, Object> document, Emitter emitter) {
+                    String type = (String)document.get("type");
+                    if ("list".equals(type))
+                        emitter.emit(document.get("title"), null);
+                }
+            };
+            view.setMap(mapper, "1.0");
+        }
+        return view;
+    }
+
+    public View getTasksView() {
+        View view = mDatabase.getView("tasks");
+        if (view.getMap() == null) {
+            Mapper map = new Mapper() {
+                @Override
+                public void map(Map<String, Object> document, Emitter emitter) {
+                    if ("task".equals(document.get("type"))) {
+                        List<Object> keys = new ArrayList<Object>();
+                        keys.add(document.get("list_id"));
+                        keys.add(document.get("created_at"));
+                        emitter.emit(keys, document);
+                    }
+                }
+            };
+            view.setMap(map, "1.0");
+        }
+        return view;
+    }
+
+    public View getUserProfilesView() {
+        View view = mDatabase.getView("profiles");
+        if (view.getMap() == null) {
+            Mapper map = new Mapper() {
+                @Override
+                public void map(Map<String, Object> document, Emitter emitter) {
+                    if ("profile".equals(document.get("type")))
+                        emitter.emit(document.get("name"), null);
+                }
+            };
+            view.setMap(map, "1.0");
+        }
+        return view;
     }
 
     /** Display error message */

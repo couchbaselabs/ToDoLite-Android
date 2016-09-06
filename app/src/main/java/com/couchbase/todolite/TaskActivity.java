@@ -201,23 +201,8 @@ public class TaskActivity extends AppCompatActivity {
     }
 
     private Query getQuery() {
-        com.couchbase.lite.View view = mDatabase.getView("tasks");
-        if (view.getMap() == null) {
-            Mapper map = new Mapper() {
-                @Override
-                public void map(Map<String, Object> document, Emitter emitter) {
-                    if ("task".equals(document.get("type"))) {
-                        List<Object> keys = new ArrayList<Object>();
-                        keys.add(document.get("list_id"));
-                        keys.add(document.get("created_at"));
-                        emitter.emit(keys, document);
-                    }
-                }
-            };
-            view.setMap(map, "1.0");
-        }
-
-        Query query = view.createQuery();
+        Application application = (Application) getApplication();
+        Query query = application.getTasksView().createQuery();
         query.setDescending(true);
 
         List<Object> startKeys = new ArrayList<Object>();

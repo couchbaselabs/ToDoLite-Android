@@ -76,19 +76,8 @@ public class ShareActivity extends AppCompatActivity {
     }
 
     private Query getQuery() {
-        com.couchbase.lite.View view = mDatabase.getView("profiles");
-        if (view.getMap() == null) {
-            Mapper map = new Mapper() {
-                @Override
-                public void map(Map<String, Object> document, Emitter emitter) {
-                    if ("profile".equals(document.get("type")))
-                        emitter.emit(document.get("name"), null);
-                }
-            };
-            view.setMap(map, "1");
-        }
-
-        Query query = view.createQuery();
+        Application application = (Application) getApplication();
+        Query query = application.getUserProfilesView().createQuery();
         return query;
     }
 
