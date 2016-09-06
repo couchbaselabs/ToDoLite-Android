@@ -225,7 +225,8 @@ public class Application extends android.app.Application implements Replication.
 
         if (error != mReplError) {
             mReplError = error;
-            showErrorMessage(mReplError.getMessage(), null);
+            if (mReplError != null)
+                showErrorMessage(mReplError.getMessage(), null);
         }
     }
 
