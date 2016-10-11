@@ -35,7 +35,8 @@ $ cd ToDoLite-Android
 
     You can use the `adb reverse tcp:4984 tcp:4984` command to open the port access from the host to the Android emulator. This command is only available on devices running android 5.0+ (API 21).
 
-4. Add list and tasks and they should be visible on the Sync Gateway Admin UI on [http://localhost:4985/_admin/](http://localhost:4985/_admin/).
+4. Log in with your Facebook account.
+5. Add lists and tasks and they should be visible on the Sync Gateway Admin UI on [http://localhost:4985/_admin/](http://localhost:4985/_admin/).
 
 ## Community
 
