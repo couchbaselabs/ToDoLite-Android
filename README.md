@@ -1,3 +1,5 @@
+**This repository is in the process of being deprecated.  See the [Android TODO app](https://developer.couchbase.com/documentation/mobile/1.3/training/develop/create-database/index.html) in the training documentation for a more up-to-date sample.
+
 ## ToDo Lite for Android
 
 [![Join the chat at https://gitter.im/couchbase/mobile](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/couchbase/mobile?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
